@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
   bash db-upload.sh
   ```
 
+  Data source: [PRQL/chinook](https://github.com/PRQL/chinook).
+
 - Added this changelog to track project changes.
 
 ### Changed
