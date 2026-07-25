@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Glue Data Catalog and Athena resources for querying the Chinook Parquet dataset.
+
+Parameters:
+  DataBucketName:
+    Type: String
+    Default: msc-analytics
+    Description: Name of the existing S3 bucket containing the Chinook dataset.
+
+  DataPrefix:
+    Type: String
+    Default: chinook
+    Description: S3 prefix containing one folder per Chinook table (without slashes).
+
+  AthenaResultsPrefix:
+    Type: String
+    Default: athena-results
+    Description: S3 prefix where Athena query results will be written (without slashes).
+
+  GlueDatabaseName:
+    Type: String
+    Default: chinook
+    AllowedPattern: "[a-z0-9_]+"
+    Description: Name of the Glue Data Catalog database.
+
+Resources:
+  ChinookDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref GlueDatabaseName
+        Description: Chinook tables stored as Parquet files in Amazon S3.
+
+  GlueCrawlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Allows the Glue crawler to discover the Chinook Parquet tables.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: ReadChinookParquetData
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ListDataPrefix
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub arn:${AWS::Partition}:s3:::${DataBucketName}
+                Condition:
+                  StringLike:
+                    s3:prefix:
+                      - !Sub "${DataPrefix}/*"
+              - Sid: ReadParquetObjects
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:${AWS::Partition}:s3:::${DataBucketName}/${DataPrefix}/*
+
+  ChinookCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${AWS::StackName}-chinook"
+      Description: Discovers the Chinook Parquet files and creates Glue catalog tables.
+      Role: !GetAtt GlueCrawlerRole.Arn
+      DatabaseName: !Ref ChinookDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/albums/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/artists/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/customers/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/employees/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/genres/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/invoice_items/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/invoices/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/media_types/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/playlist_track/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/playlists/"
+          - Path: !Sub "s3://${DataBucketName}/${DataPrefix}/tracks/"
+      RecrawlPolicy:
+        RecrawlBehavior: CRAWL_NEW_FOLDERS_ONLY
+      SchemaChangePolicy:
+        UpdateBehavior: LOG
+        DeleteBehavior: LOG
+
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub "${AWS::StackName}-chinook"
+      Description: Athena workgroup for querying the Chinook dataset.
+      State: ENABLED
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+        ResultConfiguration:
+          OutputLocation: !Sub "s3://${DataBucketName}/${AthenaResultsPrefix}/"
+          EncryptionConfiguration:
+            EncryptionOption: SSE_S3
+
+Outputs:
+  GlueDatabase:
+    Description: Glue Data Catalog database containing the discovered Chinook tables.
+    Value: !Ref ChinookDatabase
+
+  GlueCrawler:
+    Description: Run this crawler once after deploying the stack to create the tables.
+    Value: !Ref ChinookCrawler
+
+  AthenaWorkGroup:
+    Description: Athena workgroup configured for the Chinook queries.
+    Value: !Ref AthenaWorkGroup
+
+  AthenaResultsLocation:
+    Description: S3 location used for Athena query results.
+    Value: !Sub "s3://${DataBucketName}/${AthenaResultsPrefix}/"
