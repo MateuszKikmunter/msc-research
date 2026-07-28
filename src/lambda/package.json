@@ -1,0 +1,29 @@
+{
+    "name": "query-athena-lambda",
+    "version": "1.0.0",
+    "description": "Bedrock Agent action group Lamda to exectue Athena queries",
+    "homepage": "https://github.com/MateuszKikmunter/msc-research#readme",
+    "bugs": {
+        "url": "https://github.com/MateuszKikmunter/msc-research/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MateuszKikmunter/msc-research.git"
+    },
+    "license": "ISC",
+    "author": "Mateusz Kikmunter",
+    "type": "commonjs",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "esbuild index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/index.js",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@types/node": "^26.1.1",
+        "esbuild": "^0.25.0",
+        "typescript": "^7.0.2"
+    },
+    "dependencies": {
+        "@aws-sdk/client-athena": "^3.1095.0"
+    }
+}
