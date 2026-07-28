@@ -9,19 +9,94 @@ template uses the AWS SAM transform to build its TypeScript Lambda:
 
 ## Deploy
 
-Upload the dataset and deploy `infra/athena.yaml` first. Run its Glue crawler once so
-that the Chinook tables exist. Then build and deploy the agent from the repository
-root:
+### Prerequisites
+
+- Node.js and npm
+- AWS CLI authenticated with the `aws your` profile
+- AWS SAM CLI
+- An existing `msc-analytics` S3 bucket in the deployment account
+
+If you use a different AWS profile, bucket, or data prefix, update
+`scripts/db-upload.sh` and supply the corresponding CloudFormation parameter
+overrides when deploying the templates.
+
+### 1. Upload the dataset
+
+The `chinook/` directory contains one Parquet file per table. Run the upload script
+from its own directory:
+
+```bash
+cd scripts
+bash db-upload.sh
+cd ..
+```
+
+The script uploads each file into a separate table prefix:
+
+```text
+s3://msc-analytics/chinook/albums/albums.parquet
+s3://msc-analytics/chinook/artists/artists.parquet
+s3://msc-analytics/chinook/tracks/tracks.parquet
+...
+```
+
+You can verify the uploaded dataset with:
+
+```bash
+aws s3 ls s3://msc-analytics/chinook/ \
+    --profile matt-dev \
+    --recursive
+```
+
+### 2. Deploy Athena and discover the tables
+
+From the repository root, deploy the Glue database, crawler, and Athena workgroup:
+
+```bash
+aws cloudformation deploy \
+    --profile matt-dev \
+    --template-file infra/athena.yaml \
+    --stack-name chinook-athena \
+    --capabilities CAPABILITY_IAM
+```
+
+Run the crawler after the stack deployment completes:
+
+```bash
+aws glue start-crawler \
+    --profile matt-dev \
+    --name chinook-athena-chinook
+```
+
+Wait for the crawler to finish before deploying or invoking the agent. It creates
+the Glue tables used by Athena.
+
+### 3. Build and deploy the agent
+
+Install the Lambda dependencies, build the SAM application, and deploy it:
 
 ```bash
 npm --prefix src/lambda install
-sam build --template-file infra/conversational-query-agent.yaml
-sam deploy --guided
+
+PATH="$PWD/src/lambda/node_modules/.bin:$PATH" \
+    sam build --template-file infra/conversational-query-agent.yaml
+
+sam deploy \
+    --template-file .aws-sam/build/template.yaml \
+    --guided
 ```
 
 For `AthenaWorkGroupName`, use the `AthenaWorkGroup` output from the Athena stack.
-The other defaults match `infra/athena.yaml`; override them if that stack was
-deployed with different parameter values.
+With the deployment commands above, its value is `chinook-athena-chinook`. The
+other parameter defaults match `infra/athena.yaml`; override them if that stack was
+deployed with different values.
+
+`esbuild` is installed locally with the Lambda dependencies. Local npm
+executables are not automatically available to commands run directly in the
+shell, so the build command temporarily adds `src/lambda/node_modules/.bin` to
+`PATH`. After the build succeeds, SAM writes the deployable template to
+`.aws-sam/build/template.yaml`; passing that path to `sam deploy` avoids looking
+for a source `template.yml` in the repository root.
 
 SAM follows the function's `CodeUri` into `src/lambda/` and uses its
 `BuildMethod: esbuild` metadata to compile and bundle `index.ts`. During deployment,
