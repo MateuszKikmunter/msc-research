@@ -1,0 +1,290 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Bedrock Agent for conversational queries over the Chinook dataset in Athena.
+
+Metadata:
+    AWS::CloudFormation::Interface:
+        ParameterGroups:
+            - Label:
+                  default: Bedrock configuration
+              Parameters:
+                  - FoundationModel
+                  - AgentName
+            - Label:
+                  default: Existing Athena stack resources
+              Parameters:
+                  - DataBucketName
+                  - DataPrefix
+                  - AthenaResultsPrefix
+                  - GlueDatabaseName
+                  - AthenaWorkGroupName
+
+Parameters:
+    FoundationModel:
+        Type: String
+        Default: amazon.nova-lite-v1:0
+        AllowedValues:
+            - amazon.nova-lite-v1:0
+            - amazon.nova-pro-v1:0
+        Description: Amazon Nova model used to orchestrate the Bedrock Agent.
+
+    AgentName:
+        Type: String
+        Default: chinook-conversational-query-agent
+        AllowedPattern: ^([0-9A-Za-z][_-]?){1,100}$
+
+    DataBucketName:
+        Type: String
+        Default: msc-analytics
+        Description: Existing bucket containing Chinook data and Athena results.
+
+    DataPrefix:
+        Type: String
+        Default: chinook
+        Description: Prefix containing the Chinook Parquet data.
+
+    AthenaResultsPrefix:
+        Type: String
+        Default: athena-results
+        Description: Prefix used for Athena query output.
+
+    GlueDatabaseName:
+        Type: String
+        Default: chinook
+        AllowedPattern: "[a-z0-9_]+"
+
+    AthenaWorkGroupName:
+        Type: String
+        Description: Name output as AthenaWorkGroup by infra/athena.yaml.
+
+Resources:
+    QueryLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: lambda.amazonaws.com
+                      Action: sts:AssumeRole
+            ManagedPolicyArns:
+                - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+            Policies:
+                - PolicyName: ReadChinookWithAthena
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Sid: RunQueriesInProjectWorkGroup
+                            Effect: Allow
+                            Action:
+                                - athena:GetQueryExecution
+                                - athena:GetQueryResults
+                                - athena:StartQueryExecution
+                                - athena:StopQueryExecution
+                            Resource: !Sub arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/${AthenaWorkGroupName}
+                          - Sid: ReadChinookCatalog
+                            Effect: Allow
+                            Action:
+                                - glue:GetDatabase
+                                - glue:GetDatabases
+                                - glue:GetTable
+                                - glue:GetTables
+                                - glue:GetPartition
+                                - glue:GetPartitions
+                            Resource:
+                                - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                                - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${GlueDatabaseName}
+                                - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${GlueDatabaseName}/*
+                          - Sid: ListProjectBucket
+                            Effect: Allow
+                            Action:
+                                - s3:GetBucketLocation
+                                - s3:ListBucket
+                            Resource: !Sub arn:${AWS::Partition}:s3:::${DataBucketName}
+                            Condition:
+                                StringLike:
+                                    s3:prefix:
+                                        - !Sub ${DataPrefix}/*
+                                        - !Sub ${AthenaResultsPrefix}/*
+                          - Sid: ReadChinookData
+                            Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:${AWS::Partition}:s3:::${DataBucketName}/${DataPrefix}/*
+                          - Sid: ManageAthenaResults
+                            Effect: Allow
+                            Action:
+                                - s3:AbortMultipartUpload
+                                - s3:GetObject
+                                - s3:PutObject
+                            Resource: !Sub arn:${AWS::Partition}:s3:::${DataBucketName}/${AthenaResultsPrefix}/*
+
+    QueryAthenaFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            Description: Executes read-only Athena SQL selected by the Chinook Bedrock Agent.
+            CodeUri: ../src/lambda/
+            Handler: index.handler
+            Runtime: nodejs24.x
+            Architectures:
+                - arm64
+            MemorySize: 256
+            Timeout: 135
+            Role: !GetAtt QueryLambdaRole.Arn
+            Environment:
+                Variables:
+                    DATABASE_NAME: !Ref GlueDatabaseName
+                    ATHENA_WORKGROUP: !Ref AthenaWorkGroupName
+                    ATHENA_OUTPUT_LOCATION: !Sub s3://${DataBucketName}/${AthenaResultsPrefix}/
+                    MAX_RESULT_ROWS: "200"
+                    QUERY_TIMEOUT_MS: "120000"
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                EntryPoints:
+                    - index.ts
+                Format: cjs
+                Minify: false
+                Target: es2022
+
+    BedrockAgentRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: bedrock.amazonaws.com
+                      Action: sts:AssumeRole
+                      Condition:
+                          StringEquals:
+                              aws:SourceAccount: !Ref AWS::AccountId
+            Policies:
+                - PolicyName: InvokeNova
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action: bedrock:InvokeModel
+                            Resource: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${FoundationModel}
+
+    ChinookQueryAgent:
+        Type: AWS::Bedrock::Agent
+        Properties:
+            AgentName: !Ref AgentName
+            AgentResourceRoleArn: !GetAtt BedrockAgentRole.Arn
+            AutoPrepare: true
+            FoundationModel: !Ref FoundationModel
+            IdleSessionTTLInSeconds: 900
+            Description: Answers natural-language questions about the Chinook music-store dataset.
+            Instruction: |
+                You are a data analyst for the Chinook sample music-store database. Translate the
+                user's question into one read-only Amazon Athena SQL query, call executeAthenaQuery,
+                and explain the result concisely. Never invent results and never propose a write query.
+                If the request is ambiguous, unclear, or missing information that would materially
+                change the query or answer, ask the user one concise clarifying question and wait for
+                their response. Do not guess their intended metric, filters, grouping, or time range,
+                and do not call executeAthenaQuery until the necessary ambiguity is resolved.
+
+                The Glue database name is supplied by the action at runtime. Its tables are:
+                artists(artist_id, name)
+                albums(album_id, title, artist_id)
+                tracks(track_id, name, album_id, media_type_id, genre_id, composer,
+                       milliseconds, bytes, unit_price)
+                genres(genre_id, name)
+                media_types(media_type_id, name)
+                playlists(playlist_id, name)
+                playlist_track(playlist_id, track_id)
+                customers(customer_id, first_name, last_name, company, address, city, state,
+                          country, postal_code, phone, fax, email, support_rep_id)
+                employees(employee_id, last_name, first_name, title, reports_to, birth_date,
+                          hire_date, address, city, state, country, postal_code, phone, fax, email)
+                invoices(invoice_id, customer_id, invoice_date, billing_address, billing_city,
+                         billing_state, billing_country, billing_postal_code, total)
+                invoice_items(invoice_line_id, invoice_id, track_id, unit_price, quantity)
+
+                Join tables using the matching *_id columns. Athena folds unquoted identifiers to
+                lowercase. Select only columns needed to answer the question. Use LIMIT 200 for detail
+                listings; aggregate queries may omit LIMIT. If Athena returns an error, correct the SQL
+                and retry once. In the final answer, include the SQL that was executed.
+            ActionGroups:
+                - ActionGroupName: query_chinook
+                  Description: Run a read-only SQL query against the Chinook Glue database with Athena.
+                  ActionGroupState: ENABLED
+                  ActionGroupExecutor:
+                      Lambda: !GetAtt QueryAthenaFunction.Arn
+                  ApiSchema:
+                      Payload: |
+                          {
+                            "openapi": "3.0.0",
+                            "info": {
+                              "title": "Chinook Athena query API",
+                              "version": "1.0.0"
+                            },
+                            "paths": {
+                              "/query": {
+                                "post": {
+                                  "operationId": "executeAthenaQuery",
+                                  "description": "Execute one read-only Athena SELECT or WITH query.",
+                                  "requestBody": {
+                                    "required": true,
+                                    "content": {
+                                      "application/json": {
+                                        "schema": {
+                                          "type": "object",
+                                          "properties": {
+                                            "query": {
+                                              "type": "string",
+                                              "description": "A single read-only Athena SQL SELECT or WITH query."
+                                            }
+                                          },
+                                          "required": ["query"]
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "responses": {
+                                    "200": {
+                                      "description": "Query result rows and the executed SQL."
+                                    },
+                                    "400": {
+                                      "description": "Invalid or unsafe SQL."
+                                    },
+                                    "500": {
+                                      "description": "Athena execution error."
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+
+    AllowBedrockToInvokeQueryFunction:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !Ref QueryAthenaFunction
+            Principal: bedrock.amazonaws.com
+            SourceAccount: !Ref AWS::AccountId
+            SourceArn: !GetAtt ChinookQueryAgent.AgentArn
+
+    ChinookQueryAgentAlias:
+        Type: AWS::Bedrock::AgentAlias
+        Properties:
+            AgentId: !Ref ChinookQueryAgent
+            AgentAliasName: live
+            Description: Deployable alias for the prepared Chinook query agent.
+
+Outputs:
+    AgentId:
+        Description: Bedrock Agent ID.
+        Value: !Ref ChinookQueryAgent
+
+    AgentAliasId:
+        Description: Bedrock Agent alias ID used by InvokeAgent.
+        Value: !GetAtt ChinookQueryAgentAlias.AgentAliasId
+
+    QueryFunctionArn:
+        Description: ARN of the separately built TypeScript action Lambda.
+        Value: !GetAtt QueryAthenaFunction.Arn
