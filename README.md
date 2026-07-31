@@ -1,11 +1,16 @@
 # MSC research: conversational Chinook analytics
 
+Design rationale, dataset semantics, experiment methodology, evaluation guidance, and
+troubleshooting are maintained in [`docs/`](docs/README.md).
+
 The infrastructure is split into two AWS CloudFormation templates. The agent
 template uses the AWS SAM transform to build its TypeScript Lambda:
 
 - `infra/athena.yaml` creates the Glue catalog, crawler, and Athena workgroup.
 - `infra/conversational-query-agent.yaml` creates an Amazon Bedrock Agent using
-  Amazon Nova, plus its Athena action Lambda and deployable agent alias.
+  the selected supported foundation model, plus its Athena action Lambda and deployable agent
+  alias. Nova Lite is the default; Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5 are also
+  allowed when available in the deployment Region.
 
 ## Deploy
 
