@@ -26,7 +26,9 @@ Parameters:
         AllowedValues:
             - amazon.nova-lite-v1:0
             - amazon.nova-pro-v1:0
-        Description: Amazon Nova model used to orchestrate the Bedrock Agent.
+            - anthropic.claude-haiku-4-5-20251001-v1:0
+            - anthropic.claude-sonnet-4-5-20250929-v1:0
+        Description: Foundation model used to orchestrate the Bedrock Agent. The selected model must be available in the deployment Region.
 
     AgentName:
         Type: String
@@ -161,7 +163,7 @@ Resources:
                           StringEquals:
                               aws:SourceAccount: !Ref AWS::AccountId
             Policies:
-                - PolicyName: InvokeNova
+                - PolicyName: InvokeFoundationModel
                   PolicyDocument:
                       Version: "2012-10-17"
                       Statement:
