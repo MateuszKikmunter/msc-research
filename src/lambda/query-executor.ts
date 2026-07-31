@@ -20,6 +20,11 @@ const TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS ?? 120000);
 const athena = new AthenaClient({});
 
 export async function executeQuery(query: string): Promise<QueryResult> {
+    console.info(
+        'Submitting SQL to Athena',
+        JSON.stringify({ query, database: DATABASE, workGroup: WORK_GROUP })
+    );
+
     const started = await athena.send(
         new StartQueryExecutionCommand({
             QueryString: query,

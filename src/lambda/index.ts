@@ -9,6 +9,7 @@ export async function handler(event: BedrockActionEvent) {
 
     try {
         const query = extractQuery(event);
+        console.info('Agent proposed SQL', JSON.stringify({ query }));
         validateReadOnlyQuery(query);
         const result = await executeQuery(query);
         return actionResponse(event, HttpCode.OK, result);
