@@ -49,6 +49,10 @@ export async function executeQuery(query: string): Promise<QueryResult> {
 
         const status = execution.QueryExecution?.Status;
         if (status?.State === 'SUCCEEDED') {
+            console.info(
+                'Athena query succeeded',
+                JSON.stringify({ query, queryExecutionId })
+            );
             return collectResults(queryExecutionId, query);
         }
 
