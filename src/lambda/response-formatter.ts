@@ -3,7 +3,7 @@ import { BedrockActionEvent } from './types';
 export function actionResponse(
     event: BedrockActionEvent,
     httpStatusCode: number,
-    payload: unknown,
+    payload: unknown
 ) {
     return {
         messageVersion: '1.0',
@@ -14,10 +14,10 @@ export function actionResponse(
             httpStatusCode,
             responseBody: {
                 'application/json': {
-                    body: JSON.stringify(payload),
-                },
-            },
+                    body: JSON.stringify(payload)
+                }
+            }
         },
-        sessionAttributes: event.sessionAttributes ?? {},
+        sessionAttributes: event.sessionAttributes ?? {}
     };
 }

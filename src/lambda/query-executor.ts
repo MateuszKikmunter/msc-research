@@ -5,7 +5,7 @@ import {
     GetQueryResultsCommand,
     StartQueryExecutionCommand,
     StopQueryExecutionCommand,
-    type Row,
+    type Row
 } from '@aws-sdk/client-athena';
 
 import { QueryResult } from './types';
@@ -25,8 +25,8 @@ export async function executeQuery(query: string): Promise<QueryResult> {
             QueryString: query,
             QueryExecutionContext: { Database: DATABASE },
             ResultConfiguration: { OutputLocation: OUTPUT_LOCATION },
-            WorkGroup: WORK_GROUP,
-        }),
+            WorkGroup: WORK_GROUP
+        })
     );
 
     const queryExecutionId = started.QueryExecutionId;
@@ -38,8 +38,8 @@ export async function executeQuery(query: string): Promise<QueryResult> {
     while (Date.now() < deadline) {
         const execution = await athena.send(
             new GetQueryExecutionCommand({
-                QueryExecutionId: queryExecutionId,
-            }),
+                QueryExecutionId: queryExecutionId
+            })
         );
 
         const status = execution.QueryExecution?.Status;
@@ -49,7 +49,7 @@ export async function executeQuery(query: string): Promise<QueryResult> {
 
         if (status?.State === 'FAILED' || status?.State === 'CANCELLED') {
             throw new Error(
-                `Athena query ${status.State.toLowerCase()}: ${status.StateChangeReason ?? 'no reason provided'}`,
+                `Athena query ${status.State.toLowerCase()}: ${status.StateChangeReason ?? 'no reason provided'}`
             );
         }
 
@@ -57,7 +57,7 @@ export async function executeQuery(query: string): Promise<QueryResult> {
     }
 
     await athena.send(
-        new StopQueryExecutionCommand({ QueryExecutionId: queryExecutionId }),
+        new StopQueryExecutionCommand({ QueryExecutionId: queryExecutionId })
     );
 
     throw new Error(`Athena query timed out after ${TIMEOUT_MS} ms.`);
@@ -65,7 +65,7 @@ export async function executeQuery(query: string): Promise<QueryResult> {
 
 async function collectResults(
     queryExecutionId: string,
-    query: string,
+    query: string
 ): Promise<QueryResult> {
     const rows: Array<Record<string, string | null>> = [];
     let columns: string[] = [];
@@ -78,13 +78,13 @@ async function collectResults(
             new GetQueryResultsCommand({
                 QueryExecutionId: queryExecutionId,
                 MaxResults: Math.min(MAX_ROWS + 1, 1000),
-                NextToken: nextToken,
-            }),
+                NextToken: nextToken
+            })
         );
 
         columns =
             page.ResultSet?.ResultSetMetadata?.ColumnInfo?.map(
-                (column, index) => column.Name ?? `column_${index + 1}`,
+                (column, index) => column.Name ?? `column_${index + 1}`
             ) ?? columns;
 
         const returnedRows = page.ResultSet?.Rows ?? [];
@@ -114,7 +114,7 @@ function formatRow(row: Row, columns: string[]): Record<string, string | null> {
     return Object.fromEntries(
         columns.map((column, index) => [
             column,
-            row.Data?.[index]?.VarCharValue ?? null,
-        ]),
+            row.Data?.[index]?.VarCharValue ?? null
+        ])
     );
 }

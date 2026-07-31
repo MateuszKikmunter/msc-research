@@ -9,7 +9,7 @@ export function extractQuery(event: BedrockActionEvent): string {
 
     if (!query) {
         throw new UnsafeQueryError(
-            'The request body must contain a non-empty query property.',
+            'The request body must contain a non-empty query property.'
         );
     }
 

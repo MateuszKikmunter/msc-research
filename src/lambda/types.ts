@@ -23,7 +23,7 @@ export interface QueryResult {
 export const HttpCode = {
     OK: 200,
     BAD_REQUEST: 400,
-    INTERNAL_SERVER_ERROR: 500,
+    INTERNAL_SERVER_ERROR: 500
 } as const;
 
 export class UnsafeQueryError extends Error {}

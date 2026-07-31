@@ -19,7 +19,7 @@ const forbiddenKeywords = new Set([
     'SHOW',
     'USE',
     'MSCK',
-    'REPAIR',
+    'REPAIR'
 ]);
 
 export function validateReadOnlyQuery(query: string): void {
@@ -30,7 +30,7 @@ export function validateReadOnlyQuery(query: string): void {
     const queryUpper = query.toUpperCase();
     if (!queryUpper.includes('SELECT')) {
         throw new UnsafeQueryError(
-            'Only SELECT queries, including queries using WITH, are allowed.',
+            'Only SELECT queries, including queries using WITH, are allowed.'
         );
     }
 
@@ -38,7 +38,7 @@ export function validateReadOnlyQuery(query: string): void {
         const regex = new RegExp(`\\b${keyword}\\b`);
         if (regex.test(queryUpper)) {
             throw new UnsafeQueryError(
-                `SQL operation '${keyword}' is not allowed.`,
+                `SQL operation '${keyword}' is not allowed.`
             );
         }
     });

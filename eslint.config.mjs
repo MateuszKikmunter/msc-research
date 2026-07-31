@@ -8,14 +8,14 @@ export default tseslint.config(
             '**/dist/**',
             '**/node_modules/**',
             '.aws-sam/**',
-            'chinook/**',
-        ],
+            'chinook/**'
+        ]
     },
     {
         files: ['**/*.ts'],
         extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
         languageOptions: {
-            globals: globals.node,
-        },
-    },
+            globals: globals.node
+        }
+    }
 );
