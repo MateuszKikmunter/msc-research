@@ -7,6 +7,8 @@ reliably from the source code alone.
 - [Dataset](dataset.md) documents the Chinook tables, relationships, and analytical caveats.
 - [Agent design](agent-design.md) explains prompting, tool use, safety boundaries, and the
   role a Bedrock Knowledge Base could play.
+- [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
+- [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
 - [Decision records](decisions/) explain important architectural choices.
 
 Keep deployment commands in the repository-level `README.md`. Update these documents when

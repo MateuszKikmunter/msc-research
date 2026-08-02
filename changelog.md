@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-02** — Documented the deployment and runtime failures encountered during the first
+  Bedrock Agent rollout, their causes, and the applied IAM and orchestration fixes. Added the first
+  exploratory Nova Lite end-to-end experiment, including successful Athena actions, ambiguity and
+  response-compliance observations, and the final malformed date query.
+
 - **2026-07-28** — Added the deployable conversational-query stack in
   `infra/conversational-query-agent.yaml`. The SAM/CloudFormation template
   provisions:
@@ -93,6 +98,11 @@ All notable changes to this project will be documented in this file.
   preserving header removal, pagination, row limits, and `NextToken` handling.
 
 ### Fixed
+
+- **2026-08-02** — Updated the Bedrock Agent role for EU inference-profile invocation, replaced
+  Nova Lite's failure-prone default orchestration prefill with a deterministic prompt override,
+  and separated `s3:GetBucketLocation` from prefix-conditioned `s3:ListBucket` so Athena can verify
+  its output bucket.
 
 - **2026-07-28** — Documented and verified the complete SAM build and deployment
   sequence:
