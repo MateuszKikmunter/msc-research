@@ -22,12 +22,12 @@ Metadata:
 Parameters:
     FoundationModel:
         Type: String
-        Default: amazon.nova-lite-v1:0
+        Default: eu.amazon.nova-lite-v1:0
         AllowedValues:
-            - amazon.nova-lite-v1:0
-            - amazon.nova-pro-v1:0
-            - anthropic.claude-haiku-4-5-20251001-v1:0
-            - anthropic.claude-sonnet-4-5-20250929-v1:0
+            - eu.amazon.nova-lite-v1:0
+            - eu.amazon.nova-pro-v1:0
+            - eu.anthropic.claude-haiku-4-5-20251001-v1:0
+            - eu.anthropic.claude-sonnet-4-5-20250929-v1:0
         Description: Foundation model used to orchestrate the Bedrock Agent. The selected model must be available in the deployment Region.
 
     AgentName:
@@ -163,13 +163,21 @@ Resources:
                           StringEquals:
                               aws:SourceAccount: !Ref AWS::AccountId
             Policies:
-                - PolicyName: InvokeFoundationModel
+                - PolicyName: InvokeFoundationModelThroughInferenceProfile
                   PolicyDocument:
                       Version: "2012-10-17"
                       Statement:
-                          - Effect: Allow
+                          - Sid: InvokeSelectedInferenceProfile
+                            Effect: Allow
                             Action: bedrock:InvokeModel
-                            Resource: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${FoundationModel}
+                            Resource: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${FoundationModel}
+                          - Sid: InvokeModelsThroughSelectedInferenceProfile
+                            Effect: Allow
+                            Action: bedrock:InvokeModel
+                            Resource: !Sub arn:${AWS::Partition}:bedrock:*::foundation-model/*
+                            Condition:
+                                ArnEquals:
+                                    bedrock:InferenceProfileArn: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${FoundationModel}
 
     ChinookQueryAgent:
         Type: AWS::Bedrock::Agent
