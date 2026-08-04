@@ -1,9 +1,9 @@
 import express, { Application } from 'express';
 import { config } from 'dotenv';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 import { BedrockAgentClient } from './services/bedrock-agent-client';
+import { HttpCode } from './types';
 
 export class Server {
     private app: Application;
@@ -13,10 +13,7 @@ export class Server {
     constructor() {
         this.app = express();
         this.init();
-        this.bedrockAgent = new BedrockAgentClient({
-            enableTrace: true,
-            sessionId: randomUUID()
-        });
+        this.bedrockAgent = new BedrockAgentClient();
     }
 
     public start(): void {
@@ -48,13 +45,33 @@ export class Server {
 
         this.app.post('/athena-intelligence', async (req, res) => {
             const query = req.body?.query;
-            if (!query) {
-                res.json({ error: 'Query not provided!' }).sendStatus(400);
+            if (!query.trim()) {
+                res.status(HttpCode.BAD_REQUEST).json({
+                    error: 'Query not provided!'
+                });
                 return;
             }
 
-            const result = await this.bedrockAgent.sendQuery(query);
-            res.json({ result });
+            const sessionId = req.body?.sessionId;
+            if (!sessionId.trim()) {
+                res.status(HttpCode.BAD_REQUEST).json({
+                    error: 'Session ID not provided!'
+                });
+                return;
+            }
+
+            try {
+                const result = await this.bedrockAgent.sendQuery(
+                    query.trim(),
+                    sessionId.trim()
+                );
+                res.json(result);
+            } catch (error) {
+                console.error(error);
+                res.status(HttpCode.INTERNAL_SERVER_ERROR).json({
+                    error: 'Bedrock request failed'
+                });
+            }
         });
     }
 }
