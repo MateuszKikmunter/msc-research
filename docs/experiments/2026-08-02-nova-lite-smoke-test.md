@@ -86,7 +86,8 @@ must distinguish a rolling three-year window from the latest three years present
 - The complete Bedrock-to-Lambda-to-Athena path worked for five consecutive actions.
 - Nova Lite generated valid joins and aggregations for several simple ranking metrics.
 - It did not follow the clarification policy for materially ambiguous words such as “popular” and
-  “best.”
+  “best” when the instruction was included in the prompt. However, it did follow the clarification
+  instruction when invoked through the AWS SDK.
 - It did not consistently follow the SQL-disclosure requirement.
 - It generated SQL from the wrong dialect and did not execute the instructed corrective retry.
 - Conversation state successfully carried the selected customer into the final turn, but earlier
