@@ -1,0 +1,31 @@
+{
+    "name": "query-athena-backend",
+    "version": "1.0.0",
+    "description": "Local server to pass users queries to the Bedrock Agent",
+    "homepage": "https://github.com/MateuszKikmunter/msc-research#readme",
+    "bugs": {
+        "url": "https://github.com/MateuszKikmunter/msc-research/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MateuszKikmunter/msc-research.git"
+    },
+    "license": "ISC",
+    "author": "Mateusz Kikmunter",
+    "type": "commonjs",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "tsx --watch index.ts"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.1.1",
+        "tsx": "^4.23.4",
+        "typescript": "^7.0.2"
+    },
+    "dependencies": {
+        "@aws-sdk/client-bedrock-agent-runtime": "^3.1103.0",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1"
+    }
+}
