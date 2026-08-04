@@ -18,13 +18,14 @@
         "start": "tsx --watch index.ts"
     },
     "devDependencies": {
-        "@aws-sdk/client-bedrock-agent": "^3.1101.0",
         "@types/express": "^5.0.6",
         "@types/node": "^26.1.1",
         "tsx": "^4.23.4",
         "typescript": "^7.0.2"
     },
     "dependencies": {
+        "@aws-sdk/client-bedrock-agent-runtime": "^3.1103.0",
+        "dotenv": "^17.4.2",
         "express": "^5.2.1"
     }
 }
