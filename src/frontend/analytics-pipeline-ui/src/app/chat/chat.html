@@ -1,9 +1,41 @@
 <p>Session ID: {{ sessionId }}</p>
+
+<section>
+    <p>
+        Response: {{ response()?.answer || 'No response yet. Please click "Ask Agent" to send a query.' }}
+    </p>
+    <p *ngIf="response()?.elapsedTimeSeconds !== undefined">
+        Elapsed Time: {{ response()?.elapsedTimeSeconds }} seconds
+    </p>
+    <div *ngIf="response()?.tokenUsage">
+        Token Usage:
+        <ul>
+            <li *ngIf="response()?.tokenUsage?.inputTokens !== undefined">
+                Input Tokens: {{ response()?.tokenUsage?.inputTokens }}
+            </li>
+            <li *ngIf="response()?.tokenUsage?.outputTokens !== undefined">
+                Output Tokens: {{ response()?.tokenUsage?.outputTokens }}
+            </li>
+            <li *ngIf="response()?.tokenUsage?.totalTokens !== undefined">
+                Total Tokens: {{ response()?.tokenUsage?.totalTokens }}
+            </li>
+        </ul>
+    </div>
+</section>
+
 <button
-  type="button"
+  matButton="outlined"
   (click)="sendQuery()"
+  [showProgress]="loading()"
   [disabled]="loading()"
   [attr.aria-busy]="loading()"
 >
   {{ loading() ? 'Asking Agent...' : 'Ask Agent' }}
+  <mat-progress-spinner
+    progressIndicator
+    mode="indeterminate"
+    diameter="20"
+    aria-label="Loading"
+    tabindex=""
+  />
 </button>
