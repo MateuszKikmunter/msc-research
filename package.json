@@ -1,7 +1,13 @@
 {
     "name": "msc-research",
     "private": true,
+    "engines": {
+        "node": ">=24.15.0"
+    },
     "scripts": {
+        "start": "concurrently --kill-others-on-fail --names backend,frontend --prefix-colors blue,magenta \"npm run start:backend\" \"npm run start:frontend\"",
+        "start:backend": "npm --prefix src/backend start",
+        "start:frontend": "npm --prefix src/frontend/analytics-pipeline-ui start",
         "prepare": "husky",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -17,6 +23,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.0.0",
+        "concurrently": "^9.2.4",
         "esbuild": "^0.28.1",
         "eslint": "^9.0.0",
         "globals": "^16.0.0",

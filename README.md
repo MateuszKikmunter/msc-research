@@ -12,6 +12,26 @@ template uses the AWS SAM transform to build its TypeScript Lambda:
   alias. Nova Lite is the default; Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5 are also
   allowed when available in the deployment Region.
 
+## Run locally
+
+Install the dependencies once:
+
+```bash
+npm install
+npm --prefix src/backend install
+npm --prefix src/frontend/analytics-pipeline-ui install
+```
+
+Then start the Express backend and Angular frontend together:
+
+```bash
+npm start
+```
+
+The launcher starts both development servers.
+Press Ctrl+C once to stop both processes. The backend
+runs at `http://localhost:8000` and the frontend at `http://localhost:4200`.
+
 ## Deploy
 
 ### Prerequisites
