@@ -1,1 +1,9 @@
 <p>Session ID: {{ sessionId }}</p>
+<button
+  type="button"
+  (click)="sendQuery()"
+  [disabled]="loading()"
+  [attr.aria-busy]="loading()"
+>
+  {{ loading() ? 'Asking Agent...' : 'Ask Agent' }}
+</button>
