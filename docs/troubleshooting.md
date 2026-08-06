@@ -31,9 +31,48 @@ block instead of emitting an action. A configured stop sequence stopped generati
 block, leaving no valid action or answer for the default parser.
 
 **Fix:** The agent now overrides the orchestration prompt. It removes the partial-thought prefill,
-requires one complete thought followed by one action or answer, includes a valid query-action
-example, sets temperature to zero, and raises the maximum response length to 2,048 tokens. The
-default Bedrock output parser remains in use.
+requires one complete thought followed by one native action or answer, sets temperature to zero,
+and raises the maximum response length to 2,048 tokens. The default Bedrock output parser remains
+in use.
+
+### A textual action call was returned as the answer
+
+**Symptom:** The application displayed text resembling
+`<REDACTED>__<REDACTED>(query="SELECT ...")<REDACTED>` instead of invoking the query action.
+Short analytical questions, including the suggested UI questions, triggered the issue more
+consistently than manually composed questions.
+
+**Cause:** The custom orchestration prompt contained a manually serialized `<function_call>`
+example. The model could imitate that example as response text instead of emitting a native
+structured tool-use event. Bedrock then treated it as completion text and redacted internal action
+identifiers. The UI correctly rendered the completion it received.
+
+**Fix:** Remove serialized function-call examples from the prompt and require action invocation
+through Bedrock's native structured tool interface. Keep the final-answer example because it does
+not prescribe tool serialization. After deploying the prompt change, publish a new numbered agent
+version and update the application alias; testing only `TSTALIASID` updates the playground draft.
+
+This risk is not unique to Nova Lite. Prompt payload and tool-call conventions can differ between
+model families. Formal comparisons should freeze equivalent semantic instructions while allowing
+model-compatible serialization supplied by Bedrock. Every model condition requires a smoke test
+that confirms actions appear as structured `toolUse` trace events rather than response text.
+
+### Clarification looped through the SQL action
+
+**Symptom:** One ambiguous question produced approximately 30 failed SQL attempts and unusually
+high token usage. Each recorded “query” was actually a repeated clarification sentence, and the
+validator returned `Only SELECT queries ...` every time.
+
+**Cause:** The prompt instructed the agent to ask the user for missing information, but the agent
+did not have Bedrock's built-in user-input action group. It placed the clarification sentence into
+the only available action's `query` parameter. The Lambda correctly rejected the non-SQL text and
+returned `REPROMPT`; the model then repeated the same invalid action until Bedrock stopped
+orchestration. These were real Lambda action invocations but not Athena query executions.
+
+**Fix:** Add an enabled action group with `ParentActionGroupSignature: AMAZON.UserInput`. A
+clarification now becomes the assistant response for the current turn and waits for the user's next
+message in the same session. It does not invoke the query Lambda and is not counted as a SQL
+attempt.
 
 ### Athena could not verify the output bucket
 

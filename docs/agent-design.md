@@ -55,6 +55,11 @@ Athena, and explain the result while distinguishing retrieved context from compu
 
 - Ask for clarification only when different reasonable interpretations produce materially
   different queries or answers.
+- Return clarification through Bedrock's built-in `AMAZON.UserInput` action and wait for the next
+  user turn; never pass clarification text to the Athena query action.
+- Action validation and Athena execution errors are returned with `responseState: REPROMPT`, so
+  Bedrock supplies the diagnostic to the model for the single permitted correction attempt rather
+  than terminating the invocation with `DependencyFailedException`.
 - Never fabricate a value when the action fails or returns no rows.
 - Preserve the difference between no matching records, a null aggregate, and an execution error.
 - Use aggregate queries for summaries. For requests that return individual records—such as
@@ -95,6 +100,11 @@ latency, token usage, retries, and estimated cost rather than assuming performan
 capabilities alone. Sonnet is a full experimental condition, not merely a judge or an optional
 fallback.
 
+“Same prompt” means equivalent semantic instructions, constraints, examples, and action
+descriptions. It does not require forcing one model family's serialized prompt or textual function
+call syntax onto another model. Prefer Bedrock's native structured tool interface, avoid embedding
+serialized action calls in examples, and smoke-test tool invocation for every model condition.
+
 The CloudFormation parameter allows Nova Lite, Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5
 base-model IDs. Before formal data collection, verify that every experimental model is supported
 by Bedrock Agents and available for direct in-Region use in the selected deployment Region. If a
@@ -105,3 +115,31 @@ the experiment so that display-name changes do not make the results ambiguous.
 The Lambda logs the SQL proposed in the Bedrock action request. The Athena
 query execution ID logged alongside the submitted query provides a correlation key for benchmark
 and CloudWatch records.
+
+## Response metrics
+
+The backend enables Bedrock agent tracing and returns these measurements with each successful
+answer:
+
+- `elapsedTimeSeconds`: wall-clock time from immediately before `InvokeAgent` until its response
+  stream has been consumed, rounded to one decimal place;
+- `foundationModel`: the first foundation-model identifier reported by a model-invocation input
+  trace, or `null` when Bedrock does not provide one;
+- `tokenUsage`: input, output, and total tokens summed across unique traced model invocations;
+- `agentMetrics.totalSteps`: the number of unique orchestration model invocations. This is the
+  stable project definition of an agent step and deliberately does not count every trace event;
+- `agentMetrics.modelInvocations`: unique model invocations across preprocessing, orchestration,
+  postprocessing, and routing-classifier stages; and
+- `agentMetrics.actionInvocations`: unique action-group invocations requested during orchestration;
+- `agentMetrics.retryCount`: SQL attempts after the first action invocation;
+- `agentMetrics.firstAttemptSucceeded`: whether the first SQL action succeeded, or `null` when no
+  SQL action was traced; and
+- `sqlAttempts`: every generated SQL statement in order, together with its success/failure state
+  and the action error returned to the model.
+
+These are trace-derived application metrics, not a Bedrock-provided aggregate named “total
+steps.” A logical orchestration step can emit several trace events, including a rationale,
+invocation input, observation, and model output, so raw event count would overstate the work done.
+Action invocations are reported separately so evaluations can distinguish agent reasoning cycles
+from Athena action executions and retries. Metrics are zero when Bedrock emits no matching trace
+events.

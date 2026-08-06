@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import cors from 'cors';
 import { config } from 'dotenv';
 import path from 'node:path';
 
@@ -36,14 +37,19 @@ export class Server {
 
     private registerMiddleware(): void {
         this.app.use(express.json());
+        this.app.use(
+            cors({
+                origin: 'http://localhost:4200'
+            })
+        );
     }
 
     private registerRoutes(): void {
-        this.app.get('/', (req, res) => {
+        this.app.get('/api/', (req, res) => {
             res.json({ message: 'Hello World!' });
         });
 
-        this.app.post('/athena-intelligence', async (req, res) => {
+        this.app.post('/api/analytics-pipeline', async (req, res) => {
             const query = req.body?.query;
             if (!query.trim()) {
                 res.status(HttpCode.BAD_REQUEST).json({

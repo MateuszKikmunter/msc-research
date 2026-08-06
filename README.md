@@ -12,6 +12,26 @@ template uses the AWS SAM transform to build its TypeScript Lambda:
   alias. Nova Lite is the default; Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5 are also
   allowed when available in the deployment Region.
 
+## Run locally
+
+Install the dependencies once:
+
+```bash
+npm install
+npm --prefix src/backend install
+npm --prefix src/frontend/analytics-pipeline-ui install
+```
+
+Then start the Express backend and Angular frontend together:
+
+```bash
+npm start
+```
+
+The launcher starts both development servers.
+Press Ctrl+C once to stop both processes. The backend
+runs at `http://localhost:8000` and the frontend at `http://localhost:4200`.
+
 ## Deploy
 
 ### Prerequisites
@@ -90,6 +110,33 @@ sam deploy \
     --template-file .aws-sam/build/template.yaml \
     --guided
 ```
+
+`AgentAliasRevision` controls publication through the deployable `live` alias. Increment it (for
+example, from `v1` to `v2`) whenever an agent instruction, action schema, or other agent
+configuration change must reach the application. Changing the revision updates the alias without
+changing its ID and causes Bedrock to create and associate a new immutable agent version. The
+playground's `TSTALIASID` continues to target `DRAFT` and must not be used as the deployed
+application alias.
+
+After deployment, retrieve the application identifiers from the stack outputs:
+
+```bash
+aws cloudformation describe-stacks \
+    --profile matt-dev \
+    --stack-name <agent-stack-name> \
+    --query 'Stacks[0].Outputs[?OutputKey==`AgentId` || OutputKey==`AgentAliasId`].[OutputKey,OutputValue]' \
+    --output table
+```
+
+Copy the returned values into `.env`:
+
+```dotenv
+AGENT_ID=<AgentId output>
+AGENT_ALIAS=<AgentAliasId output>
+```
+
+The alias ID normally remains stable across revisions; the revision changes the numbered agent
+version to which that alias routes. Restart the backend after editing `.env`.
 
 For `AthenaWorkGroupName`, use the `AthenaWorkGroup` output from the Athena stack.
 With the deployment commands above, its value is `chinook-athena-chinook`. The

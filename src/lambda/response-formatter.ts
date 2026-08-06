@@ -1,23 +1,25 @@
-import { BedrockActionEvent } from './types';
+import { ActionResponseState, BedrockActionEvent } from './types';
 
 export function actionResponse(
     event: BedrockActionEvent,
-    httpStatusCode: number,
-    payload: unknown
+    payload: unknown,
+    responseState?: ActionResponseState
 ) {
     return {
         messageVersion: '1.0',
         response: {
             actionGroup: event.actionGroup,
-            apiPath: event.apiPath,
-            httpMethod: event.httpMethod,
-            httpStatusCode,
-            responseBody: {
-                'application/json': {
-                    body: JSON.stringify(payload)
+            function: event.function,
+            functionResponse: {
+                ...(responseState ? { responseState } : {}),
+                responseBody: {
+                    TEXT: {
+                        body: JSON.stringify(payload)
+                    }
                 }
             }
         },
-        sessionAttributes: event.sessionAttributes ?? {}
+        sessionAttributes: event.sessionAttributes ?? {},
+        promptSessionAttributes: event.promptSessionAttributes ?? {}
     };
 }

@@ -42,7 +42,8 @@ folder may require a different recrawl strategy or a manual catalog update.
 
 - a Bedrock Agent using Amazon Nova Lite by default, with Nova Pro, Claude Haiku 4.5, and Claude
   Sonnet 4.5 also allowed;
-- an action group exposing `POST /query` as `executeAthenaQuery`;
+- an action group exposing the `executeAthenaQuery` function with one required SQL parameter;
+- the built-in `AMAZON.UserInput` action group for returning clarification questions to the user;
 - a Node.js 24, ARM64 Lambda function built from `src/lambda/`;
 - least-privilege roles for model invocation and data access; and
 - a deployable Bedrock Agent alias.
@@ -50,6 +51,10 @@ folder may require a different recrawl strategy or a manual catalog update.
 The agent prompt contains the current schema and join guidance. It asks one clarification
 question when a missing metric, filter, grouping, or time range would materially change the
 query. It may correct and retry an Athena error once.
+
+Clarification uses Bedrock's built-in user-input action and ends the current turn without calling
+the query Lambda. The application displays that question as the assistant response; the user's
+next message continues the same Bedrock session.
 
 Nova Lite remains the current deployed default. The formal evaluation will also deploy equivalent
 agent configurations using Claude Haiku 4.5 and Claude Sonnet 4.5. Those conditions must preserve
@@ -66,6 +71,10 @@ The handler performs four stages:
 2. Reject SQL without `SELECT` or containing a configured forbidden keyword.
 3. Submit the query to Athena and poll until it succeeds, fails, or reaches the timeout.
 4. Return named rows, the executed SQL, row count, and a truncation flag to the agent.
+
+Validation and Athena errors are returned as `REPROMPT` action results. This gives the model the
+specific diagnostic for its one correction attempt; marking them as failed dependencies would
+terminate the invocation before the model could retry.
 
 The default timeout is 120 seconds and the returned result is capped at 200 data rows. The
 Lambda timeout is 135 seconds, leaving a small margin for request and response processing.
