@@ -19,10 +19,11 @@ html {
   );
 }
 
+html.dark-theme {
+  color-scheme: dark;
+}
+
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
 
   // Set a default background, font and text colors for the application using
@@ -36,4 +37,17 @@ body {
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+html.dark-theme body {
+  color-scheme: dark;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+* {
+  scrollbar-color: var(--mat-sys-outline-variant) transparent;
+  scrollbar-width: thin;
+}

@@ -1,53 +1,172 @@
-<p>Session ID: {{ sessionId }}</p>
+<div class="chat-shell">
+  <mat-toolbar class="app-bar">
+    <div class="brand-mark" aria-hidden="true">
+      <mat-icon>query_stats</mat-icon>
+    </div>
+    <div class="brand-copy">
+      <strong>Chinook Analyst</strong>
+      <span>Ask questions about your music data</span>
+    </div>
 
-<section>
-  <textarea [(ngModel)]="query" placeholder="Enter your query here..." rows="4" cols="50">
-  </textarea>
-  <p>
-    Response:
-    {{ response()?.answer || 'No response yet. Please click "Ask Agent" to send a query.' }}
-  </p>
-  <p *ngIf="response()?.elapsedTimeSeconds !== undefined">
-    Elapsed Time: {{ response()?.elapsedTimeSeconds }} seconds
-  </p>
-  <p *ngIf="response()?.foundationModel">Foundation Model: {{ response()?.foundationModel }}</p>
-  <div *ngIf="response()?.tokenUsage">
-    Token Usage:
-    <ul>
-      <li *ngIf="response()?.tokenUsage?.inputTokens !== undefined">
-        Input Tokens: {{ response()?.tokenUsage?.inputTokens }}
-      </li>
-      <li *ngIf="response()?.tokenUsage?.outputTokens !== undefined">
-        Output Tokens: {{ response()?.tokenUsage?.outputTokens }}
-      </li>
-      <li *ngIf="response()?.tokenUsage?.totalTokens !== undefined">
-        Total Tokens: {{ response()?.tokenUsage?.totalTokens }}
-      </li>
-    </ul>
-  </div>
-  <div *ngIf="response()?.agentMetrics">
-    Agent Metrics:
-    <ul>
-      <li>Total Steps: {{ response()?.agentMetrics?.totalSteps }}</li>
-      <li>Model Invocations: {{ response()?.agentMetrics?.modelInvocations }}</li>
-      <li>Action Invocations: {{ response()?.agentMetrics?.actionInvocations }}</li>
-    </ul>
-  </div>
-</section>
+    <span class="toolbar-spacer"></span>
 
-<button
-  matButton="outlined"
-  (click)="sendQuery()"
-  [showProgress]="loading()"
-  [disabled]="loading()"
-  [attr.aria-busy]="loading()"
->
-  {{ loading() ? 'Asking Agent...' : 'Ask Agent' }}
-  <mat-progress-spinner
-    progressIndicator
-    mode="indeterminate"
-    diameter="20"
-    aria-label="Loading"
-    tabindex=""
-  />
-</button>
+    <div class="session-pill" matTooltip="Bedrock conversation session">
+      <span class="status-dot"></span>
+      <span class="session-label">Session</span>
+      <code>{{ sessionId }}</code>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      class="theme-toggle"
+      (click)="theme.toggle()"
+      [matTooltip]="theme.isDark() ? 'Use light theme' : 'Use dark theme'"
+      [attr.aria-label]="theme.isDark() ? 'Use light theme' : 'Use dark theme'"
+    >
+      <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <main #messageList class="message-list" aria-live="polite">
+    <div class="conversation">
+      @if (messages().length === 0) {
+        <section class="empty-state">
+          <div class="empty-icon"><mat-icon>bar_chart</mat-icon></div>
+          <p class="eyebrow">Conversational analytics</p>
+          <h1>What would you like to know?</h1>
+          <p>Ask about customers, sales, artists, tracks, or trends in the Chinook dataset.</p>
+          <div class="suggestion-row" aria-label="Example questions">
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="query = 'What is the most popular genre?'"
+            >
+              Most popular genre
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="query = 'Which country has the highest sales?'"
+            >
+              Sales by country
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="query = 'Who are the top 5 artists by tracks sold?'"
+            >
+              Top artists
+            </button>
+          </div>
+        </section>
+      }
+
+      @for (message of messages(); track message.id) {
+        <article class="message-row" [class.user-row]="message.role === 'user'">
+          <div
+            class="avatar"
+            [class.agent-avatar]="message.role === 'assistant'"
+            aria-hidden="true"
+          >
+            <mat-icon>{{ message.role === 'user' ? 'person' : 'auto_awesome' }}</mat-icon>
+          </div>
+
+          <div class="message-column">
+            <div class="message-heading">
+              <strong>{{ message.role === 'user' ? 'You' : 'Chinook Analyst' }}</strong>
+              <time [attr.datetime]="message.sentAt.toISOString()">
+                {{ message.sentAt | date: 'd MMM y, HH:mm:ss' }}
+              </time>
+            </div>
+
+            <mat-card class="message-card" [class.error-card]="message.isError">
+              <mat-card-content>{{ message.content }}</mat-card-content>
+            </mat-card>
+
+            @if (message.response; as response) {
+              <div class="response-metadata" aria-label="Agent response metrics">
+                <mat-chip-set>
+                  <mat-chip matTooltip="Wall-clock request duration">
+                    <mat-icon matChipAvatar>schedule</mat-icon>
+                    {{ response.elapsedTimeSeconds }}s
+                  </mat-chip>
+                  <mat-chip matTooltip="Foundation model reported by Bedrock">
+                    <mat-icon matChipAvatar>memory</mat-icon>
+                    {{ response.foundationModel || 'Model unavailable' }}
+                  </mat-chip>
+                  <mat-chip matTooltip="Total input and output tokens">
+                    <mat-icon matChipAvatar>data_usage</mat-icon>
+                    {{ response.tokenUsage.totalTokens }} tokens
+                  </mat-chip>
+                  <mat-chip matTooltip="Unique orchestration model invocations">
+                    <mat-icon matChipAvatar>route</mat-icon>
+                    {{ response.agentMetrics.totalSteps }} steps
+                  </mat-chip>
+                </mat-chip-set>
+
+                <div class="metric-details">
+                  <span
+                    ><strong>{{ response.tokenUsage.inputTokens }}</strong> input tokens</span
+                  >
+                  <span
+                    ><strong>{{ response.tokenUsage.outputTokens }}</strong> output tokens</span
+                  >
+                  <span
+                    ><strong>{{ response.agentMetrics.modelInvocations }}</strong> model calls</span
+                  >
+                  <span
+                    ><strong>{{ response.agentMetrics.actionInvocations }}</strong> action
+                    calls</span
+                  >
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      }
+
+      @if (loading()) {
+        <article class="message-row thinking-row">
+          <div class="avatar agent-avatar" aria-hidden="true">
+            <mat-icon>auto_awesome</mat-icon>
+          </div>
+          <div class="thinking-bubble">
+            <mat-progress-spinner mode="indeterminate" diameter="18" />
+            <span>Analyzing your data…</span>
+          </div>
+        </article>
+      }
+    </div>
+  </main>
+
+  <footer class="composer-wrap">
+    <div class="composer">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Ask a question about the Chinook dataset</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="query"
+          (keydown.enter)="handleEnter($event)"
+          [disabled]="loading()"
+          rows="1"
+          cdkTextareaAutosize
+          aria-label="Question"
+        ></textarea>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          class="send-button"
+          (click)="sendQuery()"
+          [disabled]="loading() || !query.trim()"
+          aria-label="Send question"
+          matTooltip="Send question"
+        >
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+      </mat-form-field>
+      <p>Press Enter to send · Shift + Enter for a new line</p>
+    </div>
+  </footer>
+</div>
