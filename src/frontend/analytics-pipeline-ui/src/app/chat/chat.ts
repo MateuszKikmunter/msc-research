@@ -9,9 +9,10 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 import { HttpClient } from '../../services/http-client';
 import { AgentResponse } from '../../types';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-chat',
-  imports: [MatButton, MatProgressSpinner, CommonModule],
+  imports: [MatButton, MatProgressSpinner, CommonModule, FormsModule],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   standalone: true,
@@ -25,6 +26,8 @@ export class Chat {
   readonly loading = this.loadingState.asReadonly();
   readonly response = this.agentResponse.asReadonly();
   readonly sessionId = this.activatedRoute.snapshot.data['sessionId'];
+
+  public query = 'Enter your query here...';
 
   constructor(readonly httpClient: HttpClient) {}
 
