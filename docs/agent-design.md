@@ -55,6 +55,8 @@ Athena, and explain the result while distinguishing retrieved context from compu
 
 - Ask for clarification only when different reasonable interpretations produce materially
   different queries or answers.
+- Return clarification through Bedrock's built-in `AMAZON.UserInput` action and wait for the next
+  user turn; never pass clarification text to the Athena query action.
 - Action validation and Athena execution errors are returned with `responseState: REPROMPT`, so
   Bedrock supplies the diagnostic to the model for the single permitted correction attempt rather
   than terminating the invocation with `DependencyFailedException`.
@@ -97,6 +99,11 @@ fresh-session policy, row cap, and repetition count. Measure correctness, clarif
 latency, token usage, retries, and estimated cost rather than assuming performance from published
 capabilities alone. Sonnet is a full experimental condition, not merely a judge or an optional
 fallback.
+
+“Same prompt” means equivalent semantic instructions, constraints, examples, and action
+descriptions. It does not require forcing one model family's serialized prompt or textual function
+call syntax onto another model. Prefer Bedrock's native structured tool interface, avoid embedding
+serialized action calls in examples, and smoke-test tool invocation for every model condition.
 
 The CloudFormation parameter allows Nova Lite, Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5
 base-model IDs. Before formal data collection, verify that every experimental model is supported
