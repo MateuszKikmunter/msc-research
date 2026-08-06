@@ -10,6 +10,7 @@
   <p *ngIf="response()?.elapsedTimeSeconds !== undefined">
     Elapsed Time: {{ response()?.elapsedTimeSeconds }} seconds
   </p>
+  <p *ngIf="response()?.foundationModel">Foundation Model: {{ response()?.foundationModel }}</p>
   <div *ngIf="response()?.tokenUsage">
     Token Usage:
     <ul>
@@ -22,6 +23,14 @@
       <li *ngIf="response()?.tokenUsage?.totalTokens !== undefined">
         Total Tokens: {{ response()?.tokenUsage?.totalTokens }}
       </li>
+    </ul>
+  </div>
+  <div *ngIf="response()?.agentMetrics">
+    Agent Metrics:
+    <ul>
+      <li>Total Steps: {{ response()?.agentMetrics?.totalSteps }}</li>
+      <li>Model Invocations: {{ response()?.agentMetrics?.modelInvocations }}</li>
+      <li>Action Invocations: {{ response()?.agentMetrics?.actionInvocations }}</li>
     </ul>
   </div>
 </section>

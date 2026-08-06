@@ -6,7 +6,7 @@ import {
     Trace
 } from '@aws-sdk/client-bedrock-agent-runtime';
 
-import type { AgentResponse, TokenUsage } from '../types';
+import type { AgentMetrics, AgentResponse, TokenUsage } from '../types';
 
 export class BedrockAgentClient {
     private client: BedrockAgentRuntimeClient;
@@ -43,15 +43,16 @@ export class BedrockAgentClient {
         });
 
         const response = await this.client.send(command);
-        const { answer, tokenUsage } = await this.aggregateAgentResponse(
-            response.completion
-        );
+        const { answer, foundationModel, tokenUsage, agentMetrics } =
+            await this.aggregateAgentResponse(response.completion);
 
         return {
             answer,
+            foundationModel,
             elapsedTimeSeconds:
                 Math.round((performance.now() - startedAt) / 100) / 10,
-            tokenUsage
+            tokenUsage,
+            agentMetrics
         };
     }
 
@@ -64,33 +65,116 @@ export class BedrockAgentClient {
 
         const decoder = new TextDecoder('utf-8');
         let answer = '';
+        let foundationModel: string | null = null;
         let inputTokens = 0;
         let outputTokens = 0;
         const countedTraceIds = new Set<string>();
+        const countedStepIds = new Set<string>();
+        const countedModelInvocationIds = new Set<string>();
+        const countedActionInvocationIds = new Set<string>();
+        const agentMetrics: AgentMetrics = {
+            totalSteps: 0,
+            modelInvocations: 0,
+            actionInvocations: 0
+        };
 
         for await (const event of completion) {
             if (event.chunk?.bytes) {
                 answer += decoder.decode(event.chunk.bytes, { stream: true });
             }
 
-            const usage = this.getTokenUsage(
-                event.trace?.trace,
-                countedTraceIds
-            );
+            const trace = event.trace?.trace;
+            foundationModel ??= this.getFoundationModel(trace);
+
+            const usage = this.getTokenUsage(trace, countedTraceIds);
             inputTokens += usage.inputTokens;
             outputTokens += usage.outputTokens;
+
+            this.updateAgentMetrics(
+                trace,
+                agentMetrics,
+                countedStepIds,
+                countedModelInvocationIds,
+                countedActionInvocationIds
+            );
         }
 
         answer += decoder.decode();
 
         return {
             answer,
+            foundationModel,
             tokenUsage: {
                 inputTokens,
                 outputTokens,
                 totalTokens: inputTokens + outputTokens
-            }
+            },
+            agentMetrics
         };
+    }
+
+    private getFoundationModel(trace: Trace | undefined): string | null {
+        if (!trace) {
+            return null;
+        }
+
+        const stage =
+            trace.preProcessingTrace ??
+            trace.orchestrationTrace ??
+            trace.postProcessingTrace ??
+            trace.routingClassifierTrace;
+
+        return stage?.modelInvocationInput?.foundationModel ?? null;
+    }
+
+    private updateAgentMetrics(
+        trace: Trace | undefined,
+        metrics: AgentMetrics,
+        countedStepIds: Set<string>,
+        countedModelInvocationIds: Set<string>,
+        countedActionInvocationIds: Set<string>
+    ): void {
+        if (!trace) {
+            return;
+        }
+
+        const modelOutput = this.getModelOutput(trace);
+        if (modelOutput) {
+            if (
+                !modelOutput.traceId ||
+                !countedModelInvocationIds.has(modelOutput.traceId)
+            ) {
+                metrics.modelInvocations += 1;
+                if (modelOutput.traceId) {
+                    countedModelInvocationIds.add(modelOutput.traceId);
+                }
+            }
+        }
+
+        const orchestrationTrace = trace.orchestrationTrace;
+        const orchestrationOutput = orchestrationTrace?.modelInvocationOutput;
+        if (
+            orchestrationOutput &&
+            (!orchestrationOutput.traceId ||
+                !countedStepIds.has(orchestrationOutput.traceId))
+        ) {
+            metrics.totalSteps += 1;
+            if (orchestrationOutput.traceId) {
+                countedStepIds.add(orchestrationOutput.traceId);
+            }
+        }
+
+        const invocation = orchestrationTrace?.invocationInput;
+        if (
+            invocation?.actionGroupInvocationInput &&
+            (!invocation.traceId ||
+                !countedActionInvocationIds.has(invocation.traceId))
+        ) {
+            metrics.actionInvocations += 1;
+            if (invocation.traceId) {
+                countedActionInvocationIds.add(invocation.traceId);
+            }
+        }
     }
 
     private getTokenUsage(
