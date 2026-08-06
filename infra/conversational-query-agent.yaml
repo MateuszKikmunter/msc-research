@@ -10,6 +10,7 @@ Metadata:
               Parameters:
                   - FoundationModel
                   - AgentName
+                  - AgentAliasRevision
             - Label:
                   default: Existing Athena stack resources
               Parameters:
@@ -34,6 +35,12 @@ Parameters:
         Type: String
         Default: chinook-conversational-query-agent
         AllowedPattern: ^([0-9A-Za-z][_-]?){1,100}$
+
+    AgentAliasRevision:
+        Type: String
+        Default: v1
+        AllowedPattern: ^[0-9A-Za-z._-]{1,32}$
+        Description: Change this value whenever a new prepared agent configuration should be published through the live alias.
 
     DataBucketName:
         Type: String
@@ -255,51 +262,16 @@ Resources:
                   ActionGroupState: ENABLED
                   ActionGroupExecutor:
                       Lambda: !GetAtt QueryAthenaFunction.Arn
-                  ApiSchema:
-                      Payload: |
-                          {
-                            "openapi": "3.0.0",
-                            "info": {
-                              "title": "Chinook Athena query API",
-                              "version": "1.0.0"
-                            },
-                            "paths": {
-                              "/query": {
-                                "post": {
-                                  "operationId": "executeAthenaQuery",
-                                  "description": "Execute one read-only Athena SELECT or WITH query.",
-                                  "requestBody": {
-                                    "required": true,
-                                    "content": {
-                                      "application/json": {
-                                        "schema": {
-                                          "type": "object",
-                                          "properties": {
-                                            "query": {
-                                              "type": "string",
-                                              "description": "A single read-only Athena SQL SELECT or WITH query."
-                                            }
-                                          },
-                                          "required": ["query"]
-                                        }
-                                      }
-                                    }
-                                  },
-                                  "responses": {
-                                    "200": {
-                                      "description": "Query result rows and the executed SQL."
-                                    },
-                                    "400": {
-                                      "description": "Invalid or unsafe SQL."
-                                    },
-                                    "500": {
-                                      "description": "Athena execution error."
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
+                  FunctionSchema:
+                      Functions:
+                          - Name: executeAthenaQuery
+                            Description: Execute one read-only Athena SELECT or WITH query.
+                            RequireConfirmation: DISABLED
+                            Parameters:
+                                query:
+                                    Type: string
+                                    Required: true
+                                    Description: A single read-only Athena SQL SELECT or WITH query.
 
     AllowBedrockToInvokeQueryFunction:
         Type: AWS::Lambda::Permission
@@ -315,7 +287,7 @@ Resources:
         Properties:
             AgentId: !Ref ChinookQueryAgent
             AgentAliasName: live
-            Description: Deployable alias for the prepared Chinook query agent.
+            Description: !Sub Deployable alias revision ${AgentAliasRevision} for the prepared Chinook query agent.
 
 Outputs:
     AgentId:
@@ -325,6 +297,10 @@ Outputs:
     AgentAliasId:
         Description: Bedrock Agent alias ID used by InvokeAgent.
         Value: !GetAtt ChinookQueryAgentAlias.AgentAliasId
+
+    FoundationModelId:
+        Description: Foundation model or inference profile configured for this agent.
+        Value: !Ref FoundationModel
 
     QueryFunctionArn:
         Description: ARN of the separately built TypeScript action Lambda.

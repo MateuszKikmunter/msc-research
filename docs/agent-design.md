@@ -55,6 +55,9 @@ Athena, and explain the result while distinguishing retrieved context from compu
 
 - Ask for clarification only when different reasonable interpretations produce materially
   different queries or answers.
+- Action validation and Athena execution errors are returned with `responseState: REPROMPT`, so
+  Bedrock supplies the diagnostic to the model for the single permitted correction attempt rather
+  than terminating the invocation with `DependencyFailedException`.
 - Never fabricate a value when the action fails or returns no rows.
 - Preserve the difference between no matching records, a null aggregate, and an execution error.
 - Use aggregate queries for summaries. For requests that return individual records—such as
@@ -120,7 +123,12 @@ answer:
   stable project definition of an agent step and deliberately does not count every trace event;
 - `agentMetrics.modelInvocations`: unique model invocations across preprocessing, orchestration,
   postprocessing, and routing-classifier stages; and
-- `agentMetrics.actionInvocations`: unique action-group invocations requested during orchestration.
+- `agentMetrics.actionInvocations`: unique action-group invocations requested during orchestration;
+- `agentMetrics.retryCount`: SQL attempts after the first action invocation;
+- `agentMetrics.firstAttemptSucceeded`: whether the first SQL action succeeded, or `null` when no
+  SQL action was traced; and
+- `sqlAttempts`: every generated SQL statement in order, together with its success/failure state
+  and the action error returned to the model.
 
 These are trace-derived application metrics, not a Bedrock-provided aggregate named “total
 steps.” A logical orchestration step can emit several trace events, including a rationale,

@@ -6,7 +6,12 @@ import {
     Trace
 } from '@aws-sdk/client-bedrock-agent-runtime';
 
-import type { AgentMetrics, AgentResponse, TokenUsage } from '../types';
+import type {
+    AgentMetrics,
+    AgentResponse,
+    SqlAttempt,
+    TokenUsage
+} from '../types';
 
 export class BedrockAgentClient {
     private client: BedrockAgentRuntimeClient;
@@ -43,8 +48,13 @@ export class BedrockAgentClient {
         });
 
         const response = await this.client.send(command);
-        const { answer, foundationModel, tokenUsage, agentMetrics } =
-            await this.aggregateAgentResponse(response.completion);
+        const {
+            answer,
+            foundationModel,
+            tokenUsage,
+            agentMetrics,
+            sqlAttempts
+        } = await this.aggregateAgentResponse(response.completion);
 
         return {
             answer,
@@ -52,7 +62,8 @@ export class BedrockAgentClient {
             elapsedTimeSeconds:
                 Math.round((performance.now() - startedAt) / 100) / 10,
             tokenUsage,
-            agentMetrics
+            agentMetrics,
+            sqlAttempts
         };
     }
 
@@ -72,10 +83,14 @@ export class BedrockAgentClient {
         const countedStepIds = new Set<string>();
         const countedModelInvocationIds = new Set<string>();
         const countedActionInvocationIds = new Set<string>();
+        const sqlAttempts: SqlAttempt[] = [];
+        const sqlAttemptIndexesByTraceId = new Map<string, number>();
         const agentMetrics: AgentMetrics = {
             totalSteps: 0,
             modelInvocations: 0,
-            actionInvocations: 0
+            actionInvocations: 0,
+            retryCount: 0,
+            firstAttemptSucceeded: null
         };
 
         for await (const event of completion) {
@@ -97,9 +112,20 @@ export class BedrockAgentClient {
                 countedModelInvocationIds,
                 countedActionInvocationIds
             );
+            this.updateSqlAttempts(
+                trace,
+                sqlAttempts,
+                sqlAttemptIndexesByTraceId
+            );
         }
 
         answer += decoder.decode();
+        agentMetrics.retryCount = Math.max(sqlAttempts.length - 1, 0);
+        const firstAttempt = sqlAttempts[0];
+        agentMetrics.firstAttemptSucceeded =
+            firstAttempt && firstAttempt.status !== 'pending'
+                ? firstAttempt.status === 'succeeded'
+                : null;
 
         return {
             answer,
@@ -109,8 +135,67 @@ export class BedrockAgentClient {
                 outputTokens,
                 totalTokens: inputTokens + outputTokens
             },
-            agentMetrics
+            agentMetrics,
+            sqlAttempts
         };
+    }
+
+    private updateSqlAttempts(
+        trace: Trace | undefined,
+        attempts: SqlAttempt[],
+        indexesByTraceId: Map<string, number>
+    ): void {
+        const orchestrationTrace = trace?.orchestrationTrace;
+        if (!orchestrationTrace) {
+            return;
+        }
+
+        const invocation = orchestrationTrace.invocationInput;
+        const query = invocation?.actionGroupInvocationInput?.parameters
+            ?.find(({ name }) => name === 'query')
+            ?.value?.trim();
+
+        if (
+            query &&
+            (!invocation?.traceId || !indexesByTraceId.has(invocation.traceId))
+        ) {
+            const attemptIndex = attempts.length;
+            attempts.push({
+                attempt: attemptIndex + 1,
+                query,
+                status: 'pending',
+                error: null
+            });
+            if (invocation?.traceId) {
+                indexesByTraceId.set(invocation.traceId, attemptIndex);
+            }
+        }
+
+        const observation = orchestrationTrace.observation;
+        const output = observation?.actionGroupInvocationOutput?.text;
+        if (!output || !observation?.traceId) {
+            return;
+        }
+
+        const attemptIndex = indexesByTraceId.get(observation.traceId);
+        const attempt =
+            attemptIndex === undefined ? undefined : attempts[attemptIndex];
+        if (!attempt) {
+            return;
+        }
+
+        try {
+            const payload = JSON.parse(output) as { error?: unknown };
+            if (typeof payload.error === 'string') {
+                attempt.status = 'failed';
+                attempt.error = payload.error;
+            } else {
+                attempt.status = 'succeeded';
+            }
+        } catch {
+            attempt.status = 'failed';
+            attempt.error = output;
+        }
     }
 
     private getFoundationModel(trace: Trace | undefined): string | null {

@@ -1,15 +1,9 @@
 export interface BedrockActionEvent {
     actionGroup: string;
-    apiPath: string;
-    httpMethod: string;
-    requestBody?: {
-        content?: {
-            'application/json'?: {
-                properties?: Array<{ name: string; value: string }>;
-            };
-        };
-    };
+    function: string;
+    parameters?: Array<{ name: string; type?: string; value: string }>;
     sessionAttributes?: Record<string, string>;
+    promptSessionAttributes?: Record<string, string>;
 }
 
 export interface QueryResult {
@@ -20,10 +14,6 @@ export interface QueryResult {
     truncated: boolean;
 }
 
-export const HttpCode = {
-    OK: 200,
-    BAD_REQUEST: 400,
-    INTERNAL_SERVER_ERROR: 500
-} as const;
+export type ActionResponseState = 'FAILURE' | 'REPROMPT';
 
 export class UnsafeQueryError extends Error {}

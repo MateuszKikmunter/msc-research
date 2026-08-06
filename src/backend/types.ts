@@ -8,6 +8,15 @@ export interface AgentMetrics {
     totalSteps: number;
     modelInvocations: number;
     actionInvocations: number;
+    retryCount: number;
+    firstAttemptSucceeded: boolean | null;
+}
+
+export interface SqlAttempt {
+    attempt: number;
+    query: string;
+    status: 'pending' | 'succeeded' | 'failed';
+    error: string | null;
 }
 
 export interface AgentResponse {
@@ -16,6 +25,7 @@ export interface AgentResponse {
     elapsedTimeSeconds: number;
     tokenUsage: TokenUsage;
     agentMetrics: AgentMetrics;
+    sqlAttempts: SqlAttempt[];
 }
 
 export const HttpCode = {

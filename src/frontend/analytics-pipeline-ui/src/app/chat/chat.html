@@ -119,7 +119,46 @@
                     ><strong>{{ response.agentMetrics.actionInvocations }}</strong> action
                     calls</span
                   >
+                  <span
+                    ><strong>{{ response.agentMetrics.retryCount }}</strong> retries</span
+                  >
                 </div>
+
+                @if (response.sqlAttempts.length) {
+                  <mat-expansion-panel class="attempt-panel">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>SQL attempts</mat-panel-title>
+                      <mat-panel-description>
+                        {{
+                          response.agentMetrics.firstAttemptSucceeded
+                            ? 'Correct on first attempt'
+                            : response.agentMetrics.retryCount + ' retries required'
+                        }}
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <div class="attempt-list">
+                      @for (attempt of response.sqlAttempts; track attempt.attempt) {
+                        <section class="attempt">
+                          <div class="attempt-heading">
+                            <strong>Attempt {{ attempt.attempt }}</strong>
+                            <span
+                              class="attempt-status"
+                              [class.succeeded]="attempt.status === 'succeeded'"
+                              [class.failed]="attempt.status === 'failed'"
+                            >
+                              {{ attempt.status }}
+                            </span>
+                          </div>
+                          <pre><code>{{ attempt.query }}</code></pre>
+                          @if (attempt.error) {
+                            <p class="attempt-error">{{ attempt.error }}</p>
+                          }
+                        </section>
+                      }
+                    </div>
+                  </mat-expansion-panel>
+                }
               </div>
             }
           </div>

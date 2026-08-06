@@ -16,7 +16,21 @@ describe('Chat', () => {
     foundationModel: 'amazon.nova-lite-v1:0',
     elapsedTimeSeconds: 1.4,
     tokenUsage: { inputTokens: 100, outputTokens: 20, totalTokens: 120 },
-    agentMetrics: { totalSteps: 2, modelInvocations: 3, actionInvocations: 1 },
+    agentMetrics: {
+      totalSteps: 2,
+      modelInvocations: 3,
+      actionInvocations: 1,
+      retryCount: 0,
+      firstAttemptSucceeded: true,
+    },
+    sqlAttempts: [
+      {
+        attempt: 1,
+        query: 'SELECT COUNT(*) FROM tracks',
+        status: 'succeeded',
+        error: null,
+      },
+    ],
   };
 
   beforeEach(async () => {
