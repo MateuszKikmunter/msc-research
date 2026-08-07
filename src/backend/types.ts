@@ -33,3 +33,23 @@ export const HttpCode = {
     BAD_REQUEST: 400,
     INTERNAL_SERVER_ERROR: 500
 } as const;
+
+export interface SaveInteractionInput {
+    sessionId: string;
+    question: string;
+    answer: string;
+    startedAt: Date;
+    elapsedMs: number;
+    status: 'succeeded' | 'failed';
+    error?: string | null;
+    foundationModel?: string | null;
+    tokenUsage?: TokenUsage;
+    agentMetrics?: AgentMetrics;
+    sqlAttempts?: SqlAttempt[];
+    experimentName?: string | null;
+    experimentCondition?: string | null;
+    promptVersion?: string | null;
+    agentId?: string | null;
+    agentAlias?: string | null;
+    region?: string | null;
+}
