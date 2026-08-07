@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-08** — Implemented local SQLite transcript persistence for research-data collection.
+  The backend now stores one transactional record per Bedrock interaction, including the question,
+  answer, UTC timing, token usage, agent and retry metrics, SQL attempts, success or failure state,
+  reproducibility metadata, and pending evaluation fields. Successful records are committed before
+  the API returns; Bedrock failures are retained on a best-effort basis. Repository logs identify
+  the database path and committed interaction without printing transcript content, and runtime
+  database/WAL files are excluded from Git.
+
 - **2026-08-07** — Added a formal research and benchmark plan covering the revised research
   question and hypotheses, experimental conditions, a proposed 24-case benchmark, ground-truth
   preparation, SQL/recovery/final-answer scoring, operational metrics, an optional blinded utility

@@ -7,8 +7,8 @@ reliably from the source code alone.
 - [Dataset](dataset.md) documents the Chinook tables, relationships, and analytical caveats.
 - [Agent design](agent-design.md) explains prompting, tool use, safety boundaries, and the
   role a Bedrock Knowledge Base could play.
-- [Future conversation storage](conversation-storage.md) records the deferred SQLite persistence
-  design and its deployment limits.
+- [Conversation storage](conversation-storage.md) documents the implemented SQLite transcript
+  repository, schema, verification steps, privacy considerations, and deployment limits.
 - [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
 - [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
 - [Decision records](decisions/) explain important architectural choices.
