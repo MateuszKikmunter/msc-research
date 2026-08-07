@@ -10,7 +10,9 @@ Lambda action, and explains the returned result.
 
 ```mermaid
 flowchart LR
-    U[User] --> A[Amazon Bedrock Agent\nSelected foundation model]
+    U[User] --> UI[Angular chat UI]
+    UI --> B[Local Express backend]
+    B --> A[Amazon Bedrock Agent\nSelected foundation model]
     A -->|executeAthenaQuery| L[Lambda action\nTypeScript]
     L -->|validate and start query| Q[Amazon Athena]
     Q --> G[AWS Glue Data Catalog]
@@ -18,7 +20,9 @@ flowchart LR
     Q --> R[(Athena results\nin Amazon S3)]
     Q -->|rows, columns, status| L
     L -->|JSON response, max 200 rows| A
-    A -->|answer and executed SQL| U
+    A -->|answer, traces, and metrics| B
+    B -->|session and interaction| T[(Local SQLite\ntranscripts.db)]
+    B -->|answer and metrics| UI
 ```
 
 ## Components
@@ -55,6 +59,19 @@ query. It may correct and retry an Athena error once.
 Clarification uses Bedrock's built-in user-input action and ends the current turn without calling
 the query Lambda. The application displays that question as the assistant response; the user's
 next message continues the same Bedrock session.
+
+### Local application and transcript store
+
+The Angular chat sends a question and Bedrock session ID to the local Express endpoint. The
+backend aggregates the streamed answer, model metadata, token usage, orchestration metrics, and
+SQL attempts. Before returning a successful response, it commits the question, answer, metrics,
+and reproducibility metadata to `src/backend/data/transcripts.db` through the SQLite transcript
+repository. Failed Bedrock requests are recorded on a best-effort basis.
+
+The transcript store is a local research-data boundary rather than part of the deployed AWS
+stack. Its database and WAL files are ignored by Git. See
+[`conversation-storage.md`](conversation-storage.md) for the schema, verification commands, and
+privacy constraints.
 
 Nova Lite remains the current deployed default. The formal evaluation will also deploy equivalent
 agent configurations using Claude Haiku 4.5 and Claude Sonnet 4.5. Those conditions must preserve

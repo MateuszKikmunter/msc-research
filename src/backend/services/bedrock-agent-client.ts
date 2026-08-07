@@ -12,11 +12,14 @@ import type {
     SqlAttempt,
     TokenUsage
 } from '../types';
+import { TranscriptRepository } from '../data/transcript-repository';
 
 export class BedrockAgentClient {
     private client: BedrockAgentRuntimeClient;
+    private transcriptRepository: TranscriptRepository;
 
     constructor() {
+        this.transcriptRepository = new TranscriptRepository();
         this.client = new BedrockAgentRuntimeClient({
             region: process.env.REGION ?? 'eu-west-1',
             credentials: {
@@ -38,7 +41,8 @@ export class BedrockAgentClient {
             throw new Error('Session ID not provided!');
         }
 
-        const startedAt = performance.now();
+        const startedAt = new Date();
+        const startedAtPerformance = performance.now();
         const command = new InvokeAgentCommand({
             agentId: process.env.AGENT_ID,
             agentAliasId: process.env.AGENT_ALIAS,
@@ -47,23 +51,85 @@ export class BedrockAgentClient {
             inputText: query
         });
 
-        const response = await this.client.send(command);
-        const {
-            answer,
-            foundationModel,
-            tokenUsage,
-            agentMetrics,
-            sqlAttempts
-        } = await this.aggregateAgentResponse(response.completion);
+        let result: AgentResponse;
+        let elapsedMs: number;
 
+        try {
+            const response = await this.client.send(command);
+            const {
+                answer,
+                foundationModel,
+                tokenUsage,
+                agentMetrics,
+                sqlAttempts
+            } = await this.aggregateAgentResponse(response.completion);
+            elapsedMs = performance.now() - startedAtPerformance;
+            result = {
+                answer,
+                foundationModel,
+                elapsedTimeSeconds: Math.round(elapsedMs / 100) / 10,
+                tokenUsage,
+                agentMetrics,
+                sqlAttempts
+            };
+        } catch (error) {
+            const elapsedMs = performance.now() - startedAtPerformance;
+            const errorMessage =
+                error instanceof Error ? error.message : String(error);
+
+            try {
+                await this.transcriptRepository.saveInteraction({
+                    ...this.getExperimentMetadata(),
+                    sessionId,
+                    question: query,
+                    answer: '',
+                    startedAt,
+                    elapsedMs,
+                    status: 'failed',
+                    error: errorMessage
+                });
+            } catch (persistenceError) {
+                console.error(
+                    'Could not persist failed Bedrock interaction',
+                    persistenceError
+                );
+            }
+
+            throw error;
+        }
+
+        await this.transcriptRepository.saveInteraction({
+            ...this.getExperimentMetadata(),
+            sessionId,
+            question: query,
+            answer: result.answer,
+            startedAt,
+            elapsedMs,
+            status: 'succeeded',
+            foundationModel: result.foundationModel,
+            tokenUsage: result.tokenUsage,
+            agentMetrics: result.agentMetrics,
+            sqlAttempts: result.sqlAttempts
+        });
+
+        return result;
+    }
+
+    private getExperimentMetadata(): {
+        experimentName: string | null;
+        experimentCondition: string | null;
+        promptVersion: string | null;
+        agentId: string | null;
+        agentAlias: string | null;
+        region: string;
+    } {
         return {
-            answer,
-            foundationModel,
-            elapsedTimeSeconds:
-                Math.round((performance.now() - startedAt) / 100) / 10,
-            tokenUsage,
-            agentMetrics,
-            sqlAttempts
+            experimentName: process.env.EXPERIMENT_NAME ?? null,
+            experimentCondition: process.env.EXPERIMENT_CONDITION ?? null,
+            promptVersion: process.env.PROMPT_VERSION ?? null,
+            agentId: process.env.AGENT_ID ?? null,
+            agentAlias: process.env.AGENT_ALIAS ?? null,
+            region: process.env.REGION ?? 'eu-west-1'
         };
     }
 
