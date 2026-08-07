@@ -5,3 +5,6 @@ notes.md
 node_modules
 dist/
 .aws-sam/
+src/backend/data/*.db
+src/backend/data/*.db-shm
+src/backend/data/*.db-wal
