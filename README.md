@@ -133,10 +133,15 @@ Copy the returned values into `.env`:
 ```dotenv
 AGENT_ID=<AgentId output>
 AGENT_ALIAS=<AgentAliasId output>
+# Optional and discouraged for routine use; sanitized trace storage is always enabled.
+STORE_RAW_AGENT_TRACES=false
 ```
 
 The alias ID normally remains stable across revisions; the revision changes the numbered agent
 version to which that alias routes. Restart the backend after editing `.env`.
+Raw Bedrock traces can contain prompts, conversation history, tool results, and AWS identifiers.
+Keep raw trace storage disabled unless a controlled experiment specifically requires it; see the
+[agent trace storage documentation](docs/agent-trace-storage.md) for details.
 
 For `AthenaWorkGroupName`, use the `AthenaWorkGroup` output from the Athena stack.
 With the deployment commands above, its value is `chinook-athena-chinook`. The

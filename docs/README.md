@@ -9,6 +9,8 @@ reliably from the source code alone.
   role a Bedrock Knowledge Base could play.
 - [Conversation storage](conversation-storage.md) documents the implemented SQLite transcript
   repository, schema, verification steps, privacy considerations, and deployment limits.
+- [Agent trace storage](agent-trace-storage.md) explains structured Bedrock trajectory capture,
+  sanitization, optional raw retention, querying, research uses, and limitations.
 - [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
 - [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
 - [Decision records](decisions/) explain important architectural choices.

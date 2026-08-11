@@ -23,11 +23,18 @@ answer records:
   agent alias, AWS Region, and observed foundation model; and
 - `interactions`: an auto-incremented `id`, `session_id`, `question`, `answer`, `started_at`,
   `elapsed_ms`, status and error, foundation model, input/output/total tokens, orchestration
-  metrics, first-attempt outcome, serialized SQL attempts, and pending evaluation fields.
+  metrics, first-attempt outcome, serialized SQL attempts, and pending evaluation fields; and
+- `trace_events`: ordered Bedrock trace parts containing searchable stage, event, model, rationale,
+  action, observation, usage, and latency fields plus sanitized JSON and an indexed `session_id`
+  for whole-session analysis.
 
 Timestamps use UTC ISO 8601 strings, elapsed duration uses integer milliseconds, and indexes cover
 `session_id` and `started_at`. Boolean metrics use SQLite integers (`1`, `0`, or `NULL`), while SQL
 attempts are JSON encoded.
+
+Trace events are stored atomically with the interaction. Raw prompt/model trace content is disabled
+by default; see [Bedrock agent trace storage](agent-trace-storage.md) for the schema, sanitization
+rules, optional `STORE_RAW_AGENT_TRACES` setting, and research limitations.
 
 Optional experiment metadata is read from `EXPERIMENT_NAME`, `EXPERIMENT_CONDITION`, and
 `PROMPT_VERSION`. Agent ID, alias, and Region come from the existing Bedrock configuration.
