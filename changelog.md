@@ -6,6 +6,17 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-11** — Added ordered Bedrock agent-trajectory capture to transcript persistence and
+  successful chat API responses. Each interaction stores normalized model, rationale, invocation,
+  observation, guardrail, failure, usage, and
+  latency trace fields together with a sanitized copy of each AWS trace part. Prompt text, raw
+  model responses, repeated session IDs, and caller ARNs are excluded by default; complete raw
+  events are available only through the explicit
+  `STORE_RAW_AGENT_TRACES=true` research setting. Trace rows commit atomically with their parent
+  interaction and retain agent alias/version information so draft and deployed runs can be
+  distinguished. An indexed `session_id` on every trace row supports direct retrieval of the
+  complete trajectory across all interactions in a session.
+
 - **2026-08-08** — Implemented local SQLite transcript persistence for research-data collection.
   The backend now stores one transactional record per Bedrock interaction, including the question,
   answer, UTC timing, token usage, agent and retry metrics, SQL attempts, success or failure state,
@@ -31,7 +42,7 @@ All notable changes to this project will be documented in this file.
 - **2026-08-06** — Added a deferred conversation-storage design. It proposes SQLite for the
   current single-process research application, session and interaction records, UTC timestamps,
   millisecond durations, response and agent metrics, failure retention, reproducibility metadata,
-  indexes, privacy considerations, and migration criteria for PostgreSQL or DynamoDB.
+  indexes, privacy considerations, and deployment limits of the local SQLite approach.
 
 - **2026-08-06** — Added Bedrock trace-derived response metadata. Successful backend responses now
   include the reported foundation model, input/output/total token usage, unique orchestration
@@ -115,6 +126,12 @@ All notable changes to this project will be documented in this file.
 - Added this changelog to track project changes.
 
 ### Changed
+
+- **2026-08-11** — Extracted Bedrock completion-stream interpretation from `BedrockAgentClient`
+  into `BedrockResponseProcessor`. Trace normalization and sanitization, token and agent metrics,
+  foundation-model detection, SQL-attempt correlation, and answer decoding now have a dedicated
+  owner; the client is limited to invoking Bedrock, timing the call, persisting the interaction,
+  and returning the processed response.
 
 - **2026-08-07** — Migrated the Athena action group from an OpenAPI `ApiSchema` contract to
   function details with `FunctionSchema`. Lambda event extraction and response formatting now use

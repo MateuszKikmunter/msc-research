@@ -80,11 +80,51 @@ export class TranscriptRepository {
                 ]
             );
 
+            for (const traceEvent of input.traceEvents ?? []) {
+                await this.run(
+                    `INSERT INTO trace_events (
+                        interaction_id, session_id, sequence_number, trace_id,
+                        event_time, stage, event_type, agent_id, agent_alias_id,
+                        agent_version, foundation_model, rationale,
+                        action_group, action_name, action_input, observation,
+                        input_tokens, output_tokens, model_latency_ms,
+                        action_latency_ms, sanitized_event, raw_event,
+                        created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        result.lastID,
+                        input.sessionId,
+                        traceEvent.sequenceNumber,
+                        traceEvent.traceId,
+                        traceEvent.eventTime?.toISOString() ?? null,
+                        traceEvent.stage,
+                        traceEvent.eventType,
+                        traceEvent.agentId,
+                        traceEvent.agentAliasId,
+                        traceEvent.agentVersion,
+                        traceEvent.foundationModel,
+                        traceEvent.rationale,
+                        traceEvent.actionGroup,
+                        traceEvent.actionName,
+                        this.serializeJson(traceEvent.actionInput),
+                        this.serializeJson(traceEvent.observation),
+                        traceEvent.inputTokens,
+                        traceEvent.outputTokens,
+                        traceEvent.modelLatencyMs,
+                        traceEvent.actionLatencyMs,
+                        this.serializeJson(traceEvent.sanitizedEvent),
+                        this.serializeJson(traceEvent.rawEvent),
+                        new Date().toISOString()
+                    ]
+                );
+            }
+
             await this.run('COMMIT');
             console.info('Transcript interaction saved', {
                 interactionId: result.lastID,
                 sessionId: input.sessionId,
-                status: input.status
+                status: input.status,
+                traceEvents: input.traceEvents?.length ?? 0
             });
             return result.lastID;
         } catch (error) {
@@ -159,10 +199,52 @@ export class TranscriptRepository {
                     FOREIGN KEY (session_id) REFERENCES sessions(session_id)
                 );
 
+                CREATE TABLE IF NOT EXISTS trace_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    interaction_id INTEGER NOT NULL,
+                    session_id TEXT NOT NULL,
+                    sequence_number INTEGER NOT NULL,
+                    trace_id TEXT,
+                    event_time TEXT,
+                    stage TEXT NOT NULL,
+                    event_type TEXT NOT NULL,
+                    agent_id TEXT,
+                    agent_alias_id TEXT,
+                    agent_version TEXT,
+                    foundation_model TEXT,
+                    rationale TEXT,
+                    action_group TEXT,
+                    action_name TEXT,
+                    action_input TEXT,
+                    observation TEXT,
+                    input_tokens INTEGER,
+                    output_tokens INTEGER,
+                    model_latency_ms INTEGER,
+                    action_latency_ms INTEGER,
+                    sanitized_event TEXT NOT NULL,
+                    raw_event TEXT,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY (interaction_id) REFERENCES interactions(id)
+                        ON DELETE CASCADE,
+                    FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+                        ON DELETE CASCADE,
+                    UNIQUE (interaction_id, sequence_number)
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_interactions_session_id
                     ON interactions(session_id);
                 CREATE INDEX IF NOT EXISTS idx_interactions_started_at
                     ON interactions(started_at);
+                CREATE INDEX IF NOT EXISTS idx_trace_events_interaction_id
+                    ON trace_events(interaction_id);
+                CREATE INDEX IF NOT EXISTS idx_trace_events_trace_id
+                    ON trace_events(trace_id);
+                CREATE INDEX IF NOT EXISTS idx_trace_events_stage_type
+                    ON trace_events(stage, event_type);
+            `);
+            await this.exec(`
+                CREATE INDEX IF NOT EXISTS idx_trace_events_session_id
+                    ON trace_events(session_id);
             `);
             console.info('Transcript database ready', {
                 databasePath: this.databasePath
@@ -205,5 +287,11 @@ export class TranscriptRepository {
 
     private toSqliteBoolean(value: boolean | null | undefined): number | null {
         return value === undefined || value === null ? null : Number(value);
+    }
+
+    private serializeJson(value: unknown | null): string | null {
+        return value === null || value === undefined
+            ? null
+            : JSON.stringify(value);
     }
 }
