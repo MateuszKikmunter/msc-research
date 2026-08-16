@@ -7,11 +7,12 @@ export interface BedrockActionEvent {
 }
 
 export interface QueryResult {
+    queryExecutionId: string;
     query: string;
     columns: string[];
     rows: Array<Record<string, string | null>>;
-    rowCount: number;
-    truncated: boolean;
+    previewRowCount: number;
+    previewTruncated: boolean;
 }
 
 export type ActionResponseState = 'FAILURE' | 'REPROMPT';

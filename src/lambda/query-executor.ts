@@ -14,7 +14,7 @@ const DATABASE = process.env.DATABASE_NAME ?? 'chinook';
 const WORK_GROUP = process.env.ATHENA_WORKGROUP ?? 'chinook-athena-chinook';
 const OUTPUT_LOCATION = process.env.ATHENA_OUTPUT_LOCATION ?? 'athena-results';
 const WAIT_TIME = 1000;
-const MAX_ROWS = Number(process.env.MAX_RESULT_ROWS ?? 200);
+const MAX_PREVIEW_ROWS = Number(process.env.MAX_PREVIEW_ROWS ?? 200);
 const TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS ?? 120000);
 
 const athena = new AthenaClient({});
@@ -86,7 +86,7 @@ async function collectResults(
         const page = await athena.send(
             new GetQueryResultsCommand({
                 QueryExecutionId: queryExecutionId,
-                MaxResults: Math.min(MAX_ROWS + 1, 1000),
+                MaxResults: Math.min(MAX_PREVIEW_ROWS + 1, 1000),
                 NextToken: nextToken
             })
         );
@@ -98,7 +98,7 @@ async function collectResults(
 
         const returnedRows = page.ResultSet?.Rows ?? [];
         const dataRows = isFirstPage ? returnedRows.slice(1) : returnedRows;
-        const remainingCapacity = MAX_ROWS - rows.length;
+        const remainingCapacity = MAX_PREVIEW_ROWS - rows.length;
         const rowsToAdd = dataRows.slice(0, remainingCapacity);
 
         rows.push(...rowsToAdd.map((row) => formatRow(row, columns)));
@@ -108,15 +108,22 @@ async function collectResults(
 
         const pageHasMoreRows = dataRows.length > rowsToAdd.length;
         const stoppedBeforeNextPage =
-            Boolean(nextToken) && rows.length >= MAX_ROWS;
+            Boolean(nextToken) && rows.length >= MAX_PREVIEW_ROWS;
         truncated = pageHasMoreRows || stoppedBeforeNextPage;
 
-        if (!nextToken || rows.length >= MAX_ROWS) {
+        if (!nextToken || rows.length >= MAX_PREVIEW_ROWS) {
             break;
         }
     }
 
-    return { query, columns, rows, rowCount: rows.length, truncated };
+    return {
+        queryExecutionId,
+        query,
+        columns,
+        rows,
+        previewRowCount: rows.length,
+        previewTruncated: truncated
+    };
 }
 
 function formatRow(row: Row, columns: string[]): Record<string, string | null> {

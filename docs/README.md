@@ -11,6 +11,9 @@ reliably from the source code alone.
   repository, schema, verification steps, privacy considerations, and deployment limits.
 - [Agent trace storage](agent-trace-storage.md) explains structured Bedrock trajectory capture,
   sanitization, optional raw retention, querying, research uses, and limitations.
+- [Evaluation methodology](evaluation.md) defines Chinook-Bench-200's scoring, experimental
+  protocol, answer-quality rubric, and peer-reviewed methodological references. The machine-readable
+  cases and canonical SQL are in [`../benchmarks/`](../benchmarks/README.md).
 - [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
 - [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
 - [Decision records](decisions/) explain important architectural choices.

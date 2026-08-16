@@ -19,7 +19,7 @@ flowchart LR
     Q --> D[(Chinook Parquet\nin Amazon S3)]
     Q --> R[(Athena results\nin Amazon S3)]
     Q -->|rows, columns, status| L
-    L -->|JSON response, max 200 rows| A
+    L -->|execution ID and max 200 preview rows| A
     A -->|answer, traces, and metrics| B
     B -->|session and interaction| T[(Local SQLite\ntranscripts.db)]
     B -->|answer and metrics| UI
@@ -52,9 +52,10 @@ folder may require a different recrawl strategy or a manual catalog update.
 - least-privilege roles for model invocation and data access; and
 - a deployable Bedrock Agent alias.
 
-The agent prompt contains the current schema and join guidance. It asks one clarification
-question when a missing metric, filter, grouping, or time range would materially change the
-query. It may correct and retry an Athena error once.
+The agent prompt contains the current schema and join guidance. It states that the query action is
+already configured with the Glue and Athena infrastructure and asks one clarification question
+only when different reasonable interpretations of the analytical request would materially change
+the query. It may correct and retry an Athena error once.
 
 Clarification uses Bedrock's built-in user-input action and ends the current turn without calling
 the query Lambda. The application displays that question as the assistant response; the user's
@@ -62,21 +63,23 @@ next message continues the same Bedrock session.
 
 ### Local application and transcript store
 
-The Angular chat sends a question and Bedrock session ID to the local Express endpoint. The
-backend aggregates the streamed answer, model metadata, token usage, orchestration metrics, and
-SQL attempts. Before returning a successful response, it commits the question, answer, metrics,
-and reproducibility metadata to `src/backend/data/transcripts.db` through the SQLite transcript
-repository. Failed Bedrock requests are recorded on a best-effort basis.
+The Angular chat sends a question and Bedrock session ID to the local Express endpoint.
+`BedrockAgentClient` invokes the agent, while `BedrockResponseProcessor` decodes the streamed
+answer and derives trace events, model metadata, token usage, orchestration metrics, and SQL
+attempts. Before returning a successful response, the client commits the question, answer,
+metrics, ordered trace events, and reproducibility metadata to
+`src/backend/data/transcripts.db` through the SQLite transcript repository. Failed Bedrock
+requests are recorded on a best-effort basis.
 
 The transcript store is a local research-data boundary rather than part of the deployed AWS
 stack. Its database and WAL files are ignored by Git. See
 [`conversation-storage.md`](conversation-storage.md) for the schema, verification commands, and
 privacy constraints.
 
-Nova Lite remains the current deployed default. The formal evaluation will also deploy equivalent
-agent configurations using Claude Haiku 4.5 and Claude Sonnet 4.5. Those conditions must preserve
-the same prompt, action contract, Lambda implementation, and dataset so the foundation model is
-the experimental variable. Model availability and direct base-model access must be verified in the
+Nova Lite remains the current deployed default. The formal evaluation will also deploy an
+equivalent agent configuration using Claude Haiku 4.5. Both conditions must preserve the same
+prompt, action contract, Lambda implementation, and dataset so the foundation model is the
+experimental variable. Model availability and direct base-model access must be verified in the
 chosen Region before the Claude conditions are collected; a required cross-Region inference
 profile would need additional template and IAM support.
 
@@ -87,14 +90,18 @@ The handler performs four stages:
 1. Extract the `query` property from the Bedrock action event.
 2. Reject SQL without `SELECT` or containing a configured forbidden keyword.
 3. Submit the query to Athena and poll until it succeeds, fails, or reaches the timeout.
-4. Return named rows, the executed SQL, row count, and a truncation flag to the agent.
+4. Return the Athena query execution ID, named preview rows, preview row count, and a truncation
+   flag to the agent.
 
 Validation and Athena errors are returned as `REPROMPT` action results. This gives the model the
 specific diagnostic for its one correction attempt; marking them as failed dependencies would
 terminate the invocation before the model could retry.
 
-The default timeout is 120 seconds and the returned result is capped at 200 data rows. The
-Lambda timeout is 135 seconds, leaving a small margin for request and response processing.
+The default timeout is 120 seconds and the action response is capped at 200 preview rows. This cap
+does not add `LIMIT` to the SQL or truncate Athena's stored result. The benchmark evaluator uses
+the query execution ID to paginate the complete original result before comparing it with the gold
+result. The Lambda timeout is 135 seconds, leaving a small margin for request and response
+processing.
 
 ## Security boundaries
 
