@@ -137,6 +137,42 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **2026-08-17** — Completed the Chinook-Bench-200 projection-alignment review. Eighty-three
+  executable questions and ten ambiguity-resolution replies now explicitly request every field in
+  their unchanged golden result contract, without making incidental golden-query ordering part of
+  unordered questions.
+
+- **2026-08-17** — Strengthened the Bedrock agent's post-execution fidelity rules. Successful
+  action results are now authoritative: presented rows must use returned values and order, subsets
+  must be labelled, and the final `Executed SQL` must copy the action's query exactly rather than
+  reconstructing or correcting it. Bumped the default alias revision so deployment publishes the
+  updated instruction.
+
+- **2026-08-17** — Tightened Chinook-Bench-200's ordered-result contracts. Thirty-five ordered
+  questions, ambiguity replies, and interactive turns now state their required output fields,
+  primary ordering, and deterministic secondary tie-breaks. CB200-C002's second turn now returns
+  only the requested album count instead of repeating the artist identifier and name.
+
+- **2026-08-17** — Replaced the earlier broad evaluation methodology with the finalized
+  trajectory-aware protocol. The document now makes the final-to-direct success gap the primary
+  estimand, defines terminal-attempt and trajectory-class rules, separates execution-error recovery
+  from semantic revision, adds observation-to-action error metrics and paired-model trajectory
+  analysis, and bounds manual validation. It retains the current benchmark comparison contracts,
+  treats `acceptedSlots` as unimplemented metadata, and removes natural-language answer and LLM
+  judge scoring from the current study scope.
+
+- **2026-08-16** — Repaired the Chinook-Bench-200 evaluation contract after the model-facing
+  preview cap was separated from SQL semantics. Removed all 51 arbitrary `LIMIT 200` clauses,
+  made the price-listing question's expected projection explicit, and changed the co-purchase
+  question to explicitly request the retained top 20. Every executable record and interactive
+  turn now declares its required columns, row/column ordering, duplicate, tolerance, semantic
+  limit, and tie behavior. All 20 ambiguity cases now include accepted clarification slots, a
+  frozen scripted reply, resolved golden SQL, and a resolved comparison contract. The JSON export
+  is now a valid array generated with the Markdown representation from canonical JSONL, with a
+  validation command to prevent drift. Because the gold SQL changed and 20 resolved queries were
+  added, all 190 executable query definitions must be run against the frozen Athena snapshot
+  before the formal experiment.
+
 - **2026-08-16** — Removed the agent instruction that added `LIMIT 200` to every detail listing,
   because that changed query semantics and could invalidate complete-result benchmark comparisons.
   The Athena action now treats 200 rows strictly as the model-facing preview cap and returns

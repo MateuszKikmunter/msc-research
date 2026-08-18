@@ -38,7 +38,7 @@ Parameters:
 
     AgentAliasRevision:
         Type: String
-        Default: v1
+        Default: v2
         AllowedPattern: ^[0-9A-Za-z._-]{1,32}$
         Description: Change this value whenever a new prepared agent configuration should be published through the live alias.
 
@@ -235,8 +235,13 @@ Resources:
                 the user asks for a bounded number of rows or the request otherwise requires top-N
                 semantics. The action may return a capped preview without limiting the executed SQL. If
                 previewTruncated is true, state that the displayed rows are only a preview and do not
-                claim that they are the complete result. If Athena returns an error, correct the SQL and
-                retry once. In the final answer, include the SQL that was executed.
+                claim that they are the complete result. Treat a successful action result as authoritative
+                and never reconstruct query results from memory. When presenting returned rows, use only
+                columns and values supplied by the action and preserve their row order. If summarising or
+                showing only a subset, state that clearly and do not imply that it is complete. If Athena
+                returns an error, correct the SQL and retry once. In the final answer, copy the successful
+                action result's query field exactly after `Executed SQL:`; never rewrite or correct it after
+                execution.
             PromptOverrideConfiguration:
                 PromptConfigurations:
                     - PromptType: ORCHESTRATION

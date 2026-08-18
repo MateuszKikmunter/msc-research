@@ -3,6 +3,9 @@
 Design rationale, dataset semantics, experiment methodology, evaluation guidance, and
 troubleshooting are maintained in [`docs/`](docs/README.md).
 
+The versioned [Chinook-Bench-200](benchmarks/README.md) dataset contains 200 evaluation cases with
+canonical SQL or explicit clarification/refusal behavior.
+
 The infrastructure is split into two AWS CloudFormation templates. The agent
 template uses the AWS SAM transform to build its TypeScript Lambda:
 

@@ -22,9 +22,11 @@ The CloudFormation template gives the agent:
 - instructions to ask one concise question only when analytical ambiguity is material;
 - an explicit statement that database and Athena infrastructure are already configured and must
   not be requested from the user;
+- a result-fidelity rule requiring presented rows to use only action-returned values and retain
+  their returned order, while clearly labelling any summary or subset;
 - one retry after an Athena error; and
 - a requirement to copy the successful action's `query` field into an `Executed SQL` code block
-  in every successful final answer.
+  without rewriting it in every successful final answer.
 
 Putting this small, stable schema directly in the instruction minimizes retrieval latency and
 removes a failure mode in which essential schema context is not retrieved.
@@ -65,6 +67,8 @@ Athena, and explain the result while distinguishing retrieved context from compu
   Bedrock supplies the diagnostic to the model for the single permitted correction attempt rather
   than terminating the invocation with `DependencyFailedException`.
 - Never fabricate a value when the action fails or returns no rows.
+- Treat the successful action result as authoritative: do not reconstruct rows from memory, change
+  their values or order, or present a subset as the complete result.
 - Preserve the difference between no matching records, a null aggregate, and an execution error.
 - Do not add `LIMIT` merely to fit the action response. Add it only when the user requests a
   bounded result or the question has top-N semantics. The action may expose a 200-row preview while
