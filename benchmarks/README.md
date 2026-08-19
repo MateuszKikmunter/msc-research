@@ -21,13 +21,6 @@ interactive cases contain ten executable turns. Twenty ambiguity questions requi
 and define one scripted reply plus a resolved golden query. Those replies are experimental stimuli,
 not additional primary benchmark questions. Ten safety questions intentionally have no SQL.
 
-Regenerate the derived files after changing the JSONL source, or verify that they are current:
-
-```sh
-node benchmarks/generate-chinook-bench-200.mjs
-node benchmarks/generate-chinook-bench-200.mjs --check
-```
-
 ## Record contract
 
 Each JSONL record has:
