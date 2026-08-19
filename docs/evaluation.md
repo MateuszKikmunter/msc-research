@@ -2,217 +2,496 @@
 
 ## Research objective
 
-Evaluate how reliably a conversational Bedrock Agent translates natural-language analytical
-questions into safe, correct Athena queries and faithful explanations over the Chinook dataset.
+Evaluate how much final execution accuracy conceals about the observable behaviour of an agentic
+Text-to-SQL pipeline. The study distinguishes direct correctness, recovery, semantic failure,
+clarification, and unresolved failure using persisted Bedrock actions and Athena observations.
+
+The study evaluates **database-execution behaviour**. It does not evaluate hidden chain-of-thought
+or complete natural-language answer faithfulness.
 
 ## Research questions
 
-1. How often does the agent produce executable and semantically correct SQL?
-2. How often is the final natural-language answer supported by the query result?
-3. Does the agent ask for clarification when ambiguity materially changes the answer, without
-   over-clarifying straightforward requests?
-4. Does the safety boundary reject non-read-only requests and adversarial prompt content?
-5. What latency and cost trade-offs result from model choice and optional retrieval?
+The primary research question is:
 
-The model comparison will evaluate two conditions: Nova Lite as the cost-effective AWS-native
-baseline and Claude Haiku 4.5 as the cost-effective Anthropic alternative. Published positioning
-motivates these choices but is not evidence that either model will outperform the other on this
-task.
+> **To what extent does trajectory-aware decomposition change the interpretation of final
+> execution accuracy by distinguishing direct correctness, successful recovery, and unresolved
+> failure, and do Nova Lite and Haiku 4.5 exhibit different recovery, clarification,
+> error-response, and failure profiles?**
 
-The comparison should answer whether models with similar final correctness exhibit different
-direct-success, clarification, error-response, recovery, latency, and cost profiles. Report both
-models independently.
+The secondary questions are:
+
+1. What proportion of final successful outcomes were not achieved as clean, direct successes?
+2. How much final success is attributable to recovery from execution errors or semantic mistakes?
+3. How do agents respond to Athena execution-error observations, and which observable response
+   patterns lead to recovery or repeated failure?
+4. How is benchmark difficulty associated with first-attempt correctness, retries, execution
+   errors, and recovery?
+5. When both models reach the same final outcome on a case, how often do their trajectory classes
+   differ?
+
+Latency, token usage, and cost are descriptive operational measurements, not primary research
+questions.
+
+## Experimental conditions
+
+Use exactly two model conditions:
+
+1. Amazon Nova Lite; and
+2. Anthropic Claude Haiku 4.5 through Amazon Bedrock.
+
+Persist the exact model IDs, agent versions, aliases, inference configuration, prompt hashes,
+action implementation version, and deployment configuration. Friendly model names are not enough
+for reproducibility.
+
+Run two complete repetitions for each model. A third repetition is optional only if time and
+budget permit. The objective is a paired behavioural comparison, not a general model leaderboard.
 
 ## Chinook-Bench-200
 
-The benchmark source is [`../benchmarks/chinook-bench-200.jsonl`](../benchmarks/chinook-bench-200.jsonl),
-with its data contract, gold-query policy, limitations, and literature provenance documented in
-[`../benchmarks/README.md`](../benchmarks/README.md). Its 200 question turns (195 cases) are fixed
-across six strata:
+The canonical source is
+[`../benchmarks/chinook-bench-200.jsonl`](../benchmarks/chinook-bench-200.jsonl). Its complete record
+contract and gold-query policy are documented in
+[`../benchmarks/README.md`](../benchmarks/README.md).
 
-| Difficulty  | Questions | Cases | Main risks                                                    |
-| ----------- | --------: | ----: | ------------------------------------------------------------- |
-| Easy        |        50 |    50 | Schema lookup, predicates, nulls, ordering, and basic metrics |
-| Medium      |        60 |    60 | Join choice, grain, duplication, dates, and grouped metrics   |
-| Hard        |        50 |    50 | Multi-hop joins, nested logic, sets, windows, and ranking     |
-| Ambiguous   |        20 |    20 | Guessing materially underspecified intent                     |
-| Interactive |        10 |     5 | Losing context, corrections, or follow-up constraints         |
-| Safety      |        10 |    10 | Unsafe execution, injection, privacy, and domain boundaries   |
+The benchmark contains exactly 200 primary authored turns across 195 cases:
 
-Executable cases have canonical SQL. Clarification and safety cases deliberately use
-`gold_sql: null`, because generating a query is a failure for those prompts. A canonical query is
-evidence of intended semantics, not the only accepted SQL spelling.
+| Partition             | Questions | Cases | Primary evaluation                                          |
+| --------------------- | --------: | ----: | ----------------------------------------------------------- |
+| Standalone executable |       160 |   160 | Result correctness and trajectory profile                   |
+| Ambiguous             |        20 |    20 | Clarification request and post-clarification result         |
+| Interactive           |        10 |     5 | Context carry-over, turn accuracy, and interaction accuracy |
+| Safety/out of domain  |        10 |    10 | No-query compliance                                         |
 
-Before formal collection, it is required to check every question/query pair. Run
-all gold queries in Athena against the frozen Parquet snapshot, resolve disagreements, and store
-the dataset checksum, Athena engine version, benchmark commit, result-column metadata, ordered-row
-flag, and expected result hash. Keep a held-out subset unavailable during prompt development.
+The 160 standalone cases retain their easy, medium, and hard strata. The five interactive cases
+contain ten executable turns. Each ambiguity case has a scripted reply and resolved golden query;
+those replies are experimental stimuli and are not counted as additional primary benchmark turns.
 
-## Metrics
+Use separate denominators:
 
-### Query metrics
+```text
+Primary standalone metrics:      160 executable cases
+Interactive result accuracy:      10 turns in 5 episodes
+Clarification behaviour:          20 ambiguity cases
+Post-clarification accuracy:       up to 20 resolved continuations
+Safety compliance:                10 safety/out-of-domain cases
+```
 
-- **Execution success:** Athena completes the generated query. Report this diagnostic separately;
-  executable but incorrect SQL does not pass the case.
-- **Result execution accuracy (EX):** generated and gold results match after declared
-  normalization. Compare ordered rows for rankings, limits, and chronology; otherwise compare
-  unordered multisets. Preserve duplicates and nulls.
-- **Semantic SQL correctness:** blinded review of joins, predicates, aggregation grain, date
-  bounds, null handling, and metric definition for result mismatches and alternative valid SQL.
-- **First-attempt EX:** the first generated SQL matches the gold result, regardless of whether a
-  later retry succeeds.
-- **Final EX:** the last successful generated SQL matches the gold result.
-- **Recovery rate:** among cases whose first SQL is wrong or fails, the proportion with correct
-  final SQL.
-- **Safety compliance:** unsafe requests do not result in an Athena execution.
-- **Efficiency indicators:** tool-call count, retries, Athena engine duration, bytes scanned,
-  end-to-end latency, tokens, and estimated cost. Do not call endpoint latency **VES**. BIRD's VES
-  is a valid-query execution-efficiency comparison against reference SQL; on this small dataset it
-  should be reported only if engine timings are repeated, stable, and measured as defined.
+Do not replace the primary 160-case analysis with a pooled score across incompatible partitions.
 
-Execution success alone is not correctness: a valid query can answer the wrong question.
+Before formal collection, execute and verify all 190 executable query definitions against the
+frozen Athena snapshot:
 
-### Conversation metrics
+```text
+160 standalone queries
++ 10 interactive-turn queries
++ 20 resolved ambiguity queries
+= 190 executable query definitions
+```
 
-- **Answer faithfulness:** every factual claim is supported by the returned rows or approved
-  contextual documents.
-- **Completeness:** the answer addresses the requested dimensions and units.
-- **SQL disclosure:** the executed SQL is included as required.
-- **Clarification precision:** proportion of truly ambiguous cases in which clarification occurs.
-- **Clarification recall:** proportion of required-clarification cases that receive a relevant
-  question before any SQL action.
-- **Clarification overuse:** proportion of unambiguous cases unnecessarily delayed by a question.
-- **Clarification resolution:** proportion of clarification sequences that execute the correct SQL
-  after the user's answer.
-- **Turn accuracy:** correct behavior and, when applicable, correct result for each conversational
-  turn.
-- **Interaction accuracy:** all turns in a conversational case are correct; one failed turn fails
-  the sequence.
+Resolve interactive placeholders from the preceding **gold result**, not from a possibly incorrect
+model result. Cache complete normalized gold results and record the benchmark version, dataset
+checksum, Athena engine/workgroup, normalization version, resolved placeholders, row count, and
+result hash.
 
-### Operational metrics
+## Observable trajectory representation
 
-Measure end-to-end latency using consistent start and stop points. Record model invocations,
-Athena bytes scanned, Lambda duration, errors, and retry count where available. Calculate cost
-from contemporaneous AWS pricing and record the pricing date and region rather than hard-coding
-prices in this document.
+Store orthogonal facts before assigning a presentation class:
 
-## Scoring procedure
+```json
+{
+    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql",
+    "terminalOutcome": "correct | incorrect | no_sql | system_error",
+    "executionErrorObserved": true,
+    "retryAttempted": true,
+    "recovered": true,
+    "redundantActionObserved": false,
+    "regressedAfterCorrectAttempt": false,
+    "clarification": "appropriate | unnecessary | missed | not_applicable | uncertain",
+    "contractCompliant": true,
+    "traceComplete": true
+}
+```
 
-### 1. Freeze conditions
+The terminal SQL attempt is the **last SQL invocation in the episode**, not the last successful
+invocation. An earlier correct result followed by an incorrect or failing SQL invocation is not a
+terminal success.
 
-Record the benchmark commit, dataset checksums, Glue schema, Athena engine/workgroup, agent prompt
-version, action Lambda version, model ID, alias and immutable agent version, AWS Region, and pricing
-date. Use a fresh Bedrock session for every independent case. Use one session across the turns of
-an interactive case and never reuse it for another case.
+## Trajectory classes
 
-Run one complete pass per model and one planned second repetition using the same randomized case
-order policy. A third repetition is optional if time and budget permit. Report bootstrap 95%
-confidence intervals clustered across cases and run-to-run consistency. Treat cases, not repeated
-runs, as the primary independent unit.
+Assign one mutually exclusive SQL-trajectory class:
 
-### 2. Execute and capture
+- `DIRECT_SUCCESS`: the first and terminal SQL results are gold-equivalent;
+- `EXECUTION_ERROR_RECOVERED`: the first SQL attempt fails to execute and a later terminal result
+  is gold-equivalent;
+- `SEMANTIC_REVISION_SUCCESS`: the first SQL executes but is not gold-equivalent and a later
+  terminal result is gold-equivalent;
+- `EXECUTED_SEMANTIC_FAILURE`: the terminal SQL executes but is not gold-equivalent;
+- `UNRECOVERED_EXECUTION_FAILURE`: the terminal SQL still produces an execution error;
+- `NO_SQL`: SQL was required but no SQL was executed; and
+- `SYSTEM_ERROR`: infrastructure, persistence, runner, or evaluator failure prevents a model
+  outcome.
 
-For each run, the local runner submits the benchmark question through the normal server endpoint.
-The existing transcript layer records the answer, SQL attempts, timing, token usage, agent metrics,
-and ordered Bedrock trace events. The runner adds the benchmark case ID, repetition, model
-condition, and expected behavior to an evaluation record linked to the interaction ID.
+Apply this precedence:
 
-Do not intentionally create a “schema error” by asking for a natural-language concept such as
-“track prices”; mapping that phrase to `unit_price` is normal schema linking, not fault injection.
-Measure recovery from naturally invalid first attempts in the main benchmark. If controlled fault
-injection is later added, run and report it as a separate experiment so it does not contaminate
-ordinary text-to-SQL accuracy.
+```text
+1. No valid model outcome because of infrastructure/evaluator failure -> SYSTEM_ERROR
+2. SQL required but no SQL attempted                              -> NO_SQL
+3. Terminal result correct:
+     first result correct                                        -> DIRECT_SUCCESS
+     first attempt execution error                               -> EXECUTION_ERROR_RECOVERED
+     first attempt executed with wrong result                    -> SEMANTIC_REVISION_SUCCESS
+4. Terminal SQL executed with wrong result                       -> EXECUTED_SEMANTIC_FAILURE
+5. Otherwise                                                     -> UNRECOVERED_EXECUTION_FAILURE
+```
 
-### 3. Deterministic scoring
+Clarification is orthogonal to these classes. A run can have a direct SQL trajectory but fail the
+interaction contract because it asked an unnecessary question.
 
-For executable turns:
+## Core metrics
 
-1. execute each canonical SQL query once against the frozen snapshot and cache its complete
-   normalized result;
-2. take the `queryExecutionId` persisted in each successful action observation and paginate
-   `GetQueryResults` until the complete original candidate result is retrieved;
-3. treat the action's maximum 200 rows only as the preview shown to the model, never as the result
-   used for execution accuracy;
-4. normalize column names/types and numeric representation according to a versioned policy;
-5. compare ordered results when order is semantically requested, otherwise compare multisets;
-6. score first-attempt and final EX independently; and
-7. queue evaluator-uncertain mismatches and execution failures for the bounded audit.
+Use the 160 standalone executable cases as the denominator for headline metrics.
 
-If Athena's original result is no longer available, re-execute the persisted candidate SQL only
-against the same frozen dataset, engine, and workgroup and record that fallback explicitly. The
-agent must not add `LIMIT 200` solely because the action response is capped; a semantic `LIMIT`
-belongs in generated SQL only when the user requests a bounded or top-N result.
+### Final Success Rate
 
-For ambiguous turns, pass only if a relevant clarification is issued before any Athena action. For
-an unambiguous executable turn, record any clarification as unnecessary and send one frozen,
-case-independent fallback in the same session. A correct result after that fallback counts toward
-final execution accuracy but not clean direct success; a second clarification without SQL ends as
-`NO_SQL`. For safety turns, pass only if no query action occurs and the answer follows the case's
-safety target. For interactive cases, resolve gold placeholders from the preceding gold result and
-score both turn-level and all-turn interaction accuracy.
+```text
+FSR = terminal gold-equivalent runs / 160 standalone runs
+```
 
-Exact SQL-string match is not a primary metric. Equivalent SQL syntax should pass; conversely, a
-query that happens to return the same result on this small snapshot may still require review when
-its semantics are suspect.
+### First-Attempt Result Correctness
 
-### 4. Natural-language answer scoring
+```text
+FASR = gold-equivalent first SQL results / 160 standalone runs
+```
 
-Score the final answer separately from SQL:
+### Clean Direct Success Rate
 
-| Dimension            | Score | Criterion                                                        |
-| -------------------- | ----: | ---------------------------------------------------------------- |
-| Factual faithfulness |   0–2 | Claims contradict, partly match, or fully match action results   |
-| Completeness         |   0–2 | Misses, partly covers, or fully answers requested dimensions     |
-| Metric/unit clarity  |   0–2 | Wrong/absent, implicit, or explicit correct definition and units |
-| Empty/error handling |   0–2 | Fabricates, is unclear, or correctly distinguishes no data/error |
-| SQL reproducibility  |   0–2 | Missing/wrong, incomplete, or correct executed SQL is disclosed  |
+A clean direct success requires:
 
-Use deterministic checks for numbers, named entities, requested columns, and SQL disclosure where
-possible. An LLM judge may produce a secondary score, but it must use a frozen rubric and model
-version, be blinded to the tested model identity, and be calibrated against two human reviewers on
-a stratified sample. Report agreement and judge bias; do not use an uncalibrated judge as ground
-truth. Bedrock-exposed rationale is diagnostic trajectory data, not evidence that an answer is
-correct.
+- first and terminal SQL results are gold-equivalent;
+- exactly one necessary SQL attempt;
+- no execution error;
+- no deterministically redundant or prohibited action;
+- no unnecessary clarification; and
+- no interaction or safety-contract violation.
 
-### 5. Reporting
+```text
+CDSR = clean direct-success runs / 160 standalone runs
+```
 
-Report overall outcomes and all six strata separately. The primary endpoint is final EX on the 160
-standalone executable cases. Co-primary behavioral outcomes are clarification recall/overuse,
-interaction accuracy, and safety compliance. Report first-attempt EX, recovery, answer-quality
-dimensions, latency, tokens, retries, bytes scanned, and cost as secondary outcomes. Include a
-paired per-case comparison between model conditions rather than comparing only aggregate means.
+### Primary estimand: Final-to-Direct Success Gap
 
-## Methodological references
+```text
+FDG = FSR - CDSR
+```
 
-- Li et al., **BIRD**, NeurIPS 2023 Datasets and Benchmarks,
-  [DOI 10.52202/075280-1835](https://doi.org/10.52202/075280-1835): execution accuracy,
-  database-value grounding, and efficiency as a separate concern.
-- Yu et al., **Spider**, EMNLP 2018,
-  [DOI 10.18653/v1/D18-1425](https://doi.org/10.18653/v1/D18-1425): reviewed complex SQL and
-  difficulty coverage; Chinook-Bench does not claim cross-domain generalization.
-- Saparina and Lapata, **AMBROSIA**, NeurIPS 2024 Datasets and Benchmarks,
-  [DOI 10.52202/079017-2876](https://doi.org/10.52202/079017-2876): explicit ambiguity and
-  multiple plausible interpretations.
-- Yu et al., **SParC**, ACL 2019,
-  [DOI 10.18653/v1/P19-1443](https://doi.org/10.18653/v1/P19-1443): contextual sequences and
-  interaction-level accuracy.
-- Tian et al., **SQLucid**, UIST 2024,
-  [DOI 10.1145/3654777.3676368](https://doi.org/10.1145/3654777.3676368): understandable,
-  inspectable query explanations and user-centered evaluation.
-- Pourreza and Rafiei, EMNLP 2023,
-  [DOI 10.18653/v1/2023.emnlp-main.99](https://doi.org/10.18653/v1/2023.emnlp-main.99): benchmark
-  ambiguity and false penalties from rigid reference matching.
+Interpret FDG with the trajectory distribution. A large gap may represent successful resilience,
+frequent initial failure, unnecessary intervention, or a mixture of these behaviours.
 
-These peer-reviewed works were used as design references. The question text and SQL in
-Chinook-Bench-200 were authored for this project and were not copied from those datasets.
+### Recovered Success Contribution
+
+```text
+RSC = recovered successful runs / all successful standalone runs
+```
+
+### Recovery Rate
+
+```text
+RR = initially unsuccessful SQL runs that recover
+     ----------------------------------------------
+     runs whose first SQL had an execution or semantic error
+```
+
+Report execution-error recovery and semantic revision separately. Exclude `NO_SQL` and
+`SYSTEM_ERROR` from recovery denominators and report them independently.
+
+### Executed Semantic Failure Rate
+
+```text
+ESFR = executed semantic failures / 160 standalone runs
+```
+
+### Clarification metrics
+
+Record deterministically whether `AMAZON.UserInput` occurs before SQL and whether the interaction
+continues with the scripted reply. Report:
+
+- clarification-request rate on the 20 ambiguity cases;
+- unnecessary-clarification rate on the 160 standalone cases;
+- fallback-assisted success on standalone cases; and
+- post-clarification result accuracy on entered scripted continuations.
+
+`acceptedSlots` remains benchmark metadata and is not an implemented automatic scoring mechanism.
+Until a frozen relevance matcher exists, do not claim that the runner automatically understands
+whether arbitrary clarification wording addresses a slot. Mark unclear relevance as `uncertain`
+and cover it within the bounded validation sample.
+
+If an ambiguity case executes SQL without asking a clarification, record `missed` and do not send
+the scripted resolution. Do not score the guessed SQL against an interpretation the user never
+selected.
+
+For an unexpected clarification on a fully specified standalone case, send this frozen fallback
+once in the same session:
+
+```text
+The original request is fully specified. The query action is already configured for the benchmark
+database and schema. Execute the request without asking another clarification question.
+```
+
+A correct result after this intervention contributes to FSR and fallback-assisted success but not
+to CDSR. A second clarification without SQL terminates as `NO_SQL`.
+
+### Interactive and safety metrics
+
+- **Turn accuracy:** correct result/behaviour for an interactive turn.
+- **Interaction accuracy:** every turn in an interactive case is correct; one failed turn fails its
+  episode.
+- **Safety Compliance Rate:** no prohibited query is executed for a safety/out-of-domain case.
+
+Do not include safety cases in SQL execution accuracy.
+
+### Descriptive operational metrics
+
+Record distributions for:
+
+```text
+sql_attempt_count
+athena_execution_count
+athena_error_count
+tool_call_count
+clarification_count
+total_turn_count
+latency_ms
+token_usage
+bytes_scanned
+estimated_cost
+```
+
+Calculate cost using the recorded AWS Region and contemporaneous pricing date. Do not label
+endpoint latency as BIRD's Valid Efficiency Score.
+
+## Observation-to-action error-response analysis
+
+For each persisted Athena execution-error observation, correlate:
+
+```text
+preceding SQL -> normalized Athena error -> next SQL -> next execution observation
+```
+
+Normalize stable error signatures, for example:
+
+```text
+COLUMN_NOT_FOUND:<identifier>
+TABLE_NOT_FOUND:<identifier>
+SYNTAX_ERROR
+TYPE_MISMATCH
+FUNCTION_NOT_FOUND:<identifier>
+AMBIGUOUS_NAME:<identifier>
+PERMISSION_ERROR
+TIMEOUT
+OTHER:<stable_code>
+```
+
+Remove volatile request IDs, line numbers, timestamps, and query execution IDs from normalized
+signatures while retaining the original error text as evidence.
+
+Calculate:
+
+- **Retry Response Rate:** error observations followed by another SQL attempt;
+- **Unchanged-query Retry Rate:** retries whose canonical SQL did not change;
+- **Repeated-error Rate:** retries producing the same normalized error;
+- **Immediate Error-resolution Rate:** retries where the preceding normalized error does not recur;
+- **New-error Introduction Rate:** retries producing a different execution error; and
+- **Observation-conditioned Recovery Rate:** standalone episodes containing an execution error
+  that eventually end correctly.
+
+Immediate error resolution does not imply semantic correctness; the next SQL may execute while
+answering the wrong question.
+
+## Result evaluation
+
+### Complete candidate results
+
+For every successful action:
+
+1. use the persisted action observation as evidence of what the agent saw;
+2. take its `queryExecutionId` and paginate `GetQueryResults` to retrieve the complete original
+   candidate result;
+3. treat `previewRowCount` and `previewTruncated` as model-facing preview metadata only; and
+4. re-execute candidate SQL only if the original result has expired or is being independently
+   verified, recording that fallback explicitly.
+
+The agent must not add `LIMIT 200` because of the preview cap.
+
+### Frozen comparison contract
+
+For each candidate/gold pair:
+
+1. require the declared output-column count and semantic position;
+2. ignore literal aliases because `compareColumnNames` is false;
+3. reject additional columns when `allowExtraColumns` is false;
+4. normalize types, nulls, timestamps, and numeric representation;
+5. preserve duplicate rows;
+6. compare ordered rows only when `orderMatters` is true;
+7. otherwise compare unordered multisets; and
+8. apply the declared `rowLimit` and `topNTiePolicy` only for semantic top-N questions.
+
+`result_set_only`, currently used by CB200-A001, compares the complete selected rows as an unordered
+multiset. Therefore `revenue` and `total_revenue` aliases are equivalent, and different row
+presentation order does not fail the case when all selected values match.
+
+Classify a comparison contract that cannot be applied as `evaluator_uncertain`; do not
+automatically count evaluator uncertainty as model failure.
+
+Exact SQL-string or abstract-syntax-tree equality is not a primary metric. Equivalent joins, CTEs,
+predicates, and aliases may pass through result equivalence. Conversely, matching results on one
+small snapshot do not prove semantic equivalence on every database instance.
+
+## Experiment procedure
+
+### 1. Freeze the protocol
+
+Record and freeze:
+
+- benchmark commit and comparison contracts;
+- dataset checksums and Glue schema;
+- Athena engine, workgroup, and AWS Region;
+- agent prompt, model, version, alias, and inference settings;
+- Lambda/action implementation;
+- retry, timeout, fallback, and incomplete-block policies;
+- trace-retention configuration;
+- result normalization and trajectory-classification versions; and
+- pricing date for descriptive cost estimates.
+
+Use a fresh session for every independent case. Reuse a session only within an interactive or
+entered clarification episode.
+
+### 2. Pilot
+
+Run 20 strategically selected cases once with both models. Cover simple, hard, ambiguity,
+interactive, safety, top-N, numerical, empty-result, and likely-error cases. Use the pilot to find
+benchmark, parser, comparator, and classifier defects. Pilot runs are not formal experiment data.
+
+### 3. Formal collection
+
+Run every 200-turn block once per model, validate completeness, then perform the planned second
+repetition. Rerun only infrastructure failures under the frozen policy; do not rerun completed but
+incorrect model outcomes.
+
+Headline results require a complete 160-case standalone block for a model/repetition. If a block
+remains incomplete, report the actual denominator and `SYSTEM_ERROR` count and label its metrics
+provisional.
+
+## Paired model analysis
+
+Report both models independently and compare paired cases within each repetition.
+
+### Conditional Trajectory Divergence
+
+For paired cases with the same selected terminal outcome:
+
+```text
+CTD = pairs with different trajectory classes
+      -----------------------------------------
+      comparable pairs with the same terminal outcome
+```
+
+Calculate CTD separately for each repetition and as a pooled estimate with uncertainty clustered
+by benchmark case. Also report within-model outcome stability and trajectory stability across the
+two repetitions.
+
+Use paired binary analysis for success outcomes and paired/clustered methods for counts and
+continuous measures. Report effect sizes and bootstrap 95% confidence intervals rather than only
+p-values.
+
+## Bounded manual validation
+
+Manual validation checks the deterministic evaluator; it is not a second full annotation study.
+Freeze a maximum budget before formal collection:
+
+```text
+Unique run/episode classifications: maximum 40 episodes
+Error-observation transitions:      20-30, drawn from those episodes where possible
+Optional rationale illustrations:    5-10, drawn from the same episodes
+```
+
+Select the sample across both models, trajectory classes, difficulties, benchmark partitions,
+error types, recovery outcomes, and comparator edge cases. Report automated-versus-manual
+agreement, discovered evaluator defects, and remaining uncertain cases.
+
+If uncertain cases exceed the audit capacity or threaten a headline metric, fix and version the
+instrument rather than expanding manual annotation without limit.
+
+## Rationale and natural-language answers
+
+Persisted rationale events are supplementary evidence only. They are not full or hidden
+chain-of-thought, verified causal explanations, or a quantitative scoring target. An optional small
+qualitative section may illustrate observable rationale/action mismatches, but these examples do
+not affect benchmark scores.
+
+Complete natural-language answer faithfulness, rationale quality, causal explanation quality, and
+user usability are outside the current study. No LLM judge is required. Do not claim complete
+end-to-end user-answer reliability unless final answers are evaluated in a separately designed
+study.
+
+## Reporting
+
+Report:
+
+- FSR, FASR, CDSR, FDG, RSC, RR, and ESFR on the 160 standalone cases;
+- all seven trajectory-class distributions;
+- execution-error and semantic-revision recovery separately;
+- observation-to-action error-response metrics;
+- clarification requests, unnecessary clarification, fallback-assisted success, and resolved
+  ambiguity accuracy;
+- interactive turn and interaction accuracy;
+- safety/no-query compliance;
+- Conditional Trajectory Divergence and within-model stability;
+- descriptive latency, tokens, tool calls, retries, bytes scanned, and cost;
+- uncertainty intervals and completed denominators; and
+- bounded validation agreement and unresolved evaluator uncertainty.
+
+Report ambiguity, interactive, and safety partitions separately. Do not combine them into the
+primary standalone denominator.
+
+## Academic positioning
+
+The design builds on, rather than claims to replace, established methods:
+
+- **BIRD** and Gao et al. support execution-based Text-to-SQL comparison rather than SQL-string
+  equality.
+- **Ning et al.** and **Dr.Spider** support systematic error and diagnostic analysis.
+- **Spider 2.0** and **BIRD-INTERACT** motivate realistic, interactive database workflows and
+  environment feedback.
+- **RetrySQL** supports separating first-attempt performance from retry/recovery behaviour.
+- **AgentBoard** and **AgentDiagnose** support process-sensitive evaluation and diagnosis of
+  observable multi-step agent trajectories.
+- **SQLucid** and **Talk2Data** provide supporting context for inspectable and multi-step analytical
+  interaction.
+
+TRAJECT-Bench is conceptually relevant but remains a preprint and is not the sole or primary
+methodological foundation where peer-reviewed evidence is required. Full publication links and
+their precise relationship to this study are maintained in
+[`trace-aware-evaluation-plan-v3.md`](trace-aware-evaluation-plan-v3.md).
+
+The contribution is not a claim that trajectory-aware evaluation is new. It is a controlled
+empirical application showing how much final execution accuracy conceals about direct reliability,
+recovery, clarification, semantic failure, and error response in a deployed Bedrock/Athena
+Text-to-SQL pipeline, including a paired Nova Lite/Haiku 4.5 comparison.
 
 ## Threats to validity
 
-- Chinook is small and clean, so results may not generalize to large enterprise schemas.
-- A benchmark authored after observing agent failures can overfit subsequent prompts.
-- Model behavior and managed-service implementations can change over time.
-- Reusing a session can leak earlier schema or corrections into later cases.
-- Human SQL rubrics can accept or reject alternative but equivalent queries inconsistently.
+- Chinook is small and clean, so results do not establish cross-domain or enterprise-scale
+  generalization.
+- Exact-result projection can penalize a reasonable alternative output shape. Make requested
+  projections explicit and freeze them before formal collection.
+- Equivalent SQL can coincide on one snapshot while differing elsewhere.
+- Managed model and service behaviour can change; persist immutable versions and hashes.
+- Benchmark refinement after pilot failures can overfit the instrument; freeze it before formal
+  collection.
+- Reusing sessions across independent cases can leak context.
+- Incomplete trace capture or incorrect event correlation can misclassify trajectories.
+- `acceptedSlots` does not itself provide automatic natural-language relevance evaluation.
 
-Mitigate these risks with versioned configurations, fresh sessions, held-out questions, repeated
-runs, independently computed expected results, and complete experiment records.
+Mitigate these threats with versioned artifacts, fresh sessions, a frozen dataset and protocol,
+complete result retrieval, repeated paired runs, explicit uncertainty states, and bounded manual
+validation.
