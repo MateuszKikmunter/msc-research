@@ -1,9 +1,8 @@
 # Chinook-Bench-200
 
-[`chinook-bench-200.jsonl`](chinook-bench-200.jsonl) is the versioned machine-readable source for
-evaluating the local Bedrock text-to-SQL application. The generated
-[`chinook-bench-200.json`](chinook-bench-200.json) is a JSON array for tools that do not consume
-JSONL, and [`chinook-bench-200.md`](chinook-bench-200.md) is the generated human-readable form.
+[`chinook-bench-200.json`](chinook-bench-200.json) is the versioned machine-readable source for
+evaluating the local Bedrock text-to-SQL application, and
+[`chinook-bench-200.md`](chinook-bench-200.md) is the generated human-readable form.
 The benchmark contains exactly 200 primary natural-language question turns across 195 cases,
 grounded in the repository's Chinook schema:
 
@@ -23,7 +22,7 @@ not additional primary benchmark questions. Ten safety questions intentionally h
 
 ## Record contract
 
-Each JSONL record has:
+Each element in the JSON array has:
 
 - `id`: stable case identifier;
 - `difficulty` and `category`: reporting strata fixed before experiment execution;
@@ -74,7 +73,7 @@ Complete paginated results are written as JSON under
 
 The generator uses named static services for each step:
 
-- `BenchmarkLoader` reads the committed JSONL;
+- `BenchmarkLoader` reads the committed JSON;
 - `GoldQueryDefinitionBuilder` extracts executable definitions;
 - `GoldSqlResolver` resolves the two interactive placeholders from preceding golden results;
 - `AthenaService` executes SQL and retrieves every result page;

@@ -1,6 +1,6 @@
 # Chinook-Bench-200 questions and golden queries
 
-This file is generated from [`chinook-bench-200.jsonl`](chinook-bench-200.jsonl), which is the
+This file is generated from [`chinook-bench-200.json`](chinook-bench-200.json), which is the
 machine-readable source of truth. Benchmark design, scoring, review requirements, and references
 are documented in the [benchmark README](README.md).
 

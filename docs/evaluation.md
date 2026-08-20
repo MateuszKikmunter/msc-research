@@ -49,7 +49,7 @@ budget permit. The objective is a paired behavioural comparison, not a general m
 ## Chinook-Bench-200
 
 The canonical source is
-[`../benchmarks/chinook-bench-200.jsonl`](../benchmarks/chinook-bench-200.jsonl). Its complete record
+[`../benchmarks/chinook-bench-200.json`](../benchmarks/chinook-bench-200.json). Its complete record
 contract and gold-query policy are documented in
 [`../benchmarks/README.md`](../benchmarks/README.md).
 

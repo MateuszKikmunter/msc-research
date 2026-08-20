@@ -4,7 +4,7 @@
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
-> **Questions and golden SQL:** [`../../benchmarks/chinook-bench-200.jsonl`](../../benchmarks/chinook-bench-200.jsonl)
+> **Questions and golden SQL:** [`../../benchmarks/chinook-bench-200.json`](../../benchmarks/chinook-bench-200.json)
 
 ## 1. Goal
 
@@ -50,7 +50,7 @@ by every later evaluation. They are generated once and read from disk when a run
 
 The experiment tools use existing project inputs directly:
 
-- `benchmarks/chinook-bench-200.jsonl` for questions, scripted replies, golden SQL, and comparison
+- `benchmarks/chinook-bench-200.json` for questions, scripted replies, golden SQL, and comparison
   rules;
 - the existing root `.env` values for AWS region, Athena database, workgroup, and output location;
 - `http://localhost:8000/api/analytics-pipeline` as the default server endpoint; and
