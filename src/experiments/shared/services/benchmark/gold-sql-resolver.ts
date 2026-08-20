@@ -11,6 +11,9 @@ interface GoldBinding {
 }
 
 export class GoldSqlResolver {
+    // Interactive turn-two queries contain placeholders whose values must come
+    // from a specific cell in the preceding golden result. Keeping that mapping
+    // explicit avoids guessing from the placeholder name or using model output.
     private static readonly BINDINGS: Readonly<Record<string, GoldBinding[]>> =
         {
             'CB200-C001-T02': [
@@ -45,8 +48,8 @@ export class GoldSqlResolver {
                 binding,
                 completedResults
             );
-            const token = `:${binding.placeholder}`;
 
+            const token = `:${binding.placeholder}`;
             if (!sql.includes(token)) {
                 throw new Error(
                     `${definition.artifactId} does not contain expected placeholder ${token}.`
@@ -59,6 +62,8 @@ export class GoldSqlResolver {
             );
         }
 
+        // Fail before calling Athena if a benchmark query introduces a new
+        // placeholder without adding its mapping above.
         const unresolved = sql.match(/:[A-Za-z_][A-Za-z0-9_]*/);
         if (unresolved) {
             throw new Error(
@@ -73,6 +78,8 @@ export class GoldSqlResolver {
         binding: GoldBinding,
         completedResults: ReadonlyMap<string, GoldenResultFile>
     ): string {
+        // Golden results are added to this map as queries finish, so a follow-up
+        // can only be resolved after its declared source turn has completed.
         const source = completedResults.get(binding.sourceArtifactId);
         if (!source) {
             throw new Error(
@@ -80,6 +87,8 @@ export class GoldSqlResolver {
             );
         }
 
+        // Result rows are positional arrays. Resolve the named source column to
+        // its array index before reading the configured row.
         const columnIndex = source.columns.findIndex(
             (column) => column.name === binding.sourceColumn
         );
@@ -103,6 +112,9 @@ export class GoldSqlResolver {
         value: string,
         valueType: BindingValueType
     ): string {
+        // Athena returns every cell as text. Integer placeholders are validated
+        // before insertion; string placeholders are quoted and apostrophes are
+        // escaped according to SQL literal rules.
         if (valueType === 'integer') {
             if (!/^-?\d+$/.test(value)) {
                 throw new Error(
