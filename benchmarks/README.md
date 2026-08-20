@@ -81,6 +81,9 @@ The generator uses named static services for each step:
 - `GoldenResultGenerator` coordinates execution; and
 - `GoldenResultWriter` writes JSON reference results.
 
+AWS query access remains isolated in `shared/services/athena/`. Golden-result orchestration and
+writing live separately in `shared/services/golden-results/`.
+
 No CSV, manifest, hash, or separate cache is generated. Running `make gold` again overwrites the
 existing JSON files.
 

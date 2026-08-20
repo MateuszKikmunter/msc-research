@@ -1631,6 +1631,7 @@ src/experiments/
   shared/services/
     athena/
       athena-service
+    golden-results/
       generate-golden-results
       golden-result-generator
       golden-result-writer

@@ -13,7 +13,9 @@ All notable changes to this project will be documented in this file.
   `src/experiments/runs/golden-sql`. Stateless responsibilities use named static classes so the
   execution flow is explicit, while `AthenaService` owns the AWS client. Added root Make targets
   for local services, golden generation, experiment tests, and type-checking, together with focused
-  Jest coverage. The benchmark-question runner and evaluator remain pending.
+  Jest coverage. Athena access is isolated under `shared/services/athena`, while golden-result
+  orchestration and writing live under `shared/services/golden-results`. The benchmark-question
+  runner and evaluator remain pending.
 
 - **2026-08-12** — Added Chinook-Bench-200, a machine-readable benchmark with exactly 200 question
   turns across 195 cases: 50 easy, 60 medium, 50 hard, 20 ambiguity, 10 interactive turns, and 10

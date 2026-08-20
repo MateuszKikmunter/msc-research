@@ -96,6 +96,8 @@ src/experiments/
     services/
       athena/
         athena-service.ts
+
+      golden-results/
         generate-golden-results.ts
         golden-result-generator.ts
         golden-result-writer.ts
