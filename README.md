@@ -94,7 +94,7 @@ You can verify the uploaded dataset with:
 
 ```bash
 aws s3 ls s3://msc-analytics/chinook/ \
-    --profile matt-dev \
+    --profile your-profile \
     --recursive
 ```
 
@@ -104,7 +104,7 @@ From the repository root, deploy the Glue database, crawler, and Athena workgrou
 
 ```bash
 aws cloudformation deploy \
-    --profile matt-dev \
+    --profile your-profile \
     --template-file infra/athena.yaml \
     --stack-name chinook-athena \
     --capabilities CAPABILITY_IAM
@@ -114,7 +114,7 @@ Run the crawler after the stack deployment completes:
 
 ```bash
 aws glue start-crawler \
-    --profile matt-dev \
+    --profile your-profile \
     --name chinook-athena-chinook
 ```
 
@@ -147,7 +147,7 @@ After deployment, retrieve the application identifiers from the stack outputs:
 
 ```bash
 aws cloudformation describe-stacks \
-    --profile matt-dev \
+    --profile your-profile \
     --stack-name <agent-stack-name> \
     --query 'Stacks[0].Outputs[?OutputKey==`AgentId` || OutputKey==`AgentAliasId`].[OutputKey,OutputValue]' \
     --output table
