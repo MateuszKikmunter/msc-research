@@ -1,0 +1,20 @@
+{
+    "questionId": "CB200-M018",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "playlist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["1", "Music", "3290"]],
+    "rowCount": 1
+}

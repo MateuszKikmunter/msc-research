@@ -1,0 +1,16 @@
+{
+    "questionId": "CB200-A013",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "rock_units_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["USA", "157"]],
+    "rowCount": 1
+}

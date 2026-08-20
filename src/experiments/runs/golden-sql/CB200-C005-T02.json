@@ -1,0 +1,24 @@
+{
+    "questionId": "CB200-C005",
+    "turnNumber": 2,
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["1666", "Dazed And Confused", "1612329"],
+        ["620", "Space Truckin'", "1196094"],
+        ["1581", "Dazed And Confused", "1116734"]
+    ],
+    "rowCount": 3
+}

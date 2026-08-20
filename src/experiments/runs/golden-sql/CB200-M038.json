@@ -1,0 +1,20 @@
+{
+    "questionId": "CB200-M038",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["1", "Rock", "826.65"]],
+    "rowCount": 1
+}

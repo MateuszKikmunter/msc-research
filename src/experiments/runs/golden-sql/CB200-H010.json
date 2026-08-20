@@ -1,0 +1,49 @@
+{
+    "questionId": "CB200-H010",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Argentina", "4", "Alternative & Punk", "8.91"],
+        ["Australia", "1", "Rock", "21.78"],
+        ["Austria", "1", "Rock", "14.85"],
+        ["Belgium", "1", "Rock", "20.79"],
+        ["Brazil", "1", "Rock", "80.19"],
+        ["Canada", "1", "Rock", "105.93"],
+        ["Chile", "1", "Rock", "8.91"],
+        ["Czech Republic", "1", "Rock", "24.75"],
+        ["Denmark", "1", "Rock", "20.79"],
+        ["Finland", "1", "Rock", "17.82"],
+        ["France", "1", "Rock", "64.35"],
+        ["Germany", "1", "Rock", "61.38"],
+        ["Hungary", "1", "Rock", "10.89"],
+        ["India", "1", "Rock", "24.75"],
+        ["Ireland", "19", "TV Shows", "13.93"],
+        ["Italy", "1", "Rock", "17.82"],
+        ["Netherlands", "1", "Rock", "17.82"],
+        ["Norway", "1", "Rock", "16.83"],
+        ["Poland", "1", "Rock", "21.78"],
+        ["Portugal", "1", "Rock", "30.69"],
+        ["Spain", "1", "Rock", "21.78"],
+        ["Sweden", "7", "Latin", "11.88"],
+        ["USA", "1", "Rock", "155.43001"],
+        ["United Kingdom", "1", "Rock", "36.63"]
+    ],
+    "rowCount": 24
+}

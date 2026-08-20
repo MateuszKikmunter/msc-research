@@ -1,0 +1,31 @@
+{
+    "questionId": "CB200-A003",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["90", "Iron Maiden", "138.6"],
+        ["150", "U2", "105.93"],
+        ["50", "Metallica", "90.090004"],
+        ["22", "Led Zeppelin", "86.13"],
+        ["149", "Lost", "81.590004"],
+        ["156", "The Office", "49.75"],
+        ["113", "Os Paralamas Do Sucesso", "44.55"],
+        ["58", "Deep Purple", "43.56"],
+        ["82", "Faith No More", "41.58"],
+        ["81", "Eric Clapton", "39.6"]
+    ],
+    "rowCount": 10
+}

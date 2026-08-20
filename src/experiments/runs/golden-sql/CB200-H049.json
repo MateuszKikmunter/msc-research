@@ -1,0 +1,48 @@
+{
+    "questionId": "CB200-H049",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["12", "Roberto", "Almeida"],
+        ["28", "Julia", "Barnett"],
+        ["29", "Robert", "Brown"],
+        ["26", "Richard", "Cunningham"],
+        ["41", "Marc", "Dubois"],
+        ["34", "João", "Fernandes"],
+        ["1", "Luís", "Gonçalves"],
+        ["27", "Patrick", "Gray"],
+        ["4", "Bjørn", "Hansen"],
+        ["6", "Helena", "Holý"],
+        ["52", "Emma", "Jones"],
+        ["45", "Ladislav", "Kovács"],
+        ["2", "Leonie", "Köhler"],
+        ["47", "Lucas", "Mancini"],
+        ["10", "Eduardo", "Martins"],
+        ["9", "Kara", "Nielsen"],
+        ["8", "Daan", "Peeters"],
+        ["15", "Jennifer", "Peterson"],
+        ["24", "Frank", "Ralston"],
+        ["13", "Fernanda", "Ramos"],
+        ["11", "Alexandre", "Rocha"],
+        ["57", "Luis", "Rojas"],
+        ["36", "Hannah", "Schneider"],
+        ["25", "Victor", "Stevens"],
+        ["33", "Ellie", "Sullivan"],
+        ["55", "Mark", "Taylor"],
+        ["48", "Johannes", "Van der Berg"]
+    ],
+    "rowCount": 27
+}

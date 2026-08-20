@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E037",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["13"]],
+    "rowCount": 1
+}

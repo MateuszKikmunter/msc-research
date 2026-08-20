@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E035",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "average_track_price",
+            "type": "float"
+        }
+    ],
+    "rows": [["1.0508051"]],
+    "rowCount": 1
+}

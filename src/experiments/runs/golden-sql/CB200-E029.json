@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E029",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "invoice_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["83"]],
+    "rowCount": 1
+}

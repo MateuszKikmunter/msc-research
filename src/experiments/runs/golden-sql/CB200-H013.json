@@ -1,0 +1,26 @@
+{
+    "questionId": "CB200-H013",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "invoice_year",
+            "type": "bigint"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        },
+        {
+            "name": "change_from_previous_year",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["2009", "449.46", null],
+        ["2010", "481.45", "31.99002"],
+        ["2011", "469.58", "-11.870026"],
+        ["2012", "477.53", "7.950012"],
+        ["2013", "450.58", "-26.950012"]
+    ],
+    "rowCount": 5
+}

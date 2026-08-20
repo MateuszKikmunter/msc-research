@@ -1,0 +1,24 @@
+{
+    "questionId": "CB200-H034",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["4", "Margaret", "Park", "197.2"]],
+    "rowCount": 1
+}

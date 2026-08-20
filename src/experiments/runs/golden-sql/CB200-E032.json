@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E032",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "average_invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["5.651942"]],
+    "rowCount": 1
+}

@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E047",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "earliest_invoice_date",
+            "type": "timestamp"
+        }
+    ],
+    "rows": [["2009-01-01 00:00:00.000"]],
+    "rowCount": 1
+}

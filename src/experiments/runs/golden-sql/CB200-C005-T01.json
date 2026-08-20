@@ -1,0 +1,31 @@
+{
+    "questionId": "CB200-C005",
+    "turnNumber": 1,
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["1666", "Dazed And Confused", "1612329"],
+        ["620", "Space Truckin'", "1196094"],
+        ["1581", "Dazed And Confused", "1116734"],
+        ["2429", "We've Got To Get Together/Jingo", "1070027"],
+        ["2432", "Funky Piano", "934791"],
+        ["621", "Going Down / Highway Star", "913658"],
+        ["2427", "Santana Jam", "882834"],
+        ["2565", "The Sun Road", "880640"],
+        ["1670", "Whole Lotta Love", "863895"],
+        ["622", "Mistreated (Alternate Version)", "854700"]
+    ],
+    "rowCount": 10
+}

@@ -1,0 +1,73 @@
+{
+    "questionId": "CB200-H027",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "track_1_id",
+            "type": "integer"
+        },
+        {
+            "name": "track_1_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_2_id",
+            "type": "integer"
+        },
+        {
+            "name": "track_2_name",
+            "type": "varchar"
+        },
+        {
+            "name": "invoices_together",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        [
+            "9",
+            "Snowballed",
+            "3500",
+            "String Quartet No. 12 in C Minor, D. 703 \"Quartettsatz\": II. Andante - Allegro assai",
+            "2"
+        ],
+        ["20", "Overdose", "32", "Deuces Are Wild", "2"],
+        ["48", "Not The Doctor", "66", "Por Causa De Você", "2"],
+        ["48", "Not The Doctor", "84", "Welcome Home (Sanitarium)", "2"],
+        ["66", "Por Causa De Você", "84", "Welcome Home (Sanitarium)", "2"],
+        ["229", "Samba De Orly", "241", "Geni E O Zepelim", "2"],
+        ["252", "Samba Do Lado", "264", "Amor De Muito", "2"],
+        ["280", "Lixo Do Mangue", "298", "A Cor Do Sol", "2"],
+        ["280", "Lixo Do Mangue", "316", "Linha Do Equador", "2"],
+        ["298", "A Cor Do Sol", "316", "Linha Do Equador", "2"],
+        ["461", "Surrender", "473", "When I Come Around", "2"],
+        ["484", "Nice Guys Finish Last", "496", "Living On Love", "2"],
+        ["512", "Comportamento Geral", "530", "Ando Meio Desligado", "2"],
+        ["512", "Comportamento Geral", "548", "Smoke On The Water", "2"],
+        ["530", "Ando Meio Desligado", "548", "Smoke On The Water", "2"],
+        ["693", "Sweet Hitch-Hiker", "705", "The Midnight Special", "2"],
+        [
+            "716",
+            "Brasil",
+            "728",
+            "Woman Is The Nigger Of The World (Ao Vivo)",
+            "2"
+        ],
+        [
+            "744",
+            "Mis Penas Lloraba Yo (Ao Vivo) Soy Gitano (Tangos)",
+            "762",
+            "No No No",
+            "2"
+        ],
+        [
+            "744",
+            "Mis Penas Lloraba Yo (Ao Vivo) Soy Gitano (Tangos)",
+            "780",
+            "Maybe I'm A Leo",
+            "2"
+        ],
+        ["762", "No No No", "780", "Maybe I'm A Leo", "2"]
+    ],
+    "rowCount": 20
+}

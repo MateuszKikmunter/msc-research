@@ -1,0 +1,67 @@
+{
+    "questionId": "CB200-M057",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["12", "Roberto", "Almeida"],
+        ["28", "Julia", "Barnett"],
+        ["39", "Camille", "Bernard"],
+        ["18", "Michelle", "Brooks"],
+        ["29", "Robert", "Brown"],
+        ["21", "Kathy", "Chase"],
+        ["26", "Richard", "Cunningham"],
+        ["41", "Marc", "Dubois"],
+        ["30", "Edward", "Francis"],
+        ["42", "Wyatt", "Girard"],
+        ["1", "Luís", "Gonçalves"],
+        ["23", "John", "Gordon"],
+        ["27", "Patrick", "Gray"],
+        ["7", "Astrid", "Gruber"],
+        ["56", "Diego", "Gutiérrez"],
+        ["4", "Bjørn", "Hansen"],
+        ["16", "Frank", "Harris"],
+        ["6", "Helena", "Holý"],
+        ["53", "Phil", "Hughes"],
+        ["44", "Terhi", "Hämäläinen"],
+        ["52", "Emma", "Jones"],
+        ["45", "Ladislav", "Kovács"],
+        ["22", "Heather", "Leacock"],
+        ["47", "Lucas", "Mancini"],
+        ["10", "Eduardo", "Martins"],
+        ["43", "Isabelle", "Mercier"],
+        ["20", "Dan", "Miller"],
+        ["32", "Aaron", "Mitchell"],
+        ["54", "Steve", "Murray"],
+        ["50", "Enrique", "Muñoz"],
+        ["9", "Kara", "Nielsen"],
+        ["46", "Hugh", "O'Reilly"],
+        ["58", "Manoj", "Pareek"],
+        ["8", "Daan", "Peeters"],
+        ["14", "Mark", "Philips"],
+        ["24", "Frank", "Ralston"],
+        ["11", "Alexandre", "Rocha"],
+        ["35", "Madalena", "Sampaio"],
+        ["31", "Martha", "Silk"],
+        ["25", "Victor", "Stevens"],
+        ["33", "Ellie", "Sullivan"],
+        ["3", "François", "Tremblay"],
+        ["48", "Johannes", "Van der Berg"],
+        ["5", "František", "Wichterlová"],
+        ["49", "Stanisław", "Wójcik"],
+        ["37", "Fynn", "Zimmermann"]
+    ],
+    "rowCount": 46
+}

@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E008",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "employee_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["8"]],
+    "rowCount": 1
+}

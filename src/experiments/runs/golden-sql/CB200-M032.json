@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-M032",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "units_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["2240"]],
+    "rowCount": 1
+}

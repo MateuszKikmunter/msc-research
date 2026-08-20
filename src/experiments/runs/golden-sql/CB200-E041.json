@@ -1,0 +1,28 @@
+{
+    "questionId": "CB200-E041",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "email",
+            "type": "varchar"
+        },
+        {
+            "name": "country",
+            "type": "varchar"
+        }
+    ],
+    "rows": [["24", "Frank", "Ralston", "fralston@gmail.com", "USA"]],
+    "rowCount": 1
+}

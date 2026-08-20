@@ -1,0 +1,16 @@
+{
+    "questionId": "CB200-H038",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "invoice_month",
+            "type": "timestamp"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["2012-08-01 00:00:00.000", "47.62"]],
+    "rowCount": 1
+}

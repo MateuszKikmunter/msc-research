@@ -1,0 +1,59 @@
+{
+    "questionId": "CB200-H039",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "track_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["23", "Alternative", "3374", "All Night Thing", "0.99"],
+        ["4", "Alternative & Punk", "2792", "A Melhor Forma", "1.98"],
+        ["6", "Blues", "903", "Lay Down Sally", "1.98"],
+        ["11", "Bossa Nova", "648", "Onde Anda Você", "1.98"],
+        [
+            "24",
+            "Classical",
+            "3488",
+            "Music for the Funeral of Queen Mary: VI. \"Thou Knowest, Lord, the Secrets of Our Hearts\"",
+            "1.98"
+        ],
+        ["22", "Comedy", "3214", "Phyllis's Wedding", "3.98"],
+        ["21", "Drama", "3223", "How to Stop an Exploding Man", "3.98"],
+        ["12", "Easy Listening", "1053", "Bad, Bad Leroy Brown", "0.99"],
+        ["15", "Electronica/Dance", "1458", "Light Years", "1.98"],
+        ["13", "Heavy Metal", "1254", "Age Of Innocence", "0.99"],
+        ["17", "Hip Hop/Rap", "2250", "Nega Do Cabelo Duro", "1.98"],
+        ["2", "Jazz", "625", "Blue Rythm Fantasy", "1.98"],
+        ["7", "Latin", "1099", "A Novidade (Live)", "1.98"],
+        ["3", "Metal", "1344", "Aces High", "1.98"],
+        ["9", "Pop", "3268", "Beautiful Boy", "1.98"],
+        ["14", "R&B/Soul", "1785", "Abraham, Martin And John", "1.98"],
+        ["8", "Reggae", "298", "A Cor Do Sol", "1.98"],
+        ["1", "Rock", "2991", "All Along The Watchtower", "1.98"],
+        ["5", "Rock And Roll", "116", "C'Mon Everybody", "0.99"],
+        ["20", "Sci Fi & Fantasy", "3246", "Baltar's Escape", "1.99"],
+        ["18", "Science Fiction", "2832", "The Woman King", "3.98"],
+        ["10", "Soundtrack", "2136", "Plot 180", "1.98"],
+        ["19", "TV Shows", "3200", "Gay Witch Hunt", "3.98"],
+        ["16", "World", "1967", "A Moça e a Chuva", "0.99"]
+    ],
+    "rowCount": 24
+}

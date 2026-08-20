@@ -1,0 +1,40 @@
+{
+    "questionId": "CB200-E023",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "company",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["19", "Tim", "Goyer", "Apple Inc."],
+        ["11", "Alexandre", "Rocha", "Banco do Brasil S.A."],
+        [
+            "1",
+            "Luís",
+            "Gonçalves",
+            "Embraer - Empresa Brasileira de Aeronáutica S.A."
+        ],
+        ["16", "Frank", "Harris", "Google Inc."],
+        ["5", "František", "Wichterlová", "JetBrains s.r.o."],
+        ["17", "Jack", "Smith", "Microsoft Corporation"],
+        ["12", "Roberto", "Almeida", "Riotur"],
+        ["15", "Jennifer", "Peterson", "Rogers Canada"],
+        ["14", "Mark", "Philips", "Telus"],
+        ["10", "Eduardo", "Martins", "Woodstock Discos"]
+    ],
+    "rowCount": 10
+}

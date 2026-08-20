@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E025",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["978"]],
+    "rowCount": 1
+}

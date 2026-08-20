@@ -1,0 +1,26 @@
+{
+    "questionId": "CB200-M016",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "media_type_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "MPEG audio file", "3034"],
+        ["2", "Protected AAC audio file", "237"],
+        ["3", "Protected MPEG-4 video file", "214"],
+        ["5", "AAC audio file", "11"],
+        ["4", "Purchased AAC audio file", "7"]
+    ],
+    "rowCount": 5
+}

@@ -1,0 +1,24 @@
+{
+    "questionId": "CB200-E012",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "city",
+            "type": "varchar"
+        }
+    ],
+    "rows": [["46", "Hugh", "O'Reilly", "Dublin"]],
+    "rowCount": 1
+}

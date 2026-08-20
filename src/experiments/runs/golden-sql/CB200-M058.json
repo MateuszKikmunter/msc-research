@@ -1,0 +1,22 @@
+{
+    "questionId": "CB200-M058",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "invoice_year",
+            "type": "bigint"
+        },
+        {
+            "name": "customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["2009", "46"],
+        ["2010", "46"],
+        ["2011", "47"],
+        ["2012", "47"],
+        ["2013", "46"]
+    ],
+    "rowCount": 5
+}

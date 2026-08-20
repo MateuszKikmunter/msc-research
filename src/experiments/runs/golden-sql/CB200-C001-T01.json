@@ -1,0 +1,20 @@
+{
+    "questionId": "CB200-C001",
+    "turnNumber": 1,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "average_minutes",
+            "type": "double"
+        }
+    ],
+    "rows": [["20", "Sci Fi & Fantasy", "48.52971730769231"]],
+    "rowCount": 1
+}

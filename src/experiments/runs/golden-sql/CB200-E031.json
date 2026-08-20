@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E031",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["2328.6"]],
+    "rowCount": 1
+}
