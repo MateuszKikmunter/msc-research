@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import type { GoldQueryDefinition } from '../../types';
 import type { AthenaService } from '../../shared/services/athena/athena-service';
-import { GoldenResultGenerator } from '../../shared/services/athena/golden-result-generator';
-import { GoldenResultWriter } from '../../shared/services/athena/golden-result-writer';
+import { GoldenResultGenerator } from '../../shared/services/golden-results/golden-result-generator';
+import { GoldenResultWriter } from '../../shared/services/golden-results/golden-result-writer';
 
 const OUTPUT_DIRECTORY = 'golden-results';
 const OUTPUT_PATH = `${OUTPUT_DIRECTORY}/CB200-E001.json`;

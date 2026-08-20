@@ -1,8 +1,8 @@
 import path from 'node:path';
 
 import type { GoldenResultFile, GoldQueryDefinition } from '../../../types';
+import { AthenaService } from '../athena/athena-service';
 import { GoldSqlResolver } from '../benchmark/gold-sql-resolver';
-import { AthenaService } from './athena-service';
 import { GoldenResultWriter } from './golden-result-writer';
 
 export class GoldenResultGenerator {
