@@ -14,6 +14,7 @@ export class GoldQueryDefinitionBuilder {
     private static buildForRecord(
         record: BenchmarkRecord
     ): GoldQueryDefinition[] {
+        // detect interactive questions
         if (record.turns) {
             return record.turns.map((turn, index) => ({
                 artifactId: `${record.id}-T${String(index + 1).padStart(2, '0')}`,
@@ -24,6 +25,7 @@ export class GoldQueryDefinitionBuilder {
             }));
         }
 
+        // detect ambigious questions
         if (record.resolution) {
             return [
                 GoldQueryDefinitionBuilder.createStandaloneDefinition(
