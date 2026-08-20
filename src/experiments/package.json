@@ -5,7 +5,7 @@
     "type": "commonjs",
     "scripts": {
         "gold": "tsx shared/services/athena/generate-golden-results.ts",
-        "test": "jest",
+        "test": "jest --silent",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
