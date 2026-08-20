@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E034",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "smallest_invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["0.99"]],
+    "rowCount": 1
+}

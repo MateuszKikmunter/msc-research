@@ -39,9 +39,9 @@ Use exactly two model conditions:
 1. Amazon Nova Lite; and
 2. Anthropic Claude Haiku 4.5 through Amazon Bedrock.
 
-Persist the exact model IDs, agent versions, aliases, inference configuration, prompt hashes,
-action implementation version, and deployment configuration. Friendly model names are not enough
-for reproducibility.
+Run one manually deployed model at a time and label its outputs `nova-lite` or `haiku-4-5` together
+with the repetition number. The experiment tooling does not copy or validate sensitive Bedrock
+agent IDs, aliases, or versions.
 
 Run two complete repetitions for each model. A third repetition is optional only if time and
 budget permit. The objective is a paired behavioural comparison, not a general model leaderboard.
@@ -78,8 +78,8 @@ Safety compliance:                10 safety/out-of-domain cases
 
 Do not replace the primary 160-case analysis with a pooled score across incompatible partitions.
 
-Before formal collection, execute and verify all 190 executable query definitions against the
-frozen Athena snapshot:
+Before formal collection, execute all 190 executable query definitions against the same deployed
+Chinook data used by the agent:
 
 ```text
 160 standalone queries
@@ -88,10 +88,11 @@ frozen Athena snapshot:
 = 190 executable query definitions
 ```
 
-Resolve interactive placeholders from the preceding **gold result**, not from a possibly incorrect
-model result. Cache complete normalized gold results and record the benchmark version, dataset
-checksum, Athena engine/workgroup, normalization version, resolved placeholders, row count, and
-result hash.
+Run `make gold` to retrieve every Athena result page and save JSON reference results under
+`src/experiments/runs/golden-sql/`. Resolve interactive placeholders from the preceding **gold
+result**, not from a possibly incorrect model result. The saved files contain the question ID,
+optional turn number, Athena column names/types, complete positional rows, and row count. They do
+not include CSV exports, manifests, hashes, or deployment identifiers.
 
 ## Observable trajectory representation
 
@@ -317,8 +318,8 @@ For every successful action:
 2. take its `queryExecutionId` and paginate `GetQueryResults` to retrieve the complete original
    candidate result;
 3. treat `previewRowCount` and `previewTruncated` as model-facing preview metadata only; and
-4. re-execute candidate SQL only if the original result has expired or is being independently
-   verified, recording that fallback explicitly.
+4. classify the result as `evaluator_uncertain` if the complete original result cannot be
+   retrieved; do not silently re-execute the model's SQL.
 
 The agent must not add `LIMIT 200` because of the preview cap.
 
@@ -350,17 +351,17 @@ small snapshot do not prove semantic equivalence on every database instance.
 
 ### 1. Freeze the protocol
 
-Record and freeze:
+Keep constant across the two model conditions:
 
-- benchmark commit and comparison contracts;
-- dataset checksums and Glue schema;
-- Athena engine, workgroup, and AWS Region;
-- agent prompt, model, version, alias, and inference settings;
+- the committed benchmark and comparison contracts;
+- the deployed Chinook data and Glue schema;
+- Athena workgroup and AWS Region;
+- agent instructions;
 - Lambda/action implementation;
-- retry, timeout, fallback, and incomplete-block policies;
+- fallback and incomplete-block policies;
 - trace-retention configuration;
-- result normalization and trajectory-classification versions; and
-- pricing date for descriptive cost estimates.
+- result normalization and trajectory-classification logic; and
+- the model-condition label and repetition number stored with each result.
 
 Use a fresh session for every independent case. Reuse a session only within an interactive or
 entered clarification episode.
@@ -373,9 +374,9 @@ benchmark, parser, comparator, and classifier defects. Pilot runs are not formal
 
 ### 3. Formal collection
 
-Run every 200-turn block once per model, validate completeness, then perform the planned second
-repetition. Rerun only infrastructure failures under the frozen policy; do not rerun completed but
-incorrect model outcomes.
+Run every 200-turn block once per model, check completeness, then perform the planned second
+repetition. If the local server fails, stop and resume after fixing it; do not count that failure as
+a model result and do not rerun completed but incorrect model outcomes.
 
 Headline results require a complete 160-case standalone block for a model/repetition. If a block
 remains incomplete, report the actual denominator and `SYSTEM_ERROR` count and label its metrics
@@ -485,13 +486,13 @@ Text-to-SQL pipeline, including a paired Nova Lite/Haiku 4.5 comparison.
 - Exact-result projection can penalize a reasonable alternative output shape. Make requested
   projections explicit and freeze them before formal collection.
 - Equivalent SQL can coincide on one snapshot while differing elsewhere.
-- Managed model and service behaviour can change; persist immutable versions and hashes.
+- Managed model and service behaviour can change between the separately deployed model runs.
 - Benchmark refinement after pilot failures can overfit the instrument; freeze it before formal
   collection.
 - Reusing sessions across independent cases can leak context.
 - Incomplete trace capture or incorrect event correlation can misclassify trajectories.
 - `acceptedSlots` does not itself provide automatic natural-language relevance evaluation.
 
-Mitigate these threats with versioned artifacts, fresh sessions, a frozen dataset and protocol,
-complete result retrieval, repeated paired runs, explicit uncertainty states, and bounded manual
-validation.
+Mitigate these threats with committed benchmark definitions, fresh sessions, the same deployed
+data and protocol, complete result retrieval, repeated paired runs, explicit uncertainty states,
+and bounded manual validation.

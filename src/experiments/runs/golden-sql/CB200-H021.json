@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-H021",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "average_line_items",
+            "type": "double"
+        }
+    ],
+    "rows": [["5.436893203883495"]],
+    "rowCount": 1
+}

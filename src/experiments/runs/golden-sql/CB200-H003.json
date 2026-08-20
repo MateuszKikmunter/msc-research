@@ -1,0 +1,20 @@
+{
+    "questionId": "CB200-H003",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["90", "Iron Maiden", "33.66"]],
+    "rowCount": 1
+}

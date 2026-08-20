@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-H032",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["701.04"]],
+    "rowCount": 1
+}

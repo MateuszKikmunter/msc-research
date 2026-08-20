@@ -1,0 +1,28 @@
+{
+    "questionId": "CB200-M042",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["3", "Jane", "Peacock", "833.04"],
+        ["4", "Margaret", "Park", "775.4"],
+        ["5", "Steve", "Johnson", "720.16"]
+    ],
+    "rowCount": 3
+}

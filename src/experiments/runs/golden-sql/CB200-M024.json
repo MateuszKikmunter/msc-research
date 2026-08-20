@@ -1,0 +1,16 @@
+{
+    "questionId": "CB200-M024",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["USA", "523.06"]],
+    "rowCount": 1
+}

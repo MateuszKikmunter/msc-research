@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-A017",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Jazz", "79.2"],
+        ["Rock", "826.65"]
+    ],
+    "rowCount": 2
+}

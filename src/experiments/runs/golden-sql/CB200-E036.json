@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E036",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "average_minutes",
+            "type": "double"
+        }
+    ],
+    "rows": [["6.559986868398515"]],
+    "rowCount": 1
+}

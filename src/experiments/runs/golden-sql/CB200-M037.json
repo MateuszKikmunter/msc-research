@@ -1,0 +1,45 @@
+{
+    "questionId": "CB200-M037",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "units_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "835"],
+        ["7", "Latin", "386"],
+        ["3", "Metal", "264"],
+        ["4", "Alternative & Punk", "244"],
+        ["2", "Jazz", "80"],
+        ["6", "Blues", "61"],
+        ["19", "TV Shows", "47"],
+        ["24", "Classical", "41"],
+        ["14", "R&B/Soul", "41"],
+        ["8", "Reggae", "30"],
+        ["21", "Drama", "29"],
+        ["9", "Pop", "28"],
+        ["20", "Sci Fi & Fantasy", "20"],
+        ["10", "Soundtrack", "20"],
+        ["17", "Hip Hop/Rap", "17"],
+        ["11", "Bossa Nova", "15"],
+        ["23", "Alternative", "14"],
+        ["16", "World", "13"],
+        ["15", "Electronica/Dance", "12"],
+        ["13", "Heavy Metal", "12"],
+        ["12", "Easy Listening", "10"],
+        ["22", "Comedy", "9"],
+        ["5", "Rock And Roll", "6"],
+        ["18", "Science Fiction", "6"]
+    ],
+    "rowCount": 24
+}

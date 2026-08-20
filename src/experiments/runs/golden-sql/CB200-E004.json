@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E004",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["25"]],
+    "rowCount": 1
+}

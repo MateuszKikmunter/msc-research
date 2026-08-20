@@ -1,0 +1,26 @@
+{
+    "questionId": "CB200-M045",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "1297"],
+        ["7", "Latin", "579"],
+        ["3", "Metal", "374"],
+        ["4", "Alternative & Punk", "332"],
+        ["2", "Jazz", "130"]
+    ],
+    "rowCount": 5
+}

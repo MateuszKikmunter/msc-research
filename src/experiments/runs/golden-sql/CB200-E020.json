@@ -1,0 +1,31 @@
+{
+    "questionId": "CB200-E020",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["2461", "É Uma Partida De Futebol", "1071"],
+        ["168", "Now Sports", "4884"],
+        ["170", "A Statistic", "6373"],
+        ["178", "Oprah", "6635"],
+        ["3304", "Commercial 1", "7941"],
+        ["172", "The Real Problem", "11650"],
+        ["3310", "Commercial 2", "21211"],
+        ["2241", "Bossa", "29048"],
+        ["1086", "Casinha Feliz", "32287"],
+        ["246", "Mateus Enter", "33149"]
+    ],
+    "rowCount": 10
+}

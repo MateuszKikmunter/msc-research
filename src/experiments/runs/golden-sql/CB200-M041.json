@@ -1,0 +1,28 @@
+{
+    "questionId": "CB200-M041",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["3", "Jane", "Peacock", "21"],
+        ["4", "Margaret", "Park", "20"],
+        ["5", "Steve", "Johnson", "18"]
+    ],
+    "rowCount": 3
+}

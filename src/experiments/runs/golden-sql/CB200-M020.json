@@ -1,0 +1,24 @@
+{
+    "questionId": "CB200-M020",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["6", "Helena", "Holý", "49.62"]],
+    "rowCount": 1
+}

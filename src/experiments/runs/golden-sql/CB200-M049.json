@@ -1,0 +1,46 @@
+{
+    "questionId": "CB200-M049",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "average_track_price",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["22", "Comedy", "1.99"],
+        ["21", "Drama", "1.99"],
+        ["20", "Sci Fi & Fantasy", "1.99"],
+        ["18", "Science Fiction", "1.99"],
+        ["19", "TV Shows", "1.99"],
+        ["23", "Alternative", "0.99"],
+        ["4", "Alternative & Punk", "0.99"],
+        ["6", "Blues", "0.99"],
+        ["11", "Bossa Nova", "0.99"],
+        ["24", "Classical", "0.99"],
+        ["12", "Easy Listening", "0.99"],
+        ["15", "Electronica/Dance", "0.99"],
+        ["13", "Heavy Metal", "0.99"],
+        ["17", "Hip Hop/Rap", "0.99"],
+        ["2", "Jazz", "0.99"],
+        ["7", "Latin", "0.99"],
+        ["3", "Metal", "0.99"],
+        ["25", "Opera", "0.99"],
+        ["9", "Pop", "0.99"],
+        ["14", "R&B/Soul", "0.99"],
+        ["8", "Reggae", "0.99"],
+        ["1", "Rock", "0.99"],
+        ["5", "Rock And Roll", "0.99"],
+        ["10", "Soundtrack", "0.99"],
+        ["16", "World", "0.99"]
+    ],
+    "rowCount": 25
+}

@@ -1,0 +1,12 @@
+{
+    "questionId": "CB200-E001",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "artist_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["275"]],
+    "rowCount": 1
+}

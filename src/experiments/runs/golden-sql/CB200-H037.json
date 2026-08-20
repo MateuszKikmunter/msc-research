@@ -1,0 +1,33 @@
+{
+    "questionId": "CB200-H037",
+    "turnNumber": null,
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue_2011",
+            "type": "float"
+        },
+        {
+            "name": "revenue_2012",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Australia", "1.98", "22.77"],
+        ["Austria", "0.0", "11.88"],
+        ["Brazil", "19.8", "53.46"],
+        ["Chile", "5.94", "6.9300003"],
+        ["Czech Republic", "12.87", "19.83"],
+        ["Denmark", "0.0", "15.84"],
+        ["Hungary", "0.0", "11.88"],
+        ["Italy", "0.0", "15.84"],
+        ["Poland", "0.0", "11.88"],
+        ["Portugal", "8.91", "24.77"],
+        ["Sweden", "0.0", "24.75"],
+        ["USA", "103.01", "127.98"]
+    ],
+    "rowCount": 12
+}
