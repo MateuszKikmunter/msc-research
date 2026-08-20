@@ -16,8 +16,8 @@ export class GoldenResultGenerator {
         athenaService = new AthenaService(),
         outputDirectory = GoldenResultGenerator.DEFAULT_OUTPUT_DIRECTORY
     ): Promise<void> {
+        // Keep earlier query results so dependent turns can resolve SQL placeholders from them.
         const completedResults = new Map<string, GoldenResultFile>();
-
         for (const [index, definition] of definitions.entries()) {
             console.info(
                 `[${index + 1}/${definitions.length}] Executing ${definition.artifactId}`
