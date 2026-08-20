@@ -6,15 +6,25 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-20** — Added the first experiment-tooling stage under `src/experiments`. The
+  TypeScript golden-result generator loads the committed Chinook-Bench-200 JSONL, builds all 190
+  executable definitions, resolves interactive placeholders from preceding golden results,
+  retrieves complete paginated Athena results, and writes JSON reference files under
+  `src/experiments/runs/golden-sql`. Stateless responsibilities use named static classes so the
+  execution flow is explicit, while `AthenaService` owns the AWS client. Added root Make targets
+  for local services, golden generation, experiment tests, and type-checking, together with focused
+  Jest coverage. The benchmark-question runner and evaluator remain pending.
+
 - **2026-08-12** — Added Chinook-Bench-200, a machine-readable benchmark with exactly 200 question
   turns across 195 cases: 50 easy, 60 medium, 50 hard, 20 ambiguity, 10 interactive turns, and 10
   safety questions. Both machine-readable JSONL and human-readable Markdown versions include
   canonical Athena
   SQL for executable questions and explicit clarification/refusal targets when SQL must not run.
-  All 170 executable query turns were syntax- and schema-checked against the checked-in Parquet
-  snapshot. Expanded the evaluation methodology with gold-query review, result-equivalence rules,
-  first/final execution accuracy, recovery, conversational and clarification metrics, a calibrated
-  answer-quality rubric, experimental controls, and peer-reviewed methodological references.
+  The benchmark now exposes 190 executable golden definitions: 160 standalone queries, 10
+  interactive turns, and 20 resolved ambiguity continuations. Expanded the evaluation methodology
+  with gold-query review, result-equivalence rules, first/final execution accuracy, recovery,
+  conversational and clarification metrics, experimental controls, and peer-reviewed
+  methodological references.
 
 - **2026-08-11** — Added ordered Bedrock agent-trajectory capture to transcript persistence and
   successful chat API responses. Each interaction stores normalized model, rationale, invocation,

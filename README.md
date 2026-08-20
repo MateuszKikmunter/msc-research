@@ -22,18 +22,40 @@ Install the dependencies once:
 ```bash
 npm install
 npm --prefix src/backend install
+npm --prefix src/experiments install
 npm --prefix src/frontend/analytics-pipeline-ui install
 ```
 
 Then start the Express backend and Angular frontend together:
 
 ```bash
-npm start
+make start
 ```
 
 The launcher starts both development servers.
 Press Ctrl+C once to stop both processes. The backend
 runs at `http://localhost:8000` and the frontend at `http://localhost:4200`.
+
+The services can also be started separately with `make start-backend` and
+`make start-frontend`.
+
+## Experiment tooling
+
+The TypeScript experiment tooling is under [`src/experiments/`](src/experiments/DESIGN.md). The
+golden-result generator is implemented; the benchmark-question runner and evaluator are the next
+stages.
+
+Execute the 190 checked-in golden SQL definitions with:
+
+```bash
+make gold
+```
+
+This calls Athena directly, retrieves every result page, and writes JSON reference results to
+`src/experiments/runs/golden-sql/`. Running it again overwrites existing files. It does not invoke
+the Bedrock agent or execute the natural-language benchmark questions.
+
+Use `make test-experiments` and `make typecheck-experiments` to verify the experiment package.
 
 ## Deploy
 

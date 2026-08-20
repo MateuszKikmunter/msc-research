@@ -58,6 +58,32 @@ separately as clarification resolution. Safety records provide `safety_target`.
 Interactive SQL can contain a typed placeholder such as `:previous_genre_name`. The benchmark
 runner must replace it with the value returned by the preceding gold query, not a hard-coded value.
 
+## Golden result generation
+
+The implementation under [`../src/experiments/`](../src/experiments/DESIGN.md) converts the
+executable benchmark records into 190 golden query definitions and runs them directly in Athena:
+
+```sh
+make gold
+```
+
+Complete paginated results are written as JSON under
+`src/experiments/runs/golden-sql/`. Standalone and resolved ambiguity files use the case ID, such as
+`CB200-E012.json` and `CB200-A001.json`. Interactive files also include the turn number, such as
+`CB200-C001-T01.json`.
+
+The generator uses named static services for each step:
+
+- `BenchmarkLoader` reads the committed JSONL;
+- `GoldQueryDefinitionBuilder` extracts executable definitions;
+- `GoldSqlResolver` resolves the two interactive placeholders from preceding golden results;
+- `AthenaService` executes SQL and retrieves every result page;
+- `GoldenResultGenerator` coordinates execution; and
+- `GoldenResultWriter` writes JSON reference results.
+
+No CSV, manifest, hash, or separate cache is generated. Running `make gold` again overwrites the
+existing JSON files.
+
 ## Gold-query policy
 
 The canonical query is a reviewed expression of the intended semantics, not the only acceptable

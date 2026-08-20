@@ -66,7 +66,7 @@ npm --prefix src/experiments run execute -- --model haiku-4-5 --repetition 1
 The model value is only a user-provided label. The experiment tools do not inspect or expose Bedrock
 agent IDs, aliases, or versions.
 
-## 4. Proposed structure
+## 4. Structure
 
 ```text
 src/experiments/
@@ -77,11 +77,13 @@ src/experiments/
   types.ts
 
   runner/
+    # planned
     question-runner.ts
     episode-runner.ts
     server-client.ts
 
   evaluation/
+    # planned
     trace-parser.ts
     result-normalizer.ts
     result-comparator.ts
@@ -104,6 +106,7 @@ src/experiments/
         gold-sql-resolver.ts
 
       transcripts/
+        # planned
         transcript-reader.ts
 
   tests/
@@ -497,14 +500,16 @@ No agent deployment identifiers are required for that comparison.
 
 ## 16. Tests
 
-The implementation will use TypeScript and Jest.
-
-Unit tests will cover:
+The experiment package uses TypeScript and Jest. The implemented golden-result tests cover:
 
 - benchmark loading;
 - the two interactive gold bindings;
 - Athena result pagination;
-- JSON result writing;
+- golden-result coordination; and
+- JSON result writing.
+
+The runner and evaluator stages will add coverage for:
+
 - positional columns and ignored aliases;
 - ordered comparison;
 - unordered multiset comparison with duplicates;
@@ -517,11 +522,12 @@ Unit tests will cover:
 Integration tests will use mocked server and Athena responses plus a temporary SQLite transcript
 database. Normal tests will not call AWS or the deployed agent.
 
-## 17. Implementation order after approval
+## 17. Implementation progress
 
-1. Create the TypeScript/Jest package and shared types.
-2. Load the benchmark and implement the two explicit interactive bindings.
-3. Execute golden SQL and write the 190 JSON files.
+1. **Implemented:** create the TypeScript/Jest package and shared types.
+2. **Implemented:** load the benchmark and implement the two explicit interactive bindings.
+3. **Implemented:** provide `make gold` to execute golden SQL and write JSON reference files. The
+   command is run manually when those files should be generated or overwritten.
 4. Implement result normalization and comparison with tests.
 5. Implement the sequential question runner and four interaction policies.
 6. Capture complete candidate results for every successful attempt.
@@ -530,14 +536,10 @@ database. Normal tests will not call AWS or the deployed agent.
 9. Generate JSON and Markdown reports.
 10. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
-## 18. Decisions to confirm
-
-Before implementation, only these design choices need confirmation:
+## 18. Confirmed decisions
 
 1. interactive golden files use `CB200-C001-T01.json` and `CB200-C001-T02.json` because the base
    case ID alone would overwrite one of the two results;
 2. ambiguity target wording is not automatically scored; the runner only checks that clarification
    happened before SQL and then uses the frozen scripted reply; and
 3. running the `gold` command again overwrites the existing golden JSON files.
-
-No implementation or AWS execution should begin until this simplified design is approved.

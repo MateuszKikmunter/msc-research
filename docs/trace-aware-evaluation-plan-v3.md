@@ -287,10 +287,10 @@ Use the resolution object embedded in each ambiguity record:
 
 All 20 scripted replies and resolved golden queries are checked into the canonical benchmark JSONL
 and must be verified before formal runs. Keeping the resolution beside the primary case prevents a
-separate manifest from drifting out of sync.
+separate resolution file from drifting out of sync.
 
 If the agent does not request clarification and queries immediately, record `missed` clarification
-and do not send the scripted reply. Do not score the guessed SQL against the manifest's arbitrarily
+and do not send the scripted reply. Do not score the guessed SQL against the benchmark's arbitrarily
 chosen resolution, because the user never supplied that resolution. The authored ambiguity turn is
 scored on clarification behaviour; post-clarification result correctness is defined only for
 episodes that actually enter the scripted continuation.
@@ -571,26 +571,26 @@ For each executable case:
 gold SQL
  -> Athena
  -> full result
- -> normalize
- -> cache
+ -> local JSON reference result
 ```
 
-Cache metadata:
+The implemented `make gold` command reads the committed benchmark and writes one complete JSON
+result per executable definition under `src/experiments/runs/golden-sql/`. The result contains only
+the fields needed by the future evaluator:
 
 ```json
 {
-    "benchmarkVersion": "...",
-    "caseId": "...",
-    "databaseSnapshotId": "...",
-    "athenaEngineVersion": "...",
-    "athenaWorkgroup": "...",
-    "normalizationVersion": "...",
-    "resultHash": "...",
-    "rowCount": 0,
-    "orderMatters": false,
-    "truncated": false
+    "questionId": "CB200-E012",
+    "turnNumber": null,
+    "columns": [{ "name": "customer_id", "type": "integer" }],
+    "rows": [["46"]],
+    "rowCount": 1
 }
 ```
+
+Standalone and ambiguity files use the question ID. Interactive files add `-T01` or `-T02` so the
+two turn results do not overwrite each other. No CSV, manifest, hash, or separate cache is created.
+Running the command again overwrites existing reference files.
 
 ## 12.2 Prefer captured candidate observations
 
@@ -600,9 +600,9 @@ Evaluation order:
 2. persist the Athena `queryExecutionId` for every successful action;
 3. use `GetQueryResults` pagination with that ID to retrieve the complete original candidate result
    for evaluation;
-4. re-execute candidate SQL only if the original result cannot be retrieved or is being
-   independently verified; and
-5. record evaluator retrieval/re-execution separately from original agent behaviour.
+4. classify the affected attempt as `evaluator_uncertain` if the complete original result cannot
+   be retrieved; and
+5. never silently re-execute candidate SQL as though it were original agent behaviour.
 
 The action response may continue to expose only preview rows to the model. The observation must
 distinguish:
@@ -619,8 +619,7 @@ question requests a bounded or top-N result.
 
 The evaluator records the full evaluated row count separately. This avoids sending arbitrarily
 large results to the model while allowing complete comparison against the exact original Athena
-execution. If AWS has expired the original result before evaluation, controlled re-execution
-against the frozen database snapshot is the declared fallback.
+execution.
 
 ---
 
@@ -642,8 +641,8 @@ execute all executable gold SQL
 Then either:
 
 1. prove all benchmark results fit within the preview limit; or
-2. retrieve the full original results through paginated `GetQueryResults` and compute a complete
-   canonical result/hash.
+2. retrieve the full original results through paginated `GetQueryResults` and save the complete
+   result.
 
 Increasing the rows returned to the model is not the default solution because it changes model
 context size and may make conditions harder to compare.
@@ -934,8 +933,9 @@ Use exactly two frozen model conditions:
 1. Amazon Nova Lite;
 2. Anthropic Claude Haiku 4.5 through Amazon Bedrock.
 
-Persist the exact Bedrock model IDs, versions, inference configuration, agent versions, and aliases
-used in the experiment. The friendly model names above are not sufficient for reproducibility.
+Run one manually deployed model at a time. Label executor outputs with the model condition
+(`nova-lite` or `haiku-4-5`) and repetition number. Do not copy or validate sensitive Bedrock agent
+IDs, aliases, or versions in the experiment outputs.
 
 The purpose is not to rank models by accuracy alone.
 
@@ -992,7 +992,7 @@ Outcome stability and trajectory stability must be reported separately.
 Keep constant where possible:
 
 - benchmark;
-- database snapshot;
+- deployed Chinook data;
 - schema/context;
 - agent instructions;
 - action-group implementation;
@@ -1006,21 +1006,19 @@ Keep constant where possible:
 - embedded per-case result-comparison contracts;
 - benchmark ordering.
 
-Persist:
+Persist only the identifiers required to group the local results:
 
 ```json
 {
-    "modelId": "...",
-    "modelVersion": "...",
-    "agentId": "...",
-    "agentAlias": "...",
-    "agentInstructionHash": "...",
-    "actionGroupVersion": "...",
-    "gitCommit": "..."
+    "modelCondition": "nova-lite",
+    "repetition": 1,
+    "benchmarkCaseId": "CB200-E001",
+    "sessionId": "..."
 }
 ```
 
-Model switching may require separate Bedrock Agent versions or aliases rather than a simple runner parameter.
+Deploy and complete the Nova Lite runs first. Deploy Haiku 4.5 later and use the same runner and
+benchmark definitions.
 
 ---
 
@@ -1029,16 +1027,12 @@ Model switching may require separate Bedrock Agent versions or aliases rather th
 Persist:
 
 ```text
-experiment_id
-run_id
 benchmark_case_id
-model_id
+model_condition
 repetition
-episode_id
 turn_number
-interaction_id
 session_id
-runner_status
+interaction_order
 ```
 
 Interactive and ambiguity episodes may span several server interactions under the same session.
@@ -1062,13 +1056,9 @@ Prefer:
 
 - preserving that trace database;
 - enabling raw trace retention if required;
-- snapshotting/exporting the experiment database;
-- hashing experiment snapshots;
 - storing derived evaluator outputs separately.
 
 Avoid a second storage system unless it adds clear value.
-
-Record raw-trace configuration in the experiment manifest.
 
 ---
 
@@ -1076,10 +1066,9 @@ Record raw-trace configuration in the experiment manifest.
 
 ```json
 {
-    "runId": "...",
-    "experimentId": "...",
-    "modelId": "...",
+    "modelCondition": "nova-lite",
     "benchmarkCaseId": "...",
+    "sessionId": "...",
     "partition": "standalone",
     "difficulty": "hard",
     "repetition": 1,
@@ -1105,7 +1094,6 @@ Record raw-trace configuration in the experiment manifest.
         "regressedAfterCorrectAttempt": false,
         "traceComplete": true,
         "derivedClass": "EXECUTION_ERROR_RECOVERED",
-        "classificationVersion": "1.0.0",
         "sqlAttemptCount": 2,
         "athenaExecutionCount": 2,
         "athenaErrorCount": 1,
@@ -1133,9 +1121,6 @@ Record raw-trace configuration in the experiment manifest.
     },
 
     "evaluation": {
-        "goldResultVersion": "...",
-        "comparatorVersion": "1.0.0",
-        "candidateResultSource": "retrieved",
         "manuallyReviewed": false,
         "uncertain": false
     },
@@ -1166,8 +1151,7 @@ Record raw-trace configuration in the experiment manifest.
             "sameErrorRepeated": false,
             "previousErrorResolved": true,
             "newErrorIntroduced": false,
-            "episodeEventuallyRecovered": true,
-            "normalizerVersion": "1.0.0"
+            "episodeEventuallyRecovered": true
         }
     ]
 }
@@ -1207,9 +1191,9 @@ is marked `transition_uncertain` rather than guessed.
 
 Before the pilot:
 
-1. select and verify the exact Nova Lite and Haiku 4.5 model/agent aliases;
-2. freeze prompts, action group, maximum retry/turn policy, Athena environment, and database
-   snapshot;
+1. deploy Nova Lite for the first experiment block and use the `nova-lite` condition label;
+2. keep prompts, action group, maximum retry/turn policy, Athena environment, and Chinook data
+   unchanged;
 3. freeze the 160-case primary denominator and separate secondary partition reporting;
 4. freeze classification precedence and contract-violation rules;
 5. verify every embedded ambiguity resolution and scripted reply;
@@ -1623,42 +1607,42 @@ This is an applied empirical contribution suitable for an MSc dissertation.
 
 ---
 
-# 28. Recommended implementation modules
+# 28. Implementation structure
 
 ```text
-benchmark/
-  loader
-  validator
-  runner
-  interaction-policy
-  episode-controller
-  gold-executor
-  gold-cache
+src/experiments/
+  runner/
+    question-runner
+    interaction-policy
+    episode-controller
 
-traces/
-  parser
-  normalizer
-  correlation
-  error-normalizer
-  error-transition-builder
+  evaluation/
+    trace-parser
+    result-normalizer
+    result-comparator
+    attempt-evaluator
+    trajectory-facts
+    trajectory-classifier
+    error-transition-evaluator
+    clarification-evaluator
+    safety-evaluator
+    report-generator
 
-evaluation/
-  result-normalizer
-  result-comparator
-  attempt-evaluator
-  trajectory-facts
-  trajectory-classifier
-  error-response-evaluator
-  clarification-evaluator
-  safety-evaluator
-  failure-classifier
+  shared/services/
+    athena/
+      athena-service
+      generate-golden-results
+      golden-result-generator
+      golden-result-writer
+    benchmark/
+      benchmark-loader
+      gold-query-definition-builder
+      gold-sql-resolver
+    transcripts/
+      transcript-reader
 
-reporting/
-  aggregator
-  paired-analysis
-  csv-export
-  json-export
-  markdown-report
+  runs/
+    golden-sql/
 ```
 
 `interaction-policy` must handle one-shot execution, ambiguity continuations, interactive sequences, and safety/no-query cases.
@@ -1674,58 +1658,49 @@ metrics. None of these modules interprets rationale text.
 
 ---
 
-# 29. Codex implementation order
+# 29. Implementation order
 
-1. Inspect benchmark, transcript schema, Bedrock invocation, session handling, raw-trace retention, and Athena result storage.
-2. Add reliable benchmark/run correlation.
-3. Persist Athena query-execution IDs and implement complete original-result retrieval.
-4. Implement gold-result cache.
-5. Implement robust result equivalence with per-case metadata.
-6. Implement episode/session controller.
-7. Create ambiguity companion manifest.
-8. Normalize multi-turn traces into episode-level ordering.
-9. Normalize Athena errors and build observation-to-action transitions.
-10. Derive orthogonal facts.
-11. Derive mutually exclusive trajectory classes using the frozen precedence.
-12. Pilot 20 strategically selected cases across both models.
-13. Complete the bounded manual audit and fix evaluator defects.
-14. Run the first complete benchmark pass per model.
-15. Freeze benchmark/evaluator/classification protocol.
-16. Run the second planned repetition.
-17. Run a third repetition only if time and budget permit.
-18. Export results and perform paired statistical analysis.
+1. **Implemented:** load the committed benchmark and build all executable golden definitions.
+2. **Implemented:** execute golden SQL, retrieve complete Athena results, and write JSON reference
+   files.
+3. **Implemented:** resolve interactive placeholders from preceding golden results.
+4. Implement robust result equivalence with per-case metadata.
+5. Implement the sequential question runner and episode/session controller.
+6. Persist/retrieve complete original candidate results using Athena query-execution IDs.
+7. Normalize multi-turn traces into episode-level ordering.
+8. Normalize Athena errors and build observation-to-action transitions.
+9. Derive orthogonal facts and mutually exclusive trajectory classes.
+10. Export JSON and Markdown evaluation results.
+11. Pilot 20 strategically selected cases across both models.
+12. Complete the bounded manual audit and fix evaluator defects.
+13. Run the first complete benchmark pass per model.
+14. Run the second planned repetition.
+15. Run a third repetition only if time and budget permit.
 
 ---
 
 # 30. Required outputs
 
 ```text
-results/
-  runs.jsonl
-  runs.csv
-  summary.json
-  summary.md
+src/experiments/runs/
+  golden-sql/
+    CB200-E001.json
+    ...
 
-  direct-successes.jsonl
-  execution-error-recoveries.jsonl
-  semantic-revisions.jsonl
-  executed-semantic-failures.jsonl
-  unrecovered-execution-failures.jsonl
-  clarification-cases.jsonl
-  fallback-assisted-successes.jsonl
-  safety-cases.jsonl
-  system-errors.jsonl
-  evaluator-uncertain.jsonl
-  unstable-cases.jsonl
-  error-transitions.jsonl
-  error-transitions.csv
-
-  paired-model-comparison.csv
-  validation-sample.csv
-  completeness-report.json
-
-  optional-rationale-illustrations.md
+  <model-condition>/
+    repetition-<number>/
+      interactions.jsonl
+      candidate-results/
+      evaluation/
+        results.jsonl
+        error-transitions.jsonl
+        evaluator-uncertain.jsonl
+        summary.json
+        summary.md
 ```
+
+Version 1 uses JSON/JSONL for machine-readable data and Markdown for the readable summary. It does
+not generate CSV files.
 
 ---
 
@@ -1759,7 +1734,7 @@ The research harness is ready for formal experimentation when it can:
 - correlate each run with persisted trace evidence;
 - persist the Athena query-execution ID for every successful SQL action;
 - retrieve complete Athena results;
-- cache gold results;
+- save complete golden results as local JSON files;
 - compare candidate results using per-case rules;
 - distinguish execution success from semantic correctness;
 - evaluate every SQL attempt;
