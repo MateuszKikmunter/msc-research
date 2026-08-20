@@ -13,7 +13,6 @@ export class BenchmarkLoader {
         benchmarkPath = BenchmarkLoader.DEFAULT_BENCHMARK_PATH
     ): Promise<BenchmarkRecord[]> {
         const contents = await readFile(benchmarkPath, 'utf8');
-
         return JSON.parse(contents) as BenchmarkRecord[];
     }
 }
