@@ -107,4 +107,37 @@ describe('AthenaService', () => {
             'Athena query failed: COLUMN_NOT_FOUND'
         );
     });
+
+    it('retrieves an existing query result without executing the SQL again', async () => {
+        const send = jest.fn(async (command: object) => {
+            if (command instanceof GetQueryResultsCommand) {
+                return {
+                    ResultSet: {
+                        ResultSetMetadata: {
+                            ColumnInfo: [
+                                { Name: 'track_count', Type: 'bigint' }
+                            ]
+                        },
+                        Rows: [
+                            { Data: [{ VarCharValue: 'track_count' }] },
+                            { Data: [{ VarCharValue: '3503' }] }
+                        ]
+                    }
+                };
+            }
+
+            throw new Error('Unexpected Athena command.');
+        });
+        const service = new AthenaService();
+        Reflect.set(service, 'client', { send });
+
+        const result = await service.getQueryResult('existing-query-id');
+
+        expect(result).toMatchObject({
+            queryExecutionId: 'existing-query-id',
+            rows: [['3503']],
+            rowCount: 1
+        });
+        expect(send).toHaveBeenCalledTimes(1);
+    });
 });

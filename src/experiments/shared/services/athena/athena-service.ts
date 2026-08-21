@@ -42,6 +42,16 @@ export class AthenaService {
         }
 
         await this.waitForCompletion(queryExecutionId);
+        return this.getQueryResult(queryExecutionId);
+    }
+
+    public async getQueryResult(
+        queryExecutionId: string
+    ): Promise<AthenaQueryResult> {
+        if (!queryExecutionId.trim()) {
+            throw new Error('Athena query execution ID not provided.');
+        }
+
         return this.readCompleteResult(queryExecutionId);
     }
 
