@@ -42,7 +42,7 @@ export class AthenaService {
         }
 
         await this.waitForCompletion(queryExecutionId);
-        return this.getQueryResult(queryExecutionId);
+        return this.readCompleteResult(queryExecutionId);
     }
 
     public async getQueryResult(
