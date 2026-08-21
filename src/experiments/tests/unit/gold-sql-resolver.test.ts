@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import type { GoldenResultFile, GoldQueryDefinition } from '../../types';
-import { GoldSqlResolver } from '../../shared/services/benchmark/gold-sql-resolver';
+import { GoldSqlResolver } from '../../golden-results/gold-sql-resolver';
 
 const comparison = {
     mode: 'exact_result' as const,

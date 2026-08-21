@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
   execution flow is explicit, while `AthenaService` owns the AWS client. Added root Make targets
   for local services, golden generation, experiment tests, and type-checking, together with focused
   Jest coverage. Athena access is isolated under `shared/services/athena`, while golden-result
-  orchestration and writing live under `shared/services/golden-results`. The benchmark-question
+  orchestration and writing live under `src/experiments/golden-results`. The benchmark-question
   runner and evaluator remain pending.
 
 - **2026-08-12** — Added Chinook-Bench-200, a machine-readable benchmark with exactly 200 question

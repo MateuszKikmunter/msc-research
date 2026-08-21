@@ -4,7 +4,8 @@
     "private": true,
     "type": "commonjs",
     "scripts": {
-        "gold": "tsx shared/services/golden-results/generate-golden-results.ts",
+        "execute": "tsx runner/run-benchmark.ts",
+        "gold": "tsx golden-results/generate-golden-results.ts",
         "test": "jest --silent",
         "typecheck": "tsc --noEmit"
     },

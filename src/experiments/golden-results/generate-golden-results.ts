@@ -1,11 +1,11 @@
 import path from 'node:path';
 import { config } from 'dotenv';
 
-import { BenchmarkLoader } from '../benchmark/benchmark-loader';
-import { GoldQueryDefinitionBuilder } from '../benchmark/gold-query-definition-builder';
+import { BenchmarkLoader } from '../shared/services/benchmark/benchmark-loader';
+import { GoldQueryDefinitionBuilder } from './gold-query-definition-builder';
 import { GoldenResultGenerator } from './golden-result-generator';
 
-const REPOSITORY_ROOT = path.resolve(__dirname, '../../../../..');
+const REPOSITORY_ROOT = path.resolve(__dirname, '../../..');
 
 async function main(): Promise<void> {
     config({ path: path.join(REPOSITORY_ROOT, '.env') });

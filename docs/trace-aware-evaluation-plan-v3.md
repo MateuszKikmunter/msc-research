@@ -1628,17 +1628,17 @@ src/experiments/
     safety-evaluator
     report-generator
 
+  golden-results/
+    generate-golden-results
+    gold-query-definition-builder
+    gold-sql-resolver
+    golden-result-generator
+    golden-result-writer
   shared/services/
     athena/
       athena-service
-    golden-results/
-      generate-golden-results
-      golden-result-generator
-      golden-result-writer
     benchmark/
       benchmark-loader
-      gold-query-definition-builder
-      gold-sql-resolver
     transcripts/
       transcript-reader
 

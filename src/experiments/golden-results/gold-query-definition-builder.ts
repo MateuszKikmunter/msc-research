@@ -2,7 +2,7 @@ import type {
     BenchmarkRecord,
     ComparisonContract,
     GoldQueryDefinition
-} from '../../../types';
+} from '../types';
 
 export class GoldQueryDefinitionBuilder {
     public static build(records: BenchmarkRecord[]): GoldQueryDefinition[] {

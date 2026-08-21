@@ -92,20 +92,20 @@ src/experiments/
     error-transition-evaluator.ts
     report-generator.ts
 
+  golden-results/
+    generate-golden-results.ts
+    gold-query-definition-builder.ts
+    gold-sql-resolver.ts
+    golden-result-generator.ts
+    golden-result-writer.ts
+
   shared/
     services/
       athena/
         athena-service.ts
 
-      golden-results/
-        generate-golden-results.ts
-        golden-result-generator.ts
-        golden-result-writer.ts
-
       benchmark/
         benchmark-loader.ts
-        gold-query-definition-builder.ts
-        gold-sql-resolver.ts
 
       transcripts/
         # planned

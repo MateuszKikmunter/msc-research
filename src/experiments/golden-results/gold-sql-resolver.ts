@@ -1,4 +1,4 @@
-import type { GoldenResultFile, GoldQueryDefinition } from '../../../types';
+import type { GoldenResultFile, GoldQueryDefinition } from '../types';
 
 type BindingValueType = 'integer' | 'string';
 
