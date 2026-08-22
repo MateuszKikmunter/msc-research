@@ -625,7 +625,9 @@ question requests a bounded or top-N result.
 
 The evaluator records the full evaluated row count separately. This avoids sending arbitrarily
 large results to the model while allowing complete comparison against the exact original Athena
-execution.
+execution. Specifically, the preview bounds the Bedrock action payload, input-token use, context
+consumption, latency, and cost, while preserving context for instructions, schema information,
+conversation history, and a possible retry.
 
 ---
 

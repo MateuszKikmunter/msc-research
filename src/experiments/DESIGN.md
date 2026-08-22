@@ -176,7 +176,9 @@ The `gold` command executes the 190 available golden SQL definitions directly in
 Safety questions do not have golden SQL and produce no result file.
 
 Athena results are retrieved through every `GetQueryResults` page. The 200-row preview limit used
-by the agent action does not apply to golden result collection.
+by the agent action does not apply to golden result collection. That preview protects the model's
+context window and bounds action-payload size, token usage, latency, and cost; it is not a semantic
+SQL limit or an evaluator row limit.
 
 ### 6.2 Files
 

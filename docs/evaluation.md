@@ -331,6 +331,11 @@ For every successful action:
 
 The agent must not add `LIMIT 200` because of the preview cap.
 
+The cap exists to bound the Bedrock action payload and prevent large results from consuming the
+model's context window, input-token budget, and processing time. It is an inference safeguard, not
+an evaluation limit: candidate/gold comparison always uses the separately retrieved complete
+Athena result.
+
 ### Frozen comparison contract
 
 For each candidate/gold pair:
