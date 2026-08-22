@@ -34,7 +34,7 @@ export class QuestionRunner {
         const startedAt = new Date().toISOString();
         const interactions: RunInteraction[] = [];
 
-        for (const [index, benchmarkRecord] of this.runSingleQuestion(
+        for (const [index, benchmarkRecord] of this.selectBenchmarkRecords(
             benchmark,
             questionId
         ).entries()) {
@@ -85,7 +85,7 @@ export class QuestionRunner {
         };
     }
 
-    private runSingleQuestion(
+    private selectBenchmarkRecords(
         benchmark: BenchmarkRecord[],
         questionId?: string
     ) {
