@@ -1,6 +1,6 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
-> **Status:** golden SQL generation implemented; benchmark runner and evaluator pending.
+> **Status:** golden SQL generation and benchmark runner implemented; evaluator pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -35,7 +35,8 @@ The following are intentionally removed:
 - agent ID, alias, and version in experiment outputs;
 - golden-result CSV files;
 - golden-result cache terminology and cache invalidation;
-- server-timeout metrics and infrastructure retry classification; and
+- server-timeout metrics and infrastructure retry classification;
+- checkpoint and cancelled-run resume behaviour; and
 - a required backend change for returning an interaction ID.
 
 The earlier manifest and hashes were intended to prove that different runs used exactly the same
@@ -56,12 +57,20 @@ The experiment tools use existing project inputs directly:
 - `http://localhost:8000/api/analytics-pipeline` as the default server endpoint; and
 - `src/backend/data/transcripts.db` for persisted interactions and traces.
 
-The model condition and repetition are simple command arguments used to organize outputs:
+The model condition and repetition are Make variables used to organize outputs:
 
 ```sh
-npm --prefix src/experiments run execute -- --model nova-lite --repetition 1
-npm --prefix src/experiments run execute -- --model haiku-4-5 --repetition 1
+make execute MODEL=nova-lite REPETITION=1
+make execute MODEL=haiku-4-5 REPETITION=1
 ```
+
+An optional `QUESTION_ID` selects one case for diagnostics or pilot checks:
+
+```sh
+make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
+```
+
+Formal collection does not use this filter.
 
 The model value is only a user-provided label. The experiment tools do not inspect or expose Bedrock
 agent IDs, aliases, or versions.
@@ -77,10 +86,13 @@ src/experiments/
   types.ts
 
   runner/
-    # planned
+    run-benchmark.ts
     question-runner.ts
     episode-runner.ts
     server-client.ts
+    agent-response-inspector.ts
+    candidate-result-collector.ts
+    run-result-writer.ts
 
   evaluation/
     # planned
@@ -92,20 +104,20 @@ src/experiments/
     error-transition-evaluator.ts
     report-generator.ts
 
+  golden-results/
+    generate-golden-results.ts
+    gold-query-definition-builder.ts
+    gold-sql-resolver.ts
+    golden-result-generator.ts
+    golden-result-writer.ts
+
   shared/
     services/
       athena/
         athena-service.ts
 
-      golden-results/
-        generate-golden-results.ts
-        golden-result-generator.ts
-        golden-result-writer.ts
-
       benchmark/
         benchmark-loader.ts
-        gold-query-definition-builder.ts
-        gold-sql-resolver.ts
 
       transcripts/
         # planned
@@ -124,6 +136,10 @@ src/experiments/
       repetition-1/
 ```
 
+`run-benchmark.ts` constructs the runner services explicitly and passes their instances through
+constructors. `BenchmarkLoader` remains the only statically called service in the runner entry
+point. The existing golden-result utilities retain their current design.
+
 ## 5. Commands
 
 The first implementation needs only three commands:
@@ -134,15 +150,16 @@ execute    Send benchmark questions to the local server
 evaluate   Compare one completed run and generate reports
 ```
 
-The root `Makefile` exposes these entry points. The currently implemented command is:
+The root `Makefile` exposes the implemented generation and execution entry points:
 
 ```sh
 make gold
+make execute MODEL=nova-lite REPETITION=1
+make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
 ```
 
-`make execute` and `make evaluate` will be added with their respective implementation stages. The
-commands remain separate so evaluation logic can be corrected and rerun without sending the 200
-questions to Bedrock again.
+`make evaluate` will be added with the evaluator. The commands remain separate so evaluation logic
+can be corrected and rerun without sending the 200 questions to Bedrock again.
 
 ## 6. Golden SQL execution
 
@@ -159,7 +176,9 @@ The `gold` command executes the 190 available golden SQL definitions directly in
 Safety questions do not have golden SQL and produce no result file.
 
 Athena results are retrieved through every `GetQueryResults` page. The 200-row preview limit used
-by the agent action does not apply to golden result collection.
+by the agent action does not apply to golden result collection. That preview protects the model's
+context window and bounds action-payload size, token usage, latency, and cost; it is not a semantic
+SQL limit or an evaluator row limit.
 
 ### 6.2 Files
 
@@ -226,13 +245,15 @@ never taken from the model's answer.
 ## 7. Question execution
 
 The runner processes questions sequentially because the server is local and only one user is
-expected.
+expected. It waits five seconds before each episode after the first. No artificial delay is added
+between ambiguity continuations or interactive turns inside the same episode.
 
 Each benchmark case receives a unique session ID. Interactive turns and ambiguity continuations
 reuse the same session ID. This session ID is also used to find the corresponding interactions and
 traces in SQLite, so the backend does not need to return an additional interaction ID.
 
-The runner saves one JSONL record after every completed interaction. That record contains:
+After each episode completes, the runner appends its interaction records to
+`interactions.jsonl`, one compact JSON object per line. Each record contains:
 
 - question ID and optional turn number;
 - model label and repetition;
@@ -242,7 +263,8 @@ The runner saves one JSONL record after every completed interaction. That record
 - interaction order within the episode; and
 - whether a fallback or scripted clarification reply was used.
 
-Agent ID, alias, and version fields from trace events are not copied to experiment run files.
+The model condition and repetition are included in every line. Agent ID, alias, and version fields
+from trace events are not copied to experiment run files.
 
 ## 8. Execution policies
 
@@ -264,7 +286,7 @@ correctness.
 For `expected_behavior: clarify_then_execute`:
 
 1. send the ambiguous question;
-2. check whether the agent requests clarification before executing SQL;
+2. check whether an orchestration `OBSERVATION` with `type: ASK_USER` occurs before SQL;
 3. if it does, send the benchmark's `scriptedReply` in the same session;
 4. evaluate the resulting SQL against `resolution.gold_sql`; and
 5. if the agent executes SQL before clarification, record a missed clarification and do not send
@@ -273,6 +295,8 @@ For `expected_behavior: clarify_then_execute`:
 The automatic evaluation checks whether clarification happened before SQL. It does not attempt to
 judge the exact wording of the clarification question. `clarification_target` is available for the
 small manual validation sample, while `acceptedSlots` is not used by version 1 of the executor.
+AWS documents `ASK_USER` as the observation type emitted when an agent asks the user a question;
+its `finalResponse.text` contains that question.
 
 ### 8.3 Interactive questions
 
@@ -305,6 +329,10 @@ runs/nova-lite/repetition-1/candidate-results/
   CB200-H027-T01-A01.json
   CB200-H027-T01-A02.json
 ```
+
+A clarification-only `ASK_USER` interaction has no SQL attempt and therefore no candidate-result
+file. In a normal ambiguity episode, the first interaction has `candidateResults: []`, while the
+scripted continuation produces the candidate file if its SQL succeeds.
 
 `T01` is the interaction turn and `A01` is the SQL-attempt number. Saving every successful attempt
 is necessary to distinguish:
@@ -415,20 +443,22 @@ SYSTEM_ERROR
 
 `SYSTEM_ERROR` is reserved for missing or unusable evidence that prevents evaluation. Local server
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
-runner stops and prints the current question so execution can be resumed after the server issue
-is fixed.
+runner stops and prints the current question and session. The incomplete run is discarded.
 
-## 13. Progress and resume
+## 13. Cancellation and incomplete runs
 
-There is no separate checkpoint or run manifest.
+There is no pause, checkpoint, progress, or resume behaviour. An unfiltered invocation starts from
+the first benchmark case and is intended to complete the full benchmark. `QUESTION_ID` runs one
+selected case for diagnostics; it does not resume or contribute a replacement case to an existing
+formal run. The append-only file merely makes completed episodes inspectable if execution is
+cancelled.
 
-The interactions JSONL file itself is the progress record. When `execute` is started with the same
-model and repetition, it reads completed question IDs and skips them.
+If execution is cancelled or fails, generated candidate files under that run directory are removed
+manually before starting again. The server has already persisted completed calls in
+`transcripts.db`, so those partial transcript rows must also be removed separately when a clean
+database is required.
 
-If execution stops during a multi-turn case, that incomplete case is run again from turn 1 with a
-new session. Only the completed episode is included in evaluation.
-
-An incorrect completed model answer is never repeated automatically.
+An incomplete run is not evaluated.
 
 ## 14. Outputs
 
@@ -502,15 +532,19 @@ No agent deployment identifiers are required for that comparison.
 
 ## 16. Tests
 
-The experiment package uses TypeScript and Jest. The implemented golden-result tests cover:
+The experiment package uses TypeScript and Jest. Implemented tests cover:
 
 - benchmark loading;
 - the two interactive gold bindings;
 - Athena result pagination;
 - golden-result coordination; and
-- JSON result writing.
+- JSON result writing;
+- sequential benchmark execution and failure reporting;
+- standalone fallback, ambiguity continuation, interactive session, and safety policies;
+- trace inspection and sensitive deployment-identifier removal;
+- full candidate-result capture by existing Athena query-execution ID.
 
-The runner and evaluator stages will add coverage for:
+The evaluator stage will add coverage for:
 
 - positional columns and ignored aliases;
 - ordered comparison;
@@ -531,8 +565,10 @@ database. Normal tests will not call AWS or the deployed agent.
 3. **Implemented:** provide `make gold` to execute golden SQL and write JSON reference files. The
    command is run manually when those files should be generated or overwritten.
 4. Implement result normalization and comparison with tests.
-5. Implement the sequential question runner and four interaction policies.
-6. Capture complete candidate results for every successful attempt.
+5. **Implemented:** execute all benchmark cases sequentially and apply the four interaction
+   policies.
+6. **Implemented:** capture complete candidate results for every successful attempt without
+   re-executing model SQL.
 7. Read and correlate traces by session ID.
 8. Derive attempt outcomes, trajectory classes, and error transitions.
 9. Generate JSON and Markdown reports.
@@ -544,4 +580,6 @@ database. Normal tests will not call AWS or the deployed agent.
    case ID alone would overwrite one of the two results;
 2. ambiguity target wording is not automatically scored; the runner only checks that clarification
    happened before SQL and then uses the frozen scripted reply; and
-3. running the `gold` command again overwrites the existing golden JSON files.
+3. running the `gold` command again overwrites the existing golden JSON files; and
+4. the runner does not resume cancelled runs: partial run files and, when required, partial
+   transcript rows are removed manually before a complete restart.

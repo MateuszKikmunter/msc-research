@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { GoldenResultFile } from '../../../types';
+import type { GoldenResultFile } from '../types';
 
 export class GoldenResultWriter {
     public static async write(

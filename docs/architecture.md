@@ -100,8 +100,11 @@ terminate the invocation before the model could retry.
 The default timeout is 120 seconds and the action response is capped at 200 preview rows. This cap
 does not add `LIMIT` to the SQL or truncate Athena's stored result. The benchmark evaluator uses
 the query execution ID to paginate the complete original result before comparing it with the gold
-result. The Lambda timeout is 135 seconds, leaving a small margin for request and response
-processing.
+result. The model-facing cap prevents large query results from consuming excessive context-window
+space and input tokens, increasing inference latency and cost, or exceeding Bedrock/Lambda response
+payload limits. It also leaves context available for the agent instructions, schema, conversation,
+and any subsequent reasoning or retry. The Lambda timeout is 135 seconds, leaving a small margin
+for request and response processing.
 
 ## Security boundaries
 

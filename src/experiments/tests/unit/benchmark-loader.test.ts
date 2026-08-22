@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { BenchmarkLoader } from '../../shared/services/benchmark/benchmark-loader';
-import { GoldQueryDefinitionBuilder } from '../../shared/services/benchmark/gold-query-definition-builder';
+import { GoldQueryDefinitionBuilder } from '../../golden-results/gold-query-definition-builder';
 
 const EXPECTED_BENCHMARK_QUESTION_COUNT = 195;
 const EXPECTED_GOLD_QUERY_DEFINITION_COUNT = 190;

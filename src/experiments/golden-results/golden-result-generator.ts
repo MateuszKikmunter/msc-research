@@ -1,14 +1,14 @@
 import path from 'node:path';
 
-import type { GoldenResultFile, GoldQueryDefinition } from '../../../types';
-import { AthenaService } from '../athena/athena-service';
-import { GoldSqlResolver } from '../benchmark/gold-sql-resolver';
+import type { GoldenResultFile, GoldQueryDefinition } from '../types';
+import { AthenaService } from '../shared/services/athena/athena-service';
+import { GoldSqlResolver } from './gold-sql-resolver';
 import { GoldenResultWriter } from './golden-result-writer';
 
 export class GoldenResultGenerator {
     private static readonly DEFAULT_OUTPUT_DIRECTORY = path.resolve(
         __dirname,
-        '../../../runs/golden-sql'
+        '../runs/golden-sql'
     );
 
     public static async generate(

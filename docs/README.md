@@ -16,7 +16,7 @@ reliably from the source code alone.
   The machine-readable cases and canonical SQL are in
   [`../benchmarks/`](../benchmarks/README.md).
 - [Experiment runner and evaluator design](../src/experiments/DESIGN.md) documents the implemented
-  golden-result generator and the planned question-runner and evaluator structure.
+  golden-result generator and question runner, plus the planned evaluator structure.
 - [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
 - [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
 - [Decision records](decisions/) explain important architectural choices.

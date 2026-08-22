@@ -210,11 +210,10 @@ Safety compliance:
 An optional supplementary analysis may pool all executable turns, but it must be labelled as such
 and must not replace the primary 160-case analysis.
 
-Headline standalone metrics require a complete 160-case block for each model/repetition. Apply a
-frozen runner retry policy only to transport, throttling, persistence, and other infrastructure
-failures for which no model outcome exists. Never rerun a completed but incorrect model outcome.
-If a block remains incomplete after that policy, report completeness and `SYSTEM_ERROR` counts and
-do not present a denominator of 160 as though every model outcome were observed.
+Headline standalone metrics require a complete 160-case block for each model/repetition. A local
+transport, persistence, or other collection failure invalidates the incomplete run; remove its
+partial artifacts, correct the problem, and restart the full block. Never selectively rerun an
+individual completed but incorrect model outcome inside an otherwise retained run.
 
 ---
 
@@ -271,6 +270,11 @@ question
  -> terminal result
 ```
 
+Detect clarification from the documented Bedrock runtime trace shape: an orchestration
+`OBSERVATION` whose `observation.type` is `ASK_USER`. The clarification text is stored under
+`observation.finalResponse.text`. Do not require a separate `AMAZON.UserInput` invocation event;
+the deployed agent traces do not emit one for this transition.
+
 Use the resolution object embedded in each ambiguity record:
 
 ```json
@@ -285,7 +289,7 @@ Use the resolution object embedded in each ambiguity record:
 }
 ```
 
-All 20 scripted replies and resolved golden queries are checked into the canonical benchmark JSONL
+All 20 scripted replies and resolved golden queries are checked into the canonical benchmark JSON
 and must be verified before formal runs. Keeping the resolution beside the primary case prevents a
 separate resolution file from drifting out of sync.
 
@@ -506,12 +510,14 @@ Infrastructure/evaluator/runtime failure.
 Do not count system errors as model failures by default.
 
 Agent-produced invalid SQL or invalid action parameters are model outcomes, not `SYSTEM_ERROR`.
-`SYSTEM_ERROR` is reserved for failures outside a completed agent outcome, such as transport,
-throttling after the runner retry policy, persistence, evaluator, or platform failure.
+`SYSTEM_ERROR` is reserved for missing or unusable evidence outside a completed agent outcome in an
+otherwise completed collection, such as candidate-result retrieval, persistence, evaluator, or
+platform failure. A transport failure that stops collection invalidates the incomplete run instead
+of becoming a scored benchmark case.
 
 System-error runs remain in the audit output but are excluded from model-behaviour metrics. Formal
-headline metrics are generated only from complete rerun-resolved blocks; otherwise they are marked
-provisional with their actual completed denominator.
+headline metrics are generated only from complete blocks; otherwise they are marked provisional
+with their actual completed denominator.
 
 ---
 
@@ -619,7 +625,9 @@ question requests a bounded or top-N result.
 
 The evaluator records the full evaluated row count separately. This avoids sending arbitrarily
 large results to the model while allowing complete comparison against the exact original Athena
-execution.
+execution. Specifically, the preview bounds the Bedrock action payload, input-token use, context
+consumption, latency, and cost, while preserving context for instructions, schema information,
+conversation history, and a possible retry.
 
 ---
 
@@ -1199,7 +1207,12 @@ Before the pilot:
 5. verify every embedded ambiguity resolution and scripted reply;
 6. verify every embedded result-comparison contract and execute every corrected gold query;
 7. verify that every successful Athena action persists `queryExecutionId`; and
-8. freeze the infrastructure retry and incomplete-block policy.
+8. freeze the infrastructure retry and incomplete-block policy; and
+9. retain the runner's fixed five-second delay between episodes, with no artificial delay between
+   interactions inside one episode.
+
+The optional `QUESTION_ID` runner filter is for diagnostic and pilot checks only. Formal
+repetitions must be unfiltered complete runs from a clean run directory.
 
 ## Phase A — Pilot
 
@@ -1612,9 +1625,13 @@ This is an applied empirical contribution suitable for an MSc dissertation.
 ```text
 src/experiments/
   runner/
+    run-benchmark
     question-runner
-    interaction-policy
-    episode-controller
+    episode-runner
+    server-client
+    agent-response-inspector
+    candidate-result-collector
+    run-result-writer
 
   evaluation/
     trace-parser
@@ -1628,17 +1645,17 @@ src/experiments/
     safety-evaluator
     report-generator
 
+  golden-results/
+    generate-golden-results
+    gold-query-definition-builder
+    gold-sql-resolver
+    golden-result-generator
+    golden-result-writer
   shared/services/
     athena/
       athena-service
-    golden-results/
-      generate-golden-results
-      golden-result-generator
-      golden-result-writer
     benchmark/
       benchmark-loader
-      gold-query-definition-builder
-      gold-sql-resolver
     transcripts/
       transcript-reader
 
@@ -1666,8 +1683,10 @@ metrics. None of these modules interprets rationale text.
    files.
 3. **Implemented:** resolve interactive placeholders from preceding golden results.
 4. Implement robust result equivalence with per-case metadata.
-5. Implement the sequential question runner and episode/session controller.
-6. Persist/retrieve complete original candidate results using Athena query-execution IDs.
+5. **Implemented:** execute benchmark cases sequentially with the four interaction policies and
+   required episode/session continuity.
+6. **Implemented:** retrieve and persist complete original candidate results using Athena
+   query-execution IDs.
 7. Normalize multi-turn traces into episode-level ordering.
 8. Normalize Athena errors and build observation-to-action transitions.
 9. Derive orthogonal facts and mutually exclusive trajectory classes.
@@ -1752,7 +1771,8 @@ The research harness is ready for formal experimentation when it can:
 - use the primary 160-case denominator and report other partitions separately;
 - compare Nova Lite and Haiku 4.5 pairwise, calculate per-repetition and pooled CTD, and report
   within-model outcome and trajectory stability;
-- support safe resume;
+- treat a cancelled or failed collection as an incomplete run that is discarded and restarted from
+  the beginning;
 - export reproducible run-level data;
 - support the bounded stratified manual-validation protocol;
 - trace every headline statistic back to raw evidence.

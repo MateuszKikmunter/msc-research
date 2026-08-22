@@ -45,6 +45,16 @@ export class AthenaService {
         return this.readCompleteResult(queryExecutionId);
     }
 
+    public async getQueryResult(
+        queryExecutionId: string
+    ): Promise<AthenaQueryResult> {
+        if (!queryExecutionId.trim()) {
+            throw new Error('Athena query execution ID not provided.');
+        }
+
+        return this.readCompleteResult(queryExecutionId);
+    }
+
     private async waitForCompletion(queryExecutionId: string): Promise<void> {
         const timeoutMs = DEFAULT_QUERY_TIMEOUT_MS;
         const deadline = Date.now() + timeoutMs;

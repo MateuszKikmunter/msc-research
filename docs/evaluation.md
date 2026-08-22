@@ -46,6 +46,11 @@ agent IDs, aliases, or versions.
 Run two complete repetitions for each model. A third repetition is optional only if time and
 budget permit. The objective is a paired behavioural comparison, not a general model leaderboard.
 
+Formal collection uses an unfiltered `make execute MODEL=<condition> REPETITION=<number>` run. The
+runner waits five seconds between benchmark episodes but not between turns or scripted replies in
+the same episode. `QUESTION_ID=<case-id>` is available only for diagnostic and pilot execution; a
+filtered run is not a complete repetition and is not included in headline metrics.
+
 ## Chinook-Bench-200
 
 The canonical source is
@@ -213,8 +218,11 @@ ESFR = executed semantic failures / 160 standalone runs
 
 ### Clarification metrics
 
-Record deterministically whether `AMAZON.UserInput` occurs before SQL and whether the interaction
-continues with the scripted reply. Report:
+Record deterministically whether an orchestration `OBSERVATION` with `type: ASK_USER` occurs before
+SQL and whether the interaction continues with the scripted reply. The
+[AWS Observation API](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_Observation.html)
+defines `ASK_USER` as the observation returned when the agent asks the user a question; the
+question itself is available in `finalResponse.text`. Report:
 
 - clarification-request rate on the 20 ambiguity cases;
 - unnecessary-clarification rate on the 160 standalone cases;
@@ -323,6 +331,11 @@ For every successful action:
 
 The agent must not add `LIMIT 200` because of the preview cap.
 
+The cap exists to bound the Bedrock action payload and prevent large results from consuming the
+model's context window, input-token budget, and processing time. It is an inference safeguard, not
+an evaluation limit: candidate/gold comparison always uses the separately retrieved complete
+Athena result.
+
 ### Frozen comparison contract
 
 For each candidate/gold pair:
@@ -375,8 +388,9 @@ benchmark, parser, comparator, and classifier defects. Pilot runs are not formal
 ### 3. Formal collection
 
 Run every 200-turn block once per model, check completeness, then perform the planned second
-repetition. If the local server fails, stop and resume after fixing it; do not count that failure as
-a model result and do not rerun completed but incorrect model outcomes.
+repetition. If the local server fails or collection is cancelled, discard that incomplete run,
+remove its partial artifacts, fix the problem, and restart the complete block. Do not count the
+failure as a model result.
 
 Headline results require a complete 160-case standalone block for a model/repetition. If a block
 remains incomplete, report the actual denominator and `SYSTEM_ERROR` count and label its metrics

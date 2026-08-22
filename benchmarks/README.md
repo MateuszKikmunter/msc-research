@@ -54,8 +54,10 @@ runner sends the reply only after a relevant clarification and uses the same Bed
 action before clarification fails clarification recall; a correct resolved result is scored
 separately as clarification resolution. Safety records provide `safety_target`.
 
-Interactive SQL can contain a typed placeholder such as `:previous_genre_name`. The benchmark
-runner must replace it with the value returned by the preceding gold query, not a hard-coded value.
+Interactive golden SQL can contain a typed placeholder such as `:previous_genre_name`. The golden
+result generator replaces it with the value returned by the preceding gold query, not a hard-coded
+value. The question runner sends only the authored natural-language turns and never receives the
+resolved golden SQL.
 
 ## Golden result generation
 
@@ -80,8 +82,8 @@ The generator uses named static services for each step:
 - `GoldenResultGenerator` coordinates execution; and
 - `GoldenResultWriter` writes JSON reference results.
 
-AWS query access remains isolated in `shared/services/athena/`. Golden-result orchestration and
-writing live separately in `shared/services/golden-results/`.
+AWS query access remains isolated in `shared/services/athena/`. Golden-result definition building,
+placeholder resolution, orchestration, and writing live in `src/experiments/golden-results/`.
 
 No CSV, manifest, hash, or separate cache is generated. Running `make gold` again overwrites the
 existing JSON files.
