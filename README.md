@@ -3,8 +3,8 @@
 Design rationale, dataset semantics, experiment methodology, evaluation guidance, and
 troubleshooting are maintained in [`docs/`](docs/README.md).
 
-The versioned [Chinook-Bench-200](benchmarks/README.md) dataset contains 200 evaluation cases with
-canonical SQL or explicit clarification/refusal behavior.
+The versioned [Chinook-Bench-200](benchmarks/README.md) dataset contains 200 authored turns across
+195 cases with canonical SQL or explicit clarification/refusal behaviour.
 
 The infrastructure is split into two AWS CloudFormation templates. The agent
 template uses the AWS SAM transform to build its TypeScript Lambda:
@@ -42,8 +42,7 @@ The services can also be started separately with `make start-backend` and
 ## Experiment tooling
 
 The TypeScript experiment tooling is under [`src/experiments/`](src/experiments/DESIGN.md). The
-golden-result generator is implemented; the benchmark-question runner and evaluator are the next
-stages.
+golden-result generator and benchmark runner are implemented; the evaluator is the next stage.
 
 Execute the 190 checked-in golden SQL definitions with:
 
@@ -54,6 +53,19 @@ make gold
 This calls Athena directly, retrieves every result page, and writes JSON reference results to
 `src/experiments/runs/golden-sql/`. Running it again overwrites existing files. It does not invoke
 the Bedrock agent or execute the natural-language benchmark questions.
+
+With the local backend running, execute the complete benchmark for one deployed model condition:
+
+```bash
+make execute MODEL=nova-lite REPETITION=1
+```
+
+The runner processes cases sequentially, preserves sessions for ambiguity continuations and
+interactive turns, and appends each completed episode's records to `interactions.jsonl`. Complete
+successful Athena results are saved separately under
+`src/experiments/runs/nova-lite/repetition-1/`. It has no pause, checkpoint, or resume mode. If a
+run is cancelled, the records from episodes that already completed remain available for
+inspection; remove the partial run directory manually before starting a clean experiment.
 
 Use `make test-experiments` and `make typecheck-experiments` to verify the experiment package.
 

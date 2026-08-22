@@ -1,4 +1,7 @@
-.PHONY: start start-backend start-frontend gold test-experiments typecheck-experiments
+.PHONY: start start-backend start-frontend execute gold test-experiments typecheck-experiments
+
+MODEL ?= nova-lite
+REPETITION ?= 1
 
 start:
 	npm start
@@ -8,6 +11,9 @@ start-backend:
 
 start-frontend:
 	npm run start:frontend
+
+execute:
+	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) npm --prefix src/experiments run execute
 
 gold:
 	npm --prefix src/experiments run gold

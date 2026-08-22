@@ -375,8 +375,9 @@ benchmark, parser, comparator, and classifier defects. Pilot runs are not formal
 ### 3. Formal collection
 
 Run every 200-turn block once per model, check completeness, then perform the planned second
-repetition. If the local server fails, stop and resume after fixing it; do not count that failure as
-a model result and do not rerun completed but incorrect model outcomes.
+repetition. If the local server fails or collection is cancelled, discard that incomplete run,
+remove its partial artifacts, fix the problem, and restart the complete block. Do not count the
+failure as a model result.
 
 Headline results require a complete 160-case standalone block for a model/repetition. If a block
 remains incomplete, report the actual denominator and `SYSTEM_ERROR` count and label its metrics

@@ -6,20 +6,34 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-21** — Implemented the TypeScript Chinook-Bench-200 question runner. It executes all
+  benchmark cases sequentially through the local server, uses a fresh session per case, preserves
+  sessions for scripted ambiguity continuations and interactive turns, sends the frozen fallback
+  once after unnecessary standalone clarification, and handles safety/OOD cases without adding a
+  continuation. Successful SQL observations are correlated with their original Athena
+  query-execution IDs and their complete paginated results are saved under the model/repetition
+  run directory. After each episode, its records are appended individually to
+  `interactions.jsonl`, so completed work remains inspectable after cancellation, with sensitive
+  agent IDs, aliases, and versions removed from copied traces. This append-only output does not
+  provide pause or resume functionality. Added `make execute` with `MODEL` and
+  `REPETITION` variables, plus Jest coverage for execution policies, trace inspection, result
+  capture, result writing, server calls, and sequential failure reporting. Cancelled runs are
+  intentionally discarded rather than resumed.
+
 - **2026-08-20** — Added the first experiment-tooling stage under `src/experiments`. The
-  TypeScript golden-result generator loads the committed Chinook-Bench-200 JSONL, builds all 190
+  TypeScript golden-result generator loads the committed Chinook-Bench-200 JSON, builds all 190
   executable definitions, resolves interactive placeholders from preceding golden results,
   retrieves complete paginated Athena results, and writes JSON reference files under
   `src/experiments/runs/golden-sql`. Stateless responsibilities use named static classes so the
   execution flow is explicit, while `AthenaService` owns the AWS client. Added root Make targets
   for local services, golden generation, experiment tests, and type-checking, together with focused
   Jest coverage. Athena access is isolated under `shared/services/athena`, while golden-result
-  orchestration and writing live under `src/experiments/golden-results`. The benchmark-question
-  runner and evaluator remain pending.
+  orchestration and writing live under `src/experiments/golden-results`. The evaluator remains
+  pending.
 
 - **2026-08-12** — Added Chinook-Bench-200, a machine-readable benchmark with exactly 200 question
   turns across 195 cases: 50 easy, 60 medium, 50 hard, 20 ambiguity, 10 interactive turns, and 10
-  safety questions. Both machine-readable JSONL and human-readable Markdown versions include
+  safety questions. The machine-readable JSON and human-readable Markdown versions include
   canonical Athena
   SQL for executable questions and explicit clarification/refusal targets when SQL must not run.
   The benchmark now exposes 190 executable golden definitions: 160 standalone queries, 10
@@ -180,7 +194,7 @@ All notable changes to this project will be documented in this file.
   turn now declares its required columns, row/column ordering, duplicate, tolerance, semantic
   limit, and tie behavior. All 20 ambiguity cases now include accepted clarification slots, a
   frozen scripted reply, resolved golden SQL, and a resolved comparison contract. The JSON export
-  is now a valid array generated with the Markdown representation from canonical JSONL, with a
+  is now a valid array generated with the Markdown representation from canonical JSON, with a
   validation command to prevent drift. Because the gold SQL changed and 20 resolved queries were
   added, all 190 executable query definitions must be run against the frozen Athena snapshot
   before the formal experiment.
