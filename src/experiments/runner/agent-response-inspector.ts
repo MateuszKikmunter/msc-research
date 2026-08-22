@@ -35,6 +35,7 @@ export class AgentResponseInspector {
         return sqlSequence === undefined || clarificationSequence < sqlSequence;
     }
 
+    // Pair each successful Athena execution ID with its original SQL attempt number.
     public getCandidateQueryExecutions(
         response: AgentResponse
     ): CandidateQueryExecution[] {
@@ -64,15 +65,17 @@ export class AgentResponseInspector {
     private indexSqlAttemptsByTraceId(
         events: AgentTraceEvent[]
     ): Map<string, number> {
+        // Maps the ID shared by an invocation and observation to the SQL attempt number.
         const attemptByTraceId = new Map<string, number>();
         let attempt = 0;
 
-        // Shared trace IDs reliably link invocation and observation events.
+        // Count failed invocations too, so a later successful retry remains attempt 2, 3, etc.
         for (const event of events) {
             if (!this.isSqlInvocation(event)) {
                 continue;
             }
 
+            // Repeated trace parts with the same ID still represent one SQL attempt.
             if (event.traceId && attemptByTraceId.has(event.traceId)) {
                 continue;
             }
@@ -91,7 +94,9 @@ export class AgentResponseInspector {
         attemptByTraceId: ReadonlyMap<string, number>,
         successfulAttempts: number[]
     ): CandidateQueryExecution[] {
+        // Prevent a trace-less observation from being assigned an attempt already in use.
         const usedAttempts = new Set<number>();
+        // The same Athena observation may appear more than once in the trace stream.
         const usedQueryExecutionIds = new Set<string>();
         const executions: CandidateQueryExecution[] = [];
 
@@ -146,7 +151,7 @@ export class AgentResponseInspector {
             return tracedAttempt;
         }
 
-        // Without a trace ID, prefer recorded success order over observation order.
+        // If correlation data is incomplete, use the next unassigned recorded success.
         return (
             successfulAttempts.find((attempt) => !usedAttempts.has(attempt)) ??
             fallbackAttempt
