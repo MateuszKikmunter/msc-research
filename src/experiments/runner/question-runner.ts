@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { setTimeout } from 'node:timers/promises';
 
 import type {
     BenchmarkRecord,
@@ -27,12 +28,23 @@ export class QuestionRunner {
     public async run(
         benchmark: BenchmarkRecord[],
         modelCondition: string,
-        repetition: number
+        repetition: number,
+        questionId?: string
     ): Promise<ExperimentRunSummary> {
         const startedAt = new Date().toISOString();
         const interactions: RunInteraction[] = [];
 
-        for (const [index, benchmarkRecord] of benchmark.entries()) {
+        for (const [index, benchmarkRecord] of this.runSingleQuestion(
+            benchmark,
+            questionId
+        ).entries()) {
+            if (index > 0) {
+                console.info(
+                    'Waiting 5 seconds before executing the next benchmark...'
+                );
+                await setTimeout(5000);
+            }
+
             const sessionId = randomUUID();
             console.info(
                 `[${index + 1}/${benchmark.length}] Executing ${benchmarkRecord.id}`
@@ -71,5 +83,16 @@ export class QuestionRunner {
             completedAt: new Date().toISOString(),
             interactions
         };
+    }
+
+    private runSingleQuestion(
+        benchmark: BenchmarkRecord[],
+        questionId?: string
+    ) {
+        if (!questionId) {
+            return benchmark;
+        }
+
+        return benchmark.filter((record) => record.id === questionId);
     }
 }

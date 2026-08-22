@@ -23,6 +23,7 @@ async function main(): Promise<void> {
     const repetition = Number(
         process.env.REPETITION ?? String(DEFAULT_REPETITION)
     );
+    const questionId = process.env.QUESTION_ID;
 
     const runDirectory = path.join(
         EXPERIMENT_RUNS_DIRECTORY,
@@ -51,7 +52,12 @@ async function main(): Promise<void> {
     );
 
     const benchmark = await BenchmarkLoader.load();
-    const run = await questionRunner.run(benchmark, modelCondition, repetition);
+    const run = await questionRunner.run(
+        benchmark,
+        modelCondition,
+        repetition,
+        questionId
+    );
     const outputPath = path.join(runDirectory, 'interactions.jsonl');
 
     console.info(
