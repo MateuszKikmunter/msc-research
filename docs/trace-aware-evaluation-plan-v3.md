@@ -270,6 +270,11 @@ question
  -> terminal result
 ```
 
+Detect clarification from the documented Bedrock runtime trace shape: an orchestration
+`OBSERVATION` whose `observation.type` is `ASK_USER`. The clarification text is stored under
+`observation.finalResponse.text`. Do not require a separate `AMAZON.UserInput` invocation event;
+the deployed agent traces do not emit one for this transition.
+
 Use the resolution object embedded in each ambiguity record:
 
 ```json

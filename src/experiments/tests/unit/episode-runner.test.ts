@@ -64,10 +64,21 @@ describe('EpisodeRunner', () => {
     });
 
     it('continues an ambiguity episode with its scripted reply', async () => {
-        const { runner, sendQuery } = createRunner([
+        const { runner, sendQuery, collectCandidateResults } = createRunner([
             clarificationResponse(),
             sqlResponse()
         ]);
+        collectCandidateResults
+            .mockResolvedValueOnce([])
+            .mockResolvedValueOnce([
+                {
+                    attempt: 1,
+                    queryExecutionId: 'query-123',
+                    status: 'saved',
+                    file: 'candidate-results/CB200-A001-T02-A01.json',
+                    error: null
+                }
+            ]);
         const record = getBenchmarkRecord('CB200-A001');
 
         const interactions = await runner.run(record, 'session-3');
@@ -79,8 +90,14 @@ describe('EpisodeRunner', () => {
         expect(sendQuery.mock.calls[1]?.[1]).toBe('session-3');
         expect(interactions[1]).toMatchObject({
             inputType: 'scripted_reply',
-            scriptedReplyUsed: true
+            scriptedReplyUsed: true,
+            candidateResults: [
+                {
+                    file: 'candidate-results/CB200-A001-T02-A01.json'
+                }
+            ]
         });
+        expect(interactions[0]?.candidateResults).toEqual([]);
     });
 
     it('does not provide an ambiguity resolution after immediate SQL', async () => {
@@ -140,7 +157,9 @@ function createRunner(responses: AgentResponse[]) {
         responseInspector,
         new RunResultWriter()
     );
-    jest.spyOn(candidateResultCollector, 'collect').mockResolvedValue([]);
+    const collectCandidateResults = jest
+        .spyOn(candidateResultCollector, 'collect')
+        .mockResolvedValue([]);
 
     return {
         runner: new EpisodeRunner(
@@ -148,7 +167,8 @@ function createRunner(responses: AgentResponse[]) {
             candidateResultCollector,
             responseInspector
         ),
-        sendQuery
+        sendQuery,
+        collectCandidateResults
     };
 }
 
@@ -162,8 +182,13 @@ function clarificationResponse() {
     return createAgentResponse({
         traceEvents: [
             createTraceEvent({
-                eventType: 'INVOCATION',
-                actionGroup: 'AMAZON.UserInput'
+                eventType: 'OBSERVATION',
+                observation: {
+                    type: 'ASK_USER',
+                    finalResponse: {
+                        text: 'Which ranking metric should I use?'
+                    }
+                }
             })
         ]
     });

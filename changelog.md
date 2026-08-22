@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-22** — Corrected benchmark-runner clarification detection to use Bedrock's documented
+  orchestration `ASK_USER` observation rather than expecting an `AMAZON.UserInput` invocation.
+  Ambiguity and unnecessary-clarification continuations now follow the runtime trace shape emitted
+  by the deployed agent. Clarification-only interactions intentionally have no candidate-result
+  file because no Athena query was executed.
+
 - **2026-08-21** — Implemented the TypeScript Chinook-Bench-200 question runner. It executes all
   benchmark cases sequentially through the local server, uses a fresh session per case, preserves
   sessions for scripted ambiguity continuations and interactive turns, sends the frozen fallback

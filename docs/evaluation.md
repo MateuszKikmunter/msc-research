@@ -213,8 +213,11 @@ ESFR = executed semantic failures / 160 standalone runs
 
 ### Clarification metrics
 
-Record deterministically whether `AMAZON.UserInput` occurs before SQL and whether the interaction
-continues with the scripted reply. Report:
+Record deterministically whether an orchestration `OBSERVATION` with `type: ASK_USER` occurs before
+SQL and whether the interaction continues with the scripted reply. The
+[AWS Observation API](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent-runtime_Observation.html)
+defines `ASK_USER` as the observation returned when the agent asks the user a question; the
+question itself is available in `finalResponse.text`. Report:
 
 - clarification-request rate on the 20 ambiguity cases;
 - unnecessary-clarification rate on the 160 standalone cases;

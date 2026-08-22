@@ -9,13 +9,18 @@ import {
 describe('AgentResponseInspector', () => {
     const inspector = new AgentResponseInspector();
 
-    it('detects a clarification invocation before SQL', () => {
+    it('detects an ASK_USER observation before SQL', () => {
         const response = createAgentResponse({
             traceEvents: [
                 createTraceEvent({
                     sequenceNumber: 1,
-                    eventType: 'INVOCATION',
-                    actionGroup: 'AMAZON.UserInput'
+                    eventType: 'OBSERVATION',
+                    observation: {
+                        type: 'ASK_USER',
+                        finalResponse: {
+                            text: 'Which ranking metric should I use?'
+                        }
+                    }
                 }),
                 createTraceEvent({
                     sequenceNumber: 2,
@@ -42,8 +47,21 @@ describe('AgentResponseInspector', () => {
                 }),
                 createTraceEvent({
                     sequenceNumber: 2,
-                    eventType: 'INVOCATION',
-                    actionGroup: 'AMAZON.UserInput'
+                    eventType: 'OBSERVATION',
+                    observation: { type: 'ASK_USER' }
+                })
+            ]
+        });
+
+        expect(inspector.requestedClarificationBeforeSql(response)).toBe(false);
+    });
+
+    it('does not treat a final response observation as clarification', () => {
+        const response = createAgentResponse({
+            traceEvents: [
+                createTraceEvent({
+                    eventType: 'OBSERVATION',
+                    observation: { type: 'FINISH' }
                 })
             ]
         });

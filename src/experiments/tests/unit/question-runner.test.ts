@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { AgentResponseInspector } from '../../runner/agent-response-inspector';
@@ -9,6 +10,10 @@ import { ServerClient } from '../../runner/server-client';
 import { AthenaService } from '../../shared/services/athena/athena-service';
 import type { BenchmarkRecord } from '../../types';
 import { createAgentResponse } from '../fixtures/agent-response';
+
+jest.mock('node:timers/promises', () => ({
+    setTimeout: jest.fn(() => Promise.resolve())
+}));
 
 describe('QuestionRunner', () => {
     it('runs every benchmark record sequentially with a new session', async () => {
@@ -74,6 +79,7 @@ describe('QuestionRunner', () => {
             repetition: 1,
             ...secondInteraction
         });
+        expect(setTimeout).toHaveBeenCalledWith(5000);
     });
 
     it('reports the current case and session when execution fails', async () => {

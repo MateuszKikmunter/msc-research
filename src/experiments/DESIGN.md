@@ -274,7 +274,7 @@ correctness.
 For `expected_behavior: clarify_then_execute`:
 
 1. send the ambiguous question;
-2. check whether the agent requests clarification before executing SQL;
+2. check whether an orchestration `OBSERVATION` with `type: ASK_USER` occurs before SQL;
 3. if it does, send the benchmark's `scriptedReply` in the same session;
 4. evaluate the resulting SQL against `resolution.gold_sql`; and
 5. if the agent executes SQL before clarification, record a missed clarification and do not send
@@ -283,6 +283,8 @@ For `expected_behavior: clarify_then_execute`:
 The automatic evaluation checks whether clarification happened before SQL. It does not attempt to
 judge the exact wording of the clarification question. `clarification_target` is available for the
 small manual validation sample, while `acceptedSlots` is not used by version 1 of the executor.
+AWS documents `ASK_USER` as the observation type emitted when an agent asks the user a question;
+its `finalResponse.text` contains that question.
 
 ### 8.3 Interactive questions
 
@@ -315,6 +317,10 @@ runs/nova-lite/repetition-1/candidate-results/
   CB200-H027-T01-A01.json
   CB200-H027-T01-A02.json
 ```
+
+A clarification-only `ASK_USER` interaction has no SQL attempt and therefore no candidate-result
+file. In a normal ambiguity episode, the first interaction has `candidateResults: []`, while the
+scripted continuation produces the candidate file if its SQL succeeds.
 
 `T01` is the interaction turn and `A01` is the SQL-attempt number. Saving every successful attempt
 is necessary to distinguish:

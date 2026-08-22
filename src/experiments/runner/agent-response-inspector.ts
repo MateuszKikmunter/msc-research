@@ -1,7 +1,7 @@
 import type { AgentResponse, AgentTraceEvent } from '../../backend/types';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 
-const USER_INPUT_ACTION_GROUP = 'AMAZON.UserInput';
+const ASK_USER_OBSERVATION_TYPE = 'ASK_USER';
 const SENSITIVE_KEYS = new Set([
     'agentId',
     'agentAlias',
@@ -21,7 +21,7 @@ export class AgentResponseInspector {
     public requestedClarificationBeforeSql(response: AgentResponse): boolean {
         const events = this.orderedEvents(response);
         const clarificationSequence = events.find((event) =>
-            this.isClarificationInvocation(event)
+            this.isClarificationObservation(event)
         )?.sequenceNumber;
 
         if (clarificationSequence === undefined) {
@@ -39,9 +39,35 @@ export class AgentResponseInspector {
         response: AgentResponse
     ): CandidateQueryExecution[] {
         const events = this.orderedEvents(response);
+        const attemptByTraceId = this.indexSqlAttemptsByTraceId(events);
+        const successfulAttempts = response.sqlAttempts
+            .filter((sqlAttempt) => sqlAttempt.status === 'succeeded')
+            .map((sqlAttempt) => sqlAttempt.attempt);
+
+        return this.collectCandidateExecutions(
+            events,
+            attemptByTraceId,
+            successfulAttempts
+        );
+    }
+
+    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
+        return this.removeSensitiveKeys(response) as StoredAgentResponse;
+    }
+
+    private orderedEvents(response: AgentResponse): AgentTraceEvent[] {
+        return [...response.traceEvents].sort(
+            (left, right) => left.sequenceNumber - right.sequenceNumber
+        );
+    }
+
+    private indexSqlAttemptsByTraceId(
+        events: AgentTraceEvent[]
+    ): Map<string, number> {
         const attemptByTraceId = new Map<string, number>();
         let attempt = 0;
 
+        // Shared trace IDs reliably link invocation and observation events.
         for (const event of events) {
             if (!this.isSqlInvocation(event)) {
                 continue;
@@ -57,9 +83,14 @@ export class AgentResponseInspector {
             }
         }
 
-        const successfulAttempts = response.sqlAttempts
-            .filter((sqlAttempt) => sqlAttempt.status === 'succeeded')
-            .map((sqlAttempt) => sqlAttempt.attempt);
+        return attemptByTraceId;
+    }
+
+    private collectCandidateExecutions(
+        events: AgentTraceEvent[],
+        attemptByTraceId: ReadonlyMap<string, number>,
+        successfulAttempts: number[]
+    ): CandidateQueryExecution[] {
         const usedAttempts = new Set<number>();
         const usedQueryExecutionIds = new Set<string>();
         const executions: CandidateQueryExecution[] = [];
@@ -69,6 +100,7 @@ export class AgentResponseInspector {
                 continue;
             }
 
+            // Athena may nest its execution ID inside the action observation payload.
             const queryExecutionId = this.findStringByKey(
                 event.observation,
                 'queryExecutionId'
@@ -80,15 +112,13 @@ export class AgentResponseInspector {
                 continue;
             }
 
-            const tracedAttempt = event.traceId
-                ? attemptByTraceId.get(event.traceId)
-                : undefined;
-            const resolvedAttempt =
-                tracedAttempt ??
-                successfulAttempts.find(
-                    (successfulAttempt) => !usedAttempts.has(successfulAttempt)
-                ) ??
-                executions.length + 1;
+            const resolvedAttempt = this.resolveAttemptNumber(
+                event,
+                attemptByTraceId,
+                successfulAttempts,
+                usedAttempts,
+                executions.length + 1
+            );
 
             usedAttempts.add(resolvedAttempt);
             usedQueryExecutionIds.add(queryExecutionId);
@@ -101,28 +131,33 @@ export class AgentResponseInspector {
         return executions;
     }
 
-    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
-        return this.removeSensitiveKeys(response) as StoredAgentResponse;
-    }
+    private resolveAttemptNumber(
+        event: AgentTraceEvent,
+        attemptByTraceId: ReadonlyMap<string, number>,
+        successfulAttempts: number[],
+        usedAttempts: ReadonlySet<number>,
+        fallbackAttempt: number
+    ): number {
+        const tracedAttempt = event.traceId
+            ? attemptByTraceId.get(event.traceId)
+            : undefined;
 
-    private orderedEvents(response: AgentResponse): AgentTraceEvent[] {
-        return [...response.traceEvents].sort(
-            (left, right) => left.sequenceNumber - right.sequenceNumber
+        if (tracedAttempt !== undefined) {
+            return tracedAttempt;
+        }
+
+        // Without a trace ID, prefer recorded success order over observation order.
+        return (
+            successfulAttempts.find((attempt) => !usedAttempts.has(attempt)) ??
+            fallbackAttempt
         );
     }
 
-    private isClarificationInvocation(event: AgentTraceEvent): boolean {
+    private isClarificationObservation(event: AgentTraceEvent): boolean {
         return (
-            event.eventType === 'INVOCATION' &&
-            (event.actionGroup === USER_INPUT_ACTION_GROUP ||
-                this.containsString(
-                    event.actionInput,
-                    USER_INPUT_ACTION_GROUP
-                ) ||
-                this.containsString(
-                    event.sanitizedEvent,
-                    USER_INPUT_ACTION_GROUP
-                ))
+            event.eventType === 'OBSERVATION' &&
+            this.isObject(event.observation) &&
+            event.observation.type === ASK_USER_OBSERVATION_TYPE
         );
     }
 
@@ -173,24 +208,6 @@ export class AgentResponseInspector {
         }
 
         return null;
-    }
-
-    private containsString(value: unknown, target: string): boolean {
-        if (value === target) {
-            return true;
-        }
-
-        if (Array.isArray(value)) {
-            return value.some((item) => this.containsString(item, target));
-        }
-
-        if (!this.isObject(value)) {
-            return false;
-        }
-
-        return Object.values(value).some((child) =>
-            this.containsString(child, target)
-        );
     }
 
     private removeSensitiveKeys(value: unknown): unknown {
