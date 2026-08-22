@@ -1,0 +1,61 @@
+{
+    "questionId": "CB200-E039",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "541e1402-a387-44aa-b381-c65847a5cd95",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["1", "AC/DC"],
+        ["2", "Accept"],
+        ["3", "Aerosmith"],
+        ["4", "Alanis Morissette"],
+        ["5", "Alice In Chains"],
+        ["6", "Antônio Carlos Jobim"],
+        ["7", "Apocalyptica"],
+        ["8", "Audioslave"],
+        ["26", "Azymuth"],
+        ["43", "A Cor Do Som"],
+        ["159", "Aquaman"],
+        ["161", "Aerosmith & Sierra Leone's Refugee Allstars"],
+        ["166", "Avril Lavigne"],
+        ["197", "Aisha Duo"],
+        ["202", "Aaron Goldberg"],
+        ["206", "Alberto Turco & Nova Schola Gregoriana"],
+        [
+            "209",
+            "Anne-Sophie Mutter, Herbert Von Karajan & Wiener Philharmoniker"
+        ],
+        ["214", "Academy of St. Martin in the Fields & Sir Neville Marriner"],
+        [
+            "215",
+            "Academy of St. Martin in the Fields Chamber Ensemble & Sir Neville Marriner"
+        ],
+        [
+            "222",
+            "Academy of St. Martin in the Fields, John Birch, Sir Neville Marriner & Sylvia McNair"
+        ],
+        ["230", "Aaron Copland & London Symphony Orchestra"],
+        [
+            "239",
+            "Academy of St. Martin in the Fields, Sir Neville Marriner & William Bennett"
+        ],
+        ["243", "Antal Doráti & London Symphony Orchestra"],
+        ["252", "Amy Winehouse"],
+        [
+            "257",
+            "Academy of St. Martin in the Fields, Sir Neville Marriner & Thurston Dart"
+        ],
+        ["260", "Adrian Leaper & Doreen de Feis"]
+    ],
+    "rowCount": 26
+}

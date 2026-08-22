@@ -1,0 +1,49 @@
+{
+    "questionId": "CB200-M014",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "ad3a79b5-2ca4-4746-aab1-eaf6d79d7e1e",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "avg_duration_minutes",
+            "type": "double"
+        }
+    ],
+    "rows": [
+        ["20", "Sci Fi & Fantasy", "47.88461538461539"],
+        ["18", "Science Fiction", "43.07692307692308"],
+        ["21", "Drama", "42.359375"],
+        ["19", "TV Shows", "35.27956989247312"],
+        ["22", "Comedy", "26.0"],
+        ["3", "Metal", "4.668449197860962"],
+        ["15", "Electronica/Dance", "4.533333333333333"],
+        ["13", "Heavy Metal", "4.5"],
+        ["24", "Classical", "4.445945945945946"],
+        ["2", "Jazz", "4.4"],
+        ["1", "Rock", "4.222050886661527"],
+        ["6", "Blues", "4.012345679012346"],
+        ["23", "Alternative", "3.85"],
+        ["8", "Reggae", "3.586206896551724"],
+        ["10", "Soundtrack", "3.558139534883721"],
+        ["4", "Alternative & Punk", "3.4126506024096384"],
+        ["7", "Latin", "3.390328151986183"],
+        ["9", "Pop", "3.3333333333333335"],
+        ["16", "World", "3.2857142857142856"],
+        ["14", "R&B/Soul", "3.1311475409836067"],
+        ["11", "Bossa Nova", "3.066666666666667"],
+        ["12", "Easy Listening", "2.6666666666666665"],
+        ["17", "Hip Hop/Rap", "2.4285714285714284"],
+        ["25", "Opera", "2.0"],
+        ["5", "Rock And Roll", "1.6666666666666667"]
+    ],
+    "rowCount": 25
+}

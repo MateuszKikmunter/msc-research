@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-C001",
+    "turnNumber": 1,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "50b971bc-08d3-4225-8f42-d9ec55d20591",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "avg_duration_minutes",
+            "type": "double"
+        }
+    ],
+    "rows": [["20", "Sci Fi & Fantasy", "47.88461538461539"]],
+    "rowCount": 1
+}

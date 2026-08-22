@@ -1,0 +1,29 @@
+{
+    "questionId": "CB200-C001",
+    "turnNumber": 2,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "2633422f-277d-4ee9-82f0-a46c0eb2039f",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["3244", "Greetings from Earth, Pt. 1", "2960293"],
+        ["3242", "The Man With Nine Lives", "2956998"],
+        ["3227", "Battlestar Galactica, Pt. 2", "2956081"],
+        ["3226", "Battlestar Galactica, Pt. 1", "2952702"],
+        ["3243", "Murder On the Rising Star", "2935894"]
+    ],
+    "rowCount": 5
+}

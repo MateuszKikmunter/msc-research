@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M018",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "d2a5493f-293b-4da7-96d8-a1aa6def7cf5",
+    "columns": [
+        {
+            "name": "playlist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["1", "Music", "3290"]],
+    "rowCount": 1
+}

@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E036",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "0f23a46e-0485-47da-952d-68e0e66f4e1b",
+    "columns": [
+        {
+            "name": "average_duration_minutes",
+            "type": "double"
+        }
+    ],
+    "rows": [["6.559986868398515"]],
+    "rowCount": 1
+}

@@ -1,0 +1,44 @@
+{
+    "questionId": "CB200-M025",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "c710f63e-90bd-4ff7-be0c-9fb97b9b86f1",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "average_total",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Norway", "5.66"],
+        ["Netherlands", "5.802857"],
+        ["Belgium", "5.3742857"],
+        ["Ireland", "6.517143"],
+        ["United Kingdom", "5.3742857"],
+        ["Sweden", "5.517143"],
+        ["Denmark", "5.3742857"],
+        ["Germany", "5.5885715"],
+        ["France", "5.5742855"],
+        ["Australia", "5.3742857"],
+        ["Chile", "6.66"],
+        ["India", "5.789231"],
+        ["Finland", "5.945714"],
+        ["Italy", "5.3742857"],
+        ["Poland", "5.3742857"],
+        ["Hungary", "6.517143"],
+        ["Argentina", "5.3742857"],
+        ["Canada", "5.427857"],
+        ["USA", "5.747912"],
+        ["Brazil", "5.4314284"],
+        ["Portugal", "5.517143"],
+        ["Spain", "5.3742857"],
+        ["Czech Republic", "6.4457145"],
+        ["Austria", "6.0885715"]
+    ],
+    "rowCount": 24
+}

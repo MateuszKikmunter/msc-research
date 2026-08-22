@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-H021",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "2763739b-f604-4c5a-b534-4e5e6fc5512f",
+    "columns": [
+        {
+            "name": "average_line_items_per_invoice",
+            "type": "double"
+        }
+    ],
+    "rows": [["5.436893203883495"]],
+    "rowCount": 1
+}

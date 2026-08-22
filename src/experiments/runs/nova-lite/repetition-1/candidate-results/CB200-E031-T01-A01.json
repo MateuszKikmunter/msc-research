@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E031",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "1a4bcaf4-821c-4c65-8244-99ae1f141573",
+    "columns": [
+        {
+            "name": "total_value",
+            "type": "float"
+        }
+    ],
+    "rows": [["2328.6"]],
+    "rowCount": 1
+}

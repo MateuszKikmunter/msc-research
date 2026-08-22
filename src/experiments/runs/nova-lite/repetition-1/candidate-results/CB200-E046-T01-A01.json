@@ -1,0 +1,25 @@
+{
+    "questionId": "CB200-E046",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "9f64d8c2-0a16-41b6-aa2d-2d25fab69416",
+    "columns": [
+        {
+            "name": "title",
+            "type": "varchar"
+        },
+        {
+            "name": "employee_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["Sales Manager", "1"],
+        ["Sales Support Agent", "3"],
+        ["IT Manager", "1"],
+        ["IT Staff", "2"],
+        ["General Manager", "1"]
+    ],
+    "rowCount": 5
+}

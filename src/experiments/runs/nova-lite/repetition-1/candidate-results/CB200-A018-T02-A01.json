@@ -1,0 +1,22 @@
+{
+    "questionId": "CB200-A018",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "d8fa2494-2c3f-46d1-be7b-9624871c4641",
+    "columns": [
+        {
+            "name": "total_invoice_value",
+            "type": "float"
+        },
+        {
+            "name": "year",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["477.53", "2012"],
+        ["469.58", "2011"]
+    ],
+    "rowCount": 2
+}

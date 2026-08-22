@@ -1,0 +1,46 @@
+{
+    "questionId": "CB200-M039",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 5,
+    "queryExecutionId": "64e7e1fe-7197-4928-b615-2b1c04ce59c3",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "162.36"],
+        ["3", "Metal", "65.340004"],
+        ["7", "Latin", "63.36"],
+        ["4", "Alternative & Punk", "38.61"],
+        ["19", "TV Shows", "25.87"],
+        ["21", "Drama", "17.91"],
+        ["24", "Classical", "16.83"],
+        ["22", "Comedy", "11.940001"],
+        ["20", "Sci Fi & Fantasy", "11.940001"],
+        ["14", "R&B/Soul", "9.9"],
+        ["6", "Blues", "8.91"],
+        ["9", "Pop", "7.92"],
+        ["2", "Jazz", "5.94"],
+        ["8", "Reggae", "5.94"],
+        ["10", "Soundtrack", "3.96"],
+        ["17", "Hip Hop/Rap", "3.96"],
+        ["23", "Alternative", "3.96"],
+        ["13", "Heavy Metal", "2.97"],
+        ["16", "World", "2.97"],
+        ["15", "Electronica/Dance", "2.97"],
+        ["18", "Science Fiction", "1.99"],
+        ["5", "Rock And Roll", "1.98"]
+    ],
+    "rowCount": 22
+}

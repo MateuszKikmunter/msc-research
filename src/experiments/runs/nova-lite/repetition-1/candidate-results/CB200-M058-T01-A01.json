@@ -1,0 +1,25 @@
+{
+    "questionId": "CB200-M058",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "6852749a-34fb-42e4-8860-e34b0ce834ec",
+    "columns": [
+        {
+            "name": "year",
+            "type": "bigint"
+        },
+        {
+            "name": "distinct_customers",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["2009", "46"],
+        ["2010", "46"],
+        ["2011", "47"],
+        ["2012", "47"],
+        ["2013", "46"]
+    ],
+    "rowCount": 5
+}

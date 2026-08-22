@@ -1,0 +1,49 @@
+{
+    "questionId": "CB200-M012",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "089ce292-79a2-4019-b28d-b3e61d83d68e",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["3", "Metal", "374"],
+        ["5", "Rock And Roll", "12"],
+        ["6", "Blues", "81"],
+        ["25", "Opera", "1"],
+        ["2", "Jazz", "130"],
+        ["8", "Reggae", "58"],
+        ["9", "Pop", "48"],
+        ["11", "Bossa Nova", "15"],
+        ["12", "Easy Listening", "24"],
+        ["13", "Heavy Metal", "28"],
+        ["17", "Hip Hop/Rap", "35"],
+        ["10", "Soundtrack", "43"],
+        ["14", "R&B/Soul", "61"],
+        ["22", "Comedy", "17"],
+        ["23", "Alternative", "40"],
+        ["1", "Rock", "1297"],
+        ["4", "Alternative & Punk", "332"],
+        ["7", "Latin", "579"],
+        ["15", "Electronica/Dance", "30"],
+        ["16", "World", "28"],
+        ["18", "Science Fiction", "13"],
+        ["19", "TV Shows", "93"],
+        ["20", "Sci Fi & Fantasy", "26"],
+        ["21", "Drama", "64"],
+        ["24", "Classical", "74"]
+    ],
+    "rowCount": 25
+}

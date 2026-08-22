@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-A013",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "7e36fab4-cbe2-4f9e-be6a-f28783b8916a",
+    "columns": [
+        {
+            "name": "country",
+            "type": "varchar"
+        },
+        {
+            "name": "genre",
+            "type": "varchar"
+        },
+        {
+            "name": "total_quantity",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["USA", "Rock", "157"]],
+    "rowCount": 1
+}

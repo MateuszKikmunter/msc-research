@@ -1,0 +1,29 @@
+{
+    "questionId": "CB200-E021",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "5767bd23-c379-4416-bbbf-4e8792458621",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "bytes",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["3224", "Through a Looking Glass", "1059546140"],
+        ["2820", "Occupation / Precipice", "1054423946"],
+        ["3236", "The Young Lords", "587051735"],
+        ["3242", "The Man With Nine Lives", "577829804"],
+        ["2910", "Dave", "574325829"]
+    ],
+    "rowCount": 5
+}

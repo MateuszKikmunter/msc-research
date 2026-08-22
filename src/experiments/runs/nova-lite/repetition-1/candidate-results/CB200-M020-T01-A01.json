@@ -1,0 +1,27 @@
+{
+    "questionId": "CB200-M020",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "24826556-ddf1-4e6c-99cd-2e395728712d",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "total_invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["6", "Helena", "Holý", "49.62"]],
+    "rowCount": 1
+}

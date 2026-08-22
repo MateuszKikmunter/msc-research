@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-H012",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "6c76b74c-41b6-4249-b557-3fc01b5bdc85",
+    "columns": [
+        {
+            "name": "month",
+            "type": "varchar"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["yyyy-MM", "2328.6"]],
+    "rowCount": 1
+}

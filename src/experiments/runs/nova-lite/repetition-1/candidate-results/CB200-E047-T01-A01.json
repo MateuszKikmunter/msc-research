@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E047",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "7c03ce08-aea0-4c56-9c2d-2f4ec3d67c4d",
+    "columns": [
+        {
+            "name": "earliest_invoice_date",
+            "type": "timestamp"
+        }
+    ],
+    "rows": [["2009-01-01 00:00:00.000"]],
+    "rowCount": 1
+}

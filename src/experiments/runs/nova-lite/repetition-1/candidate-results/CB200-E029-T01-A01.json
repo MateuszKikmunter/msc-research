@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E029",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "039043f1-d1d9-4f92-9d14-ec6ea3959bab",
+    "columns": [
+        {
+            "name": "invoice_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["83"]],
+    "rowCount": 1
+}

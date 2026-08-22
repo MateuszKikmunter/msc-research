@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E033",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "938325ff-3c04-414a-90c5-6d8d5a275e55",
+    "columns": [
+        {
+            "name": "largest_invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["25.86"]],
+    "rowCount": 1
+}

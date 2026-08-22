@@ -1,0 +1,52 @@
+{
+    "questionId": "CB200-M048",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "7d83c8ca-a663-45ab-a48a-8c26b43eb031",
+    "columns": [
+        {
+            "name": "country",
+            "type": "varchar"
+        },
+        {
+            "name": "company_recorded",
+            "type": "varchar"
+        },
+        {
+            "name": "customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["Argentina", "No", "1"],
+        ["Australia", "No", "1"],
+        ["Austria", "No", "1"],
+        ["Belgium", "No", "1"],
+        ["Brazil", "Yes", "4"],
+        ["Brazil", "No", "1"],
+        ["Canada", "Yes", "2"],
+        ["Canada", "No", "6"],
+        ["Chile", "No", "1"],
+        ["Czech Republic", "Yes", "1"],
+        ["Czech Republic", "No", "1"],
+        ["Denmark", "No", "1"],
+        ["Finland", "No", "1"],
+        ["France", "No", "5"],
+        ["Germany", "No", "4"],
+        ["Hungary", "No", "1"],
+        ["India", "No", "2"],
+        ["Ireland", "No", "1"],
+        ["Italy", "No", "1"],
+        ["Netherlands", "No", "1"],
+        ["Norway", "No", "1"],
+        ["Poland", "No", "1"],
+        ["Portugal", "No", "2"],
+        ["Spain", "No", "1"],
+        ["Sweden", "No", "1"],
+        ["USA", "Yes", "3"],
+        ["USA", "No", "10"],
+        ["United Kingdom", "No", "3"]
+    ],
+    "rowCount": 28
+}

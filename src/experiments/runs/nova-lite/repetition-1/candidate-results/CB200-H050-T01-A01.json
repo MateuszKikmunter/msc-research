@@ -1,0 +1,27 @@
+{
+    "questionId": "CB200-H050",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "c26d034f-ef25-49e6-adcb-c65dc24837d7",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["26", "Richard", "Cunningham", "25.84"]],
+    "rowCount": 1
+}

@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E025",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "2024683c-e5e7-4303-a9af-c151959fd166",
+    "columns": [
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["978"]],
+    "rowCount": 1
+}

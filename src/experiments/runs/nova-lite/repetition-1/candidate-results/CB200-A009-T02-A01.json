@@ -1,0 +1,36 @@
+{
+    "questionId": "CB200-A009",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "b0f54917-2ea1-44a5-83f9-989bd8769612",
+    "columns": [
+        {
+            "name": "invoice_id",
+            "type": "integer"
+        },
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "invoice_date",
+            "type": "timestamp"
+        },
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "total",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["96", "45", "2010-02-18 00:00:00.000", "Hungary", "21.86"],
+        ["194", "46", "2011-04-28 00:00:00.000", "Ireland", "21.86"],
+        ["299", "26", "2012-08-05 00:00:00.000", "USA", "23.86"],
+        ["404", "6", "2013-11-13 00:00:00.000", "Czech Republic", "25.86"]
+    ],
+    "rowCount": 4
+}

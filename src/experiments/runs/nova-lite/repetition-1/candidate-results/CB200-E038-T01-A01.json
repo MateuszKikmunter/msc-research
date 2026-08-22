@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E038",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "ce941280-94a3-409d-b473-a6e11f8b2753",
+    "columns": [
+        {
+            "name": "sales_support_agent_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["3"]],
+    "rowCount": 1
+}

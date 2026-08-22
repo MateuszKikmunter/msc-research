@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-M032",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "a964ffb4-2479-4dcb-9cc5-5746eecbc3e6",
+    "columns": [
+        {
+            "name": "total_units_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["2240"]],
+    "rowCount": 1
+}

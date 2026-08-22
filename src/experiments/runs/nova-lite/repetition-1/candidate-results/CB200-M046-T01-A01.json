@@ -1,0 +1,30 @@
+{
+    "questionId": "CB200-M046",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "0ef39e38-c76b-474c-83e3-9a3a54c74035",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "album_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["90", "Iron Maiden", "21"],
+        ["150", "U2", "10"],
+        ["114", "Ozzy Osbourne", "6"],
+        ["22", "Led Zeppelin", "14"],
+        ["50", "Metallica", "10"],
+        ["58", "Deep Purple", "11"]
+    ],
+    "rowCount": 6
+}
