@@ -46,6 +46,11 @@ agent IDs, aliases, or versions.
 Run two complete repetitions for each model. A third repetition is optional only if time and
 budget permit. The objective is a paired behavioural comparison, not a general model leaderboard.
 
+Formal collection uses an unfiltered `make execute MODEL=<condition> REPETITION=<number>` run. The
+runner waits five seconds between benchmark episodes but not between turns or scripted replies in
+the same episode. `QUESTION_ID=<case-id>` is available only for diagnostic and pilot execution; a
+filtered run is not a complete repetition and is not included in headline metrics.
+
 ## Chinook-Bench-200
 
 The canonical source is

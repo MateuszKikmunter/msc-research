@@ -60,8 +60,18 @@ With the local backend running, execute the complete benchmark for one deployed 
 make execute MODEL=nova-lite REPETITION=1
 ```
 
-The runner processes cases sequentially, preserves sessions for ambiguity continuations and
-interactive turns, and appends each completed episode's records to `interactions.jsonl`. Complete
+For diagnostic or pilot work, execute one case by ID:
+
+```bash
+make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
+```
+
+`QUESTION_ID` is not used for a formal complete run. A filtered execution appends to the same run
+directory, so use a clean directory when the output must remain isolated.
+
+The runner processes cases sequentially and waits five seconds between episodes. It does not add
+this delay between ambiguity continuations or interactive turns within one episode. It preserves
+their sessions and appends each completed episode's records to `interactions.jsonl`. Complete
 successful Athena results are saved separately under
 `src/experiments/runs/nova-lite/repetition-1/`. It has no pause, checkpoint, or resume mode. If a
 run is cancelled, the records from episodes that already completed remain available for

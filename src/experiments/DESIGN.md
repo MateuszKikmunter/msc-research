@@ -64,6 +64,14 @@ make execute MODEL=nova-lite REPETITION=1
 make execute MODEL=haiku-4-5 REPETITION=1
 ```
 
+An optional `QUESTION_ID` selects one case for diagnostics or pilot checks:
+
+```sh
+make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
+```
+
+Formal collection does not use this filter.
+
 The model value is only a user-provided label. The experiment tools do not inspect or expose Bedrock
 agent IDs, aliases, or versions.
 
@@ -147,6 +155,7 @@ The root `Makefile` exposes the implemented generation and execution entry point
 ```sh
 make gold
 make execute MODEL=nova-lite REPETITION=1
+make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
 ```
 
 `make evaluate` will be added with the evaluator. The commands remain separate so evaluation logic
@@ -234,7 +243,8 @@ never taken from the model's answer.
 ## 7. Question execution
 
 The runner processes questions sequentially because the server is local and only one user is
-expected.
+expected. It waits five seconds before each episode after the first. No artificial delay is added
+between ambiguity continuations or interactive turns inside the same episode.
 
 Each benchmark case receives a unique session ID. Interactive turns and ambiguity continuations
 reuse the same session ID. This session ID is also used to find the corresponding interactions and
@@ -435,9 +445,11 @@ runner stops and prints the current question and session. The incomplete run is 
 
 ## 13. Cancellation and incomplete runs
 
-There is no pause, checkpoint, progress, or resume behaviour. Every invocation starts from the
-first benchmark case and is intended to complete the full benchmark. The append-only file merely
-makes completed episodes inspectable if execution is cancelled.
+There is no pause, checkpoint, progress, or resume behaviour. An unfiltered invocation starts from
+the first benchmark case and is intended to complete the full benchmark. `QUESTION_ID` runs one
+selected case for diagnostics; it does not resume or contribute a replacement case to an existing
+formal run. The append-only file merely makes completed episodes inspectable if execution is
+cancelled.
 
 If execution is cancelled or fails, generated candidate files under that run directory are removed
 manually before starting again. The server has already persisted completed calls in
@@ -528,7 +540,6 @@ The experiment package uses TypeScript and Jest. Implemented tests cover:
 - sequential benchmark execution and failure reporting;
 - standalone fallback, ambiguity continuation, interactive session, and safety policies;
 - trace inspection and sensitive deployment-identifier removal;
-- local server requests; and
 - full candidate-result capture by existing Athena query-execution ID.
 
 The evaluator stage will add coverage for:

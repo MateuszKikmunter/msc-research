@@ -1205,7 +1205,12 @@ Before the pilot:
 5. verify every embedded ambiguity resolution and scripted reply;
 6. verify every embedded result-comparison contract and execute every corrected gold query;
 7. verify that every successful Athena action persists `queryExecutionId`; and
-8. freeze the infrastructure retry and incomplete-block policy.
+8. freeze the infrastructure retry and incomplete-block policy; and
+9. retain the runner's fixed five-second delay between episodes, with no artificial delay between
+   interactions inside one episode.
+
+The optional `QUESTION_ID` runner filter is for diagnostic and pilot checks only. Formal
+repetitions must be unfiltered complete runs from a clean run directory.
 
 ## Phase A — Pilot
 

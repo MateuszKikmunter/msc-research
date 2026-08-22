@@ -10,7 +10,9 @@ All notable changes to this project will be documented in this file.
   orchestration `ASK_USER` observation rather than expecting an `AMAZON.UserInput` invocation.
   Ambiguity and unnecessary-clarification continuations now follow the runtime trace shape emitted
   by the deployed agent. Clarification-only interactions intentionally have no candidate-result
-  file because no Athena query was executed.
+  file because no Athena query was executed. Added the optional `QUESTION_ID` filter for isolated
+  diagnostic execution and a fixed five-second delay between benchmark episodes; formal
+  repetitions remain unfiltered complete runs.
 
 - **2026-08-21** — Implemented the TypeScript Chinook-Bench-200 question runner. It executes all
   benchmark cases sequentially through the local server, uses a fresh session per case, preserves
@@ -23,7 +25,7 @@ All notable changes to this project will be documented in this file.
   agent IDs, aliases, and versions removed from copied traces. This append-only output does not
   provide pause or resume functionality. Added `make execute` with `MODEL` and
   `REPETITION` variables, plus Jest coverage for execution policies, trace inspection, result
-  capture, result writing, server calls, and sequential failure reporting. Cancelled runs are
+  capture, result writing, and sequential failure reporting. Cancelled runs are
   intentionally discarded rather than resumed.
 
 - **2026-08-20** — Added the first experiment-tooling stage under `src/experiments`. The
