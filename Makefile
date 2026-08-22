@@ -13,7 +13,7 @@ start-frontend:
 	npm run start:frontend
 
 execute:
-	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) npm --prefix src/experiments run execute
+	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) QUESTION_ID=$(QUESTION_ID) npm --prefix src/experiments run execute
 
 gold:
 	npm --prefix src/experiments run gold
