@@ -1,0 +1,38 @@
+{
+    "questionId": "CB200-M017",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "07c53e8e-a2c6-4a1f-972a-9153f0b33694",
+    "columns": [
+        {
+            "name": "playlist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["15", "Classical 101 - The Basics", "25"],
+        ["8", "Music", "3290"],
+        ["10", "TV Shows", "213"],
+        ["13", "Classical 101 - Deep Cuts", "25"],
+        ["17", "Heavy Metal Classic", "26"],
+        ["3", "TV Shows", "213"],
+        ["5", "90’s Music", "1477"],
+        ["9", "Music Videos", "1"],
+        ["11", "Brazilian Music", "39"],
+        ["12", "Classical", "75"],
+        ["1", "Music", "3290"],
+        ["14", "Classical 101 - Next Steps", "25"],
+        ["16", "Grunge", "15"],
+        ["18", "On-The-Go 1", "1"]
+    ],
+    "rowCount": 14
+}

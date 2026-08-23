@@ -1,0 +1,48 @@
+{
+    "questionId": "CB200-M048",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "15ecda34-5a2a-4dc8-9266-0e601045386d",
+    "columns": [
+        {
+            "name": "country",
+            "type": "varchar"
+        },
+        {
+            "name": "customers_with_company",
+            "type": "bigint"
+        },
+        {
+            "name": "customers_without_company",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["Brazil", "4", "1"],
+        ["Canada", "2", "6"],
+        ["Czech Republic", "1", "1"],
+        ["Austria", "0", "1"],
+        ["USA", "3", "10"],
+        ["Portugal", "0", "2"],
+        ["Spain", "0", "1"],
+        ["Norway", "0", "1"],
+        ["Netherlands", "0", "1"],
+        ["Belgium", "0", "1"],
+        ["Denmark", "0", "1"],
+        ["Ireland", "0", "1"],
+        ["Sweden", "0", "1"],
+        ["United Kingdom", "0", "3"],
+        ["Germany", "0", "4"],
+        ["France", "0", "5"],
+        ["Finland", "0", "1"],
+        ["Hungary", "0", "1"],
+        ["Italy", "0", "1"],
+        ["Poland", "0", "1"],
+        ["Australia", "0", "1"],
+        ["Argentina", "0", "1"],
+        ["Chile", "0", "1"],
+        ["India", "0", "2"]
+    ],
+    "rowCount": 24
+}

@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M038",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "e5cf69c1-0dd3-4e25-b9cf-72ce84ba5b8e",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["1", "Rock", "826.65"]],
+    "rowCount": 1
+}

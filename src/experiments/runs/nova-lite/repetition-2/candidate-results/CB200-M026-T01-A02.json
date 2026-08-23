@@ -1,0 +1,44 @@
+{
+    "questionId": "CB200-M026",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 2,
+    "queryExecutionId": "dca10e7e-2a12-4fa6-948c-332c9bb389cc",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "distinct_customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["Germany", "4"],
+        ["France", "5"],
+        ["Chile", "1"],
+        ["Italy", "1"],
+        ["Argentina", "1"],
+        ["India", "2"],
+        ["Poland", "1"],
+        ["Hungary", "1"],
+        ["Australia", "1"],
+        ["Finland", "1"],
+        ["Canada", "8"],
+        ["USA", "13"],
+        ["Portugal", "2"],
+        ["Brazil", "5"],
+        ["Czech Republic", "2"],
+        ["Austria", "1"],
+        ["Spain", "1"],
+        ["Belgium", "1"],
+        ["Ireland", "1"],
+        ["United Kingdom", "3"],
+        ["Denmark", "1"],
+        ["Sweden", "1"],
+        ["Norway", "1"],
+        ["Netherlands", "1"]
+    ],
+    "rowCount": 24
+}

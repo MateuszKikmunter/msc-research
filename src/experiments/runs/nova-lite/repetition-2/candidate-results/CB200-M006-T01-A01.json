@@ -1,0 +1,91 @@
+{
+    "questionId": "CB200-M006",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "a9503ab4-61d9-414d-8083-284fda4e7a1a",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "support_rep_first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "support_rep_last_name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["1", "Luís", "Gonçalves", "Jane", "Peacock"],
+        ["2", "Leonie", "Köhler", "Steve", "Johnson"],
+        ["3", "François", "Tremblay", "Jane", "Peacock"],
+        ["4", "Bjørn", "Hansen", "Margaret", "Park"],
+        ["5", "František", "Wichterlová", "Margaret", "Park"],
+        ["6", "Helena", "Holý", "Steve", "Johnson"],
+        ["7", "Astrid", "Gruber", "Steve", "Johnson"],
+        ["8", "Daan", "Peeters", "Margaret", "Park"],
+        ["9", "Kara", "Nielsen", "Margaret", "Park"],
+        ["10", "Eduardo", "Martins", "Margaret", "Park"],
+        ["11", "Alexandre", "Rocha", "Steve", "Johnson"],
+        ["12", "Roberto", "Almeida", "Jane", "Peacock"],
+        ["13", "Fernanda", "Ramos", "Margaret", "Park"],
+        ["14", "Mark", "Philips", "Steve", "Johnson"],
+        ["15", "Jennifer", "Peterson", "Jane", "Peacock"],
+        ["16", "Frank", "Harris", "Margaret", "Park"],
+        ["17", "Jack", "Smith", "Steve", "Johnson"],
+        ["18", "Michelle", "Brooks", "Jane", "Peacock"],
+        ["19", "Tim", "Goyer", "Jane", "Peacock"],
+        ["20", "Dan", "Miller", "Margaret", "Park"],
+        ["21", "Kathy", "Chase", "Steve", "Johnson"],
+        ["22", "Heather", "Leacock", "Margaret", "Park"],
+        ["23", "John", "Gordon", "Margaret", "Park"],
+        ["24", "Frank", "Ralston", "Jane", "Peacock"],
+        ["25", "Victor", "Stevens", "Steve", "Johnson"],
+        ["26", "Richard", "Cunningham", "Margaret", "Park"],
+        ["27", "Patrick", "Gray", "Margaret", "Park"],
+        ["28", "Julia", "Barnett", "Steve", "Johnson"],
+        ["29", "Robert", "Brown", "Jane", "Peacock"],
+        ["30", "Edward", "Francis", "Jane", "Peacock"],
+        ["31", "Martha", "Silk", "Steve", "Johnson"],
+        ["32", "Aaron", "Mitchell", "Margaret", "Park"],
+        ["33", "Ellie", "Sullivan", "Jane", "Peacock"],
+        ["34", "João", "Fernandes", "Margaret", "Park"],
+        ["35", "Madalena", "Sampaio", "Margaret", "Park"],
+        ["36", "Hannah", "Schneider", "Steve", "Johnson"],
+        ["37", "Fynn", "Zimmermann", "Jane", "Peacock"],
+        ["38", "Niklas", "Schröder", "Jane", "Peacock"],
+        ["39", "Camille", "Bernard", "Margaret", "Park"],
+        ["40", "Dominique", "Lefebvre", "Margaret", "Park"],
+        ["41", "Marc", "Dubois", "Steve", "Johnson"],
+        ["42", "Wyatt", "Girard", "Jane", "Peacock"],
+        ["43", "Isabelle", "Mercier", "Jane", "Peacock"],
+        ["44", "Terhi", "Hämäläinen", "Jane", "Peacock"],
+        ["45", "Ladislav", "Kovács", "Jane", "Peacock"],
+        ["46", "Hugh", "O'Reilly", "Jane", "Peacock"],
+        ["47", "Lucas", "Mancini", "Steve", "Johnson"],
+        ["48", "Johannes", "Van der Berg", "Steve", "Johnson"],
+        ["49", "Stanisław", "Wójcik", "Margaret", "Park"],
+        ["50", "Enrique", "Muñoz", "Steve", "Johnson"],
+        ["51", "Joakim", "Johansson", "Steve", "Johnson"],
+        ["52", "Emma", "Jones", "Jane", "Peacock"],
+        ["53", "Phil", "Hughes", "Jane", "Peacock"],
+        ["54", "Steve", "Murray", "Steve", "Johnson"],
+        ["55", "Mark", "Taylor", "Margaret", "Park"],
+        ["56", "Diego", "Gutiérrez", "Margaret", "Park"],
+        ["57", "Luis", "Rojas", "Steve", "Johnson"],
+        ["58", "Manoj", "Pareek", "Jane", "Peacock"],
+        ["59", "Puja", "Srivastava", "Jane", "Peacock"]
+    ],
+    "rowCount": 59
+}

@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E035",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "38f78dd0-09a6-48fe-9695-842bc5bee58a",
+    "columns": [
+        {
+            "name": "average_catalogue_price",
+            "type": "float"
+        }
+    ],
+    "rows": [["1.0508051"]],
+    "rowCount": 1
+}

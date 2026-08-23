@@ -1,0 +1,36 @@
+{
+    "questionId": "CB200-H008",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "8d27cd01-5162-4d33-9154-8bb794712afc",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "genre_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["57", "Luis", "Rojas", "12"],
+        ["14", "Mark", "Philips", "10"],
+        ["3", "François", "Tremblay", "10"],
+        ["17", "Jack", "Smith", "10"],
+        ["34", "João", "Fernandes", "10"],
+        ["24", "Frank", "Ralston", "10"],
+        ["37", "Fynn", "Zimmermann", "10"],
+        ["45", "Ladislav", "Kovács", "11"]
+    ],
+    "rowCount": 8
+}

@@ -1,0 +1,22 @@
+{
+    "questionId": "CB200-A017",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "630e8f3c-30a6-4c14-8f92-f3fff29346ac",
+    "columns": [
+        {
+            "name": "genre",
+            "type": "varchar"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Rock", "826.65"],
+        ["Jazz", "79.2"]
+    ],
+    "rowCount": 2
+}

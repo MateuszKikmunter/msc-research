@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E006",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "62ee1aa2-3550-432f-bbe8-243fffad3dc3",
+    "columns": [
+        {
+            "name": "playlist_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["18"]],
+    "rowCount": 1
+}

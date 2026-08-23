@@ -1,0 +1,38 @@
+{
+    "questionId": "CB200-A003",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "0402923c-cbbf-4e12-9966-797ac2116761",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "artist_name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["2", "Accept", "1.98"],
+        ["161", "Aerosmith & Sierra Leone's Refugee Allstars", "1.98"],
+        ["252", "Amy Winehouse", "1.98"],
+        ["8", "Audioslave", "1.98"],
+        ["9", "BackBeat", "1.98"],
+        ["48", "Barão Vermelho", "1.98"],
+        ["171", "Ben Harper", "1.98"],
+        ["229", "Boston Symphony Orchestra & Seiji Ozawa", "1.98"],
+        ["20", "Cláudio Zoli", "1.98"],
+        [
+            "241",
+            "Felix Schmidt, London Symphony Orchestra & Rafael Frühbeck de Burgos",
+            "1.98"
+        ]
+    ],
+    "rowCount": 10
+}

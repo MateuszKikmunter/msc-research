@@ -1,0 +1,22 @@
+{
+    "questionId": "CB200-M030",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "d2aeab03-1796-47e8-be03-bbfcb3b7ef4c",
+    "columns": [
+        {
+            "name": "year",
+            "type": "bigint"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["2011", "469.58"],
+        ["2012", "477.53"]
+    ],
+    "rowCount": 2
+}

@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E032",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "191e5aa9-bf0b-4fd7-9bb7-1dc8445d1a7f",
+    "columns": [
+        {
+            "name": "average_invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["5.651942"]],
+    "rowCount": 1
+}

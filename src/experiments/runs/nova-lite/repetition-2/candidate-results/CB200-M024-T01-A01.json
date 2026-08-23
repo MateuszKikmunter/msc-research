@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-M024",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "5749f74d-1add-42e5-8ed5-08298240d7f5",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["USA", "523.06"]],
+    "rowCount": 1
+}

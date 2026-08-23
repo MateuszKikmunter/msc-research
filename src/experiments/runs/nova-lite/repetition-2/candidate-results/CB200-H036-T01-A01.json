@@ -1,0 +1,48 @@
+{
+    "questionId": "CB200-H036",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "4537a7b3-71f9-4966-9e5e-1e3f1d3cf7b1",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue_2011",
+            "type": "float"
+        },
+        {
+            "name": "revenue_2012",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Argentina", "0.99", "0.0"],
+        ["Australia", "3.96", "274.22998"],
+        ["Austria", "0.0", "55.440002"],
+        ["Belgium", "278.19", "0.0"],
+        ["Brazil", "132.66", "532.62"],
+        ["Canada", "455.4", "321.75"],
+        ["Chile", "19.8", "36.63"],
+        ["Czech Republic", "56.43", "240.99"],
+        ["Denmark", "0.0", "198.0"],
+        ["Finland", "71.44", "0.99"],
+        ["France", "342.61", "344.94"],
+        ["Germany", "407.43", "121.77"],
+        ["Hungary", "0.0", "55.440002"],
+        ["India", "278.19", "84.15"],
+        ["Ireland", "390.19", "0.0"],
+        ["Italy", "0.0", "198.0"],
+        ["Netherlands", "69.479996", "0.99"],
+        ["Norway", "226.0", "80.19"],
+        ["Poland", "0.0", "55.440002"],
+        ["Portugal", "40.59", "292.22998"],
+        ["Spain", "274.22998", "0.0"],
+        ["Sweden", "0.0", "278.19"],
+        ["USA", "958.02997", "1032.78"],
+        ["United Kingdom", "120.78", "51.48"]
+    ],
+    "rowCount": 24
+}

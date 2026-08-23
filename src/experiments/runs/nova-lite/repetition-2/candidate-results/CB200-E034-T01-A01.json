@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E034",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "d7483095-afa2-41df-9cc1-a93eb2f05ce3",
+    "columns": [
+        {
+            "name": "smallest_invoice_total",
+            "type": "float"
+        }
+    ],
+    "rows": [["0.99"]],
+    "rowCount": 1
+}

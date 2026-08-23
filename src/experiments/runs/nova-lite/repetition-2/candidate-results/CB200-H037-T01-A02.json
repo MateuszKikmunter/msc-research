@@ -1,0 +1,40 @@
+{
+    "questionId": "CB200-H037",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 2,
+    "queryExecutionId": "bc60a9ed-7a0e-41bb-a5a7-81c4d2862741",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Netherlands", "0.99"],
+        ["Norway", "8.91"],
+        ["Sweden", "24.75"],
+        ["United Kingdom", "9.9"],
+        ["Denmark", "15.84"],
+        ["Brazil", "53.46"],
+        ["Canada", "42.57"],
+        ["USA", "127.98"],
+        ["Portugal", "24.77"],
+        ["Czech Republic", "19.83"],
+        ["Austria", "11.88"],
+        ["Australia", "22.77"],
+        ["Poland", "11.88"],
+        ["Chile", "6.9300003"],
+        ["Germany", "18.81"],
+        ["France", "36.66"],
+        ["Finland", "0.99"],
+        ["Hungary", "11.88"],
+        ["Italy", "15.84"],
+        ["India", "10.889999"]
+    ],
+    "rowCount": 20
+}

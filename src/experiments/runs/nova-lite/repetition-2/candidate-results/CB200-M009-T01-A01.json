@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M009",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "2e27a4b5-9199-4d85-a34d-30d833eff0fd",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "album_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["90", "Iron Maiden", "21"]],
+    "rowCount": 1
+}

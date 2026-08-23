@@ -1,0 +1,31 @@
+{
+    "questionId": "CB200-M042",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "e2b6c9b8-2ecd-4a6c-9c75-a69c7eddc156",
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["4", "Margaret", "Park", "775.4"],
+        ["3", "Jane", "Peacock", "833.04"],
+        ["5", "Steve", "Johnson", "720.16"]
+    ],
+    "rowCount": 3
+}

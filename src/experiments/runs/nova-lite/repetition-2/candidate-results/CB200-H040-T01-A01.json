@@ -1,0 +1,81 @@
+{
+    "questionId": "CB200-H040",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "d5c627dd-d892-422d-ba15-a284815ed18b",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "duration",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "1666", "Dazed And Confused", "1612329"],
+        ["2", "Jazz", "610", "My Funny Valentine (Live)", "907520"],
+        ["3", "Metal", "1351", "Rime of the Ancient Mariner", "816509"],
+        [
+            "4",
+            "Alternative & Punk",
+            "1144",
+            "Homecoming / The Death Of St. Jimmy / East 12th St. / Nobody Likes You / Rock And Roll Girlfriend / We're Coming Home Again",
+            "558602"
+        ],
+        ["5", "Rock And Roll", "118", "Slow Down", "163265"],
+        ["6", "Blues", "204", "Talkin' 'Bout Women Obviously", "589531"],
+        ["7", "Latin", "1693", "Faroeste Caboclo", "543007"],
+        ["8", "Reggae", "2228", "Equal Rights Downpresser Man", "366733"],
+        ["9", "Pop", "3477", "Amy Amy Amy (Outro)", "663426"],
+        ["10", "Soundtrack", "2128", "Always Forever Now", "383764"],
+        ["11", "Bossa Nova", "646", "Samba Da Bênção", "409965"],
+        ["12", "Easy Listening", "1054", "Mack The Knife", "292075"],
+        ["13", "Heavy Metal", "1249", "Dance Of Death", "516649"],
+        ["14", "R&B/Soul", "3466", "Rehab (Hot Chip Remix)", "418293"],
+        ["15", "Electronica/Dance", "1455", "Just Another Story", "529684"],
+        ["16", "World", "3354", "I Ka Barra (Your Work)", "300605"],
+        ["17", "Hip Hop/Rap", "2253", "Se Liga", "410409"],
+        ["18", "Science Fiction", "2826", "Hero", "2713755"],
+        ["19", "TV Shows", "2820", "Occupation / Precipice", "5286953"],
+        [
+            "20",
+            "Sci Fi & Fantasy",
+            "3244",
+            "Greetings from Earth, Pt. 1",
+            "2960293"
+        ],
+        ["21", "Drama", "3224", "Through a Looking Glass", "5088838"],
+        ["22", "Comedy", "3222", "The Job", "2541875"],
+        ["23", "Alternative", "3366", "Reach Down", "672773"],
+        [
+            "24",
+            "Classical",
+            "3425",
+            "Adagio for Strings from the String Quartet, Op. 11",
+            "596519"
+        ],
+        [
+            "25",
+            "Opera",
+            "3451",
+            "Die Zauberflöte, K.620: \"Der Hölle Rache Kocht in Meinem Herze\"",
+            "174813"
+        ]
+    ],
+    "rowCount": 25
+}

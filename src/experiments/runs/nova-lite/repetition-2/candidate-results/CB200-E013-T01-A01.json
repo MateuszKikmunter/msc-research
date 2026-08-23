@@ -1,0 +1,33 @@
+{
+    "questionId": "CB200-E013",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "15cf99a4-a1aa-4040-8b2b-3d5db2606541",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "city",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["1", "Luís", "Gonçalves", "São José dos Campos"],
+        ["10", "Eduardo", "Martins", "São Paulo"],
+        ["11", "Alexandre", "Rocha", "São Paulo"],
+        ["12", "Roberto", "Almeida", "Rio de Janeiro"],
+        ["13", "Fernanda", "Ramos", "Brasília"]
+    ],
+    "rowCount": 5
+}

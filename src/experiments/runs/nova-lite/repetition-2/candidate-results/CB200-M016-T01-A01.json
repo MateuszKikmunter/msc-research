@@ -1,0 +1,29 @@
+{
+    "questionId": "CB200-M016",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "0b2d02aa-9c12-4f44-b1d8-3643a6ea0068",
+    "columns": [
+        {
+            "name": "media_type_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["4", "Purchased AAC audio file", "7"],
+        ["2", "Protected AAC audio file", "237"],
+        ["5", "AAC audio file", "11"],
+        ["1", "MPEG audio file", "3034"],
+        ["3", "Protected MPEG-4 video file", "214"]
+    ],
+    "rowCount": 5
+}

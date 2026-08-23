@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-H043",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 2,
+    "queryExecutionId": "b3d15de3-0e1f-45c5-b620-54331d12bdd2",
+    "columns": [
+        {
+            "name": "month",
+            "type": "varchar"
+        },
+        {
+            "name": "monthly_revenue",
+            "type": "float"
+        },
+        {
+            "name": "cumulative_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["yyyy-MM", "2328.6", "2328.6"]],
+    "rowCount": 1
+}

@@ -1,0 +1,33 @@
+{
+    "questionId": "CB200-H030",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 2,
+    "queryExecutionId": "1308052c-ddcb-4be5-882d-899417f3c37b",
+    "columns": [
+        {
+            "name": "media_type_id",
+            "type": "integer"
+        },
+        {
+            "name": "media_type_name",
+            "type": "varchar"
+        },
+        {
+            "name": "units_sold",
+            "type": "bigint"
+        },
+        {
+            "name": "realized_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["2", "Protected AAC audio file", "146", "144.54001"],
+        ["5", "AAC audio file", "3", "2.97"],
+        ["1", "MPEG audio file", "1976", "1956.24"],
+        ["4", "Purchased AAC audio file", "4", "3.96"],
+        ["3", "Protected MPEG-4 video file", "111", "220.89"]
+    ],
+    "rowCount": 5
+}

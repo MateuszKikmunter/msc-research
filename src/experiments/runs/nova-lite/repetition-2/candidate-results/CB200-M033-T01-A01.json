@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-M033",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "4bb36d62-5195-47ef-bef2-bf3fd063e18c",
+    "columns": [
+        {
+            "name": "distinct_tracks_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["1984"]],
+    "rowCount": 1
+}
