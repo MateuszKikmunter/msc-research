@@ -5,6 +5,19 @@
 The following failures were encountered while deploying and testing the conversational-query
 agent in `eu-west-1` on 2 August 2026.
 
+### Claude Haiku rejected the prompt inference configuration
+
+**Symptom:** `InvokeAgent` failed before emitting trace events with a validation error stating that
+`temperature` and `top_p` cannot both be specified.
+
+**Cause:** The shared orchestration prompt configured both `Temperature: 0` and `TopP: 1`. Nova
+accepted that combination, but Claude Haiku 4.5 permits only one of those sampling parameters.
+
+**Fix:** Deploy `infra/conversational-query-agent-haiku.yaml` to the existing
+`chinook-conversational-query-agent` stack. It retains `Temperature: 0` for deterministic
+experiments and omits `TopP`, while preserving the action Lambda, IAM boundaries, prompt, schema,
+and alias structure.
+
 ### Bedrock access denied before action invocation
 
 **Symptom:** The agent playground reported `Access denied when calling Bedrock`, and the query

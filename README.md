@@ -12,8 +12,9 @@ template uses the AWS SAM transform to build its TypeScript Lambda:
 - `infra/athena.yaml` creates the Glue catalog, crawler, and Athena workgroup.
 - `infra/conversational-query-agent.yaml` creates an Amazon Bedrock Agent using
   the selected supported foundation model, plus its Athena action Lambda and deployable agent
-  alias. Nova Lite is the default; Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5 are also
-  allowed when available in the deployment Region.
+  alias. Nova Lite is its default and Nova Pro remains selectable.
+- `infra/conversational-query-agent-haiku.yaml` creates the equivalent dedicated Claude Haiku 4.5
+  configuration for updating the same agent stack with model-compatible inference parameters.
 
 ## Run locally
 
@@ -145,11 +146,15 @@ the Glue tables used by Athena.
 
 ### 3. Build and deploy the agent
 
-Install the Lambda dependencies, build the SAM application, and deploy it:
+Install the Lambda dependencies once:
 
 ```bash
 npm --prefix src/lambda install
+```
 
+To configure the existing stack with Nova, build and deploy the original template:
+
+```bash
 PATH="$PWD/src/lambda/node_modules/.bin:$PATH" \
     sam build --template-file infra/conversational-query-agent.yaml
 
@@ -157,6 +162,30 @@ sam deploy \
     --template-file .aws-sam/build/template.yaml \
     --guided
 ```
+
+For Haiku, build the dedicated template and deploy it over the existing
+`chinook-conversational-query-agent` stack:
+
+```bash
+PATH="$PWD/src/lambda/node_modules/.bin:$PATH" \
+    sam build --template-file infra/conversational-query-agent-haiku.yaml
+
+sam deploy \
+    --template-file .aws-sam/build/template.yaml \
+    --stack-name chinook-conversational-query-agent \
+    --guided \
+    --parameter-overrides \
+        FoundationModel=eu.anthropic.claude-haiku-4-5-20251001-v1:0 \
+        AgentName=chinook-conversational-query-agent \
+        AgentAliasRevision=v8
+```
+
+The Haiku template retains the same action, IAM, Lambda, prompt, schema, and alias resources. Its
+model-specific differences are the fixed EU Haiku inference profile and omission of `TopP`; Claude
+Haiku 4.5 rejects requests that specify both `Temperature` and `TopP`. Use `Temperature: 0` to
+retain the deterministic experiment setting. Because the Haiku template uses the original logical
+resource IDs, agent name, and stack name, CloudFormation updates the existing agent stack instead
+of creating a second stack.
 
 `AgentAliasRevision` controls publication through the deployable `live` alias. Increment it (for
 example, from `v1` to `v2`) whenever an agent instruction, action schema, or other agent

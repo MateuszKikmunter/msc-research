@@ -113,12 +113,13 @@ descriptions. It does not require forcing one model family's serialized prompt o
 call syntax onto another model. Prefer Bedrock's native structured tool interface, avoid embedding
 serialized action calls in examples, and smoke-test tool invocation for every model condition.
 
-The CloudFormation parameter allows Nova Lite, Nova Pro, Claude Haiku 4.5, and Claude Sonnet 4.5
-base-model IDs. Before formal data collection, verify that every experimental model is supported
-by Bedrock Agents and available for direct in-Region use in the selected deployment Region. If a
-model requires a cross-Region inference profile, the template and IAM resources will need a
-separate inference-profile design. Record the exact model ID, AWS Region, and access method with
-the experiment so that display-name changes do not make the results ambiguous.
+The Nova CloudFormation template allows Nova Lite and Nova Pro inference-profile IDs. The dedicated
+Haiku template fixes the EU Claude Haiku 4.5 profile and omits `TopP`, because Haiku 4.5 accepts
+either `Temperature` or `TopP` but not both. The semantic prompt and all action resources remain
+equivalent, and both templates update the same CloudFormation stack and agent name one model
+condition at a time. Before formal collection, verify model and profile availability in the
+deployment Region and record the exact model ID, AWS Region, and access method so display-name
+changes do not make the results ambiguous.
 
 The Lambda logs the SQL proposed in the Bedrock action request. The Athena
 query execution ID logged alongside the submitted query provides a correlation key for benchmark
