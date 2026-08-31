@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-08-31** — Added a dedicated Claude Haiku 4.5 conversational-agent template that preserves
+  the existing stack's resource identities and semantic configuration but uses the EU Haiku
+  inference profile and only `Temperature: 0`. Omitting `TopP` resolves Haiku's validation failure
+  because the model does not allow `temperature` and `top_p` together. The Haiku template advances
+  the same live alias to revision `v8`; the Nova template remains available for switching the same
+  stack back to the baseline condition.
+
 - **2026-08-22** — Corrected benchmark-runner clarification detection to use Bedrock's documented
   orchestration `ASK_USER` observation rather than expecting an `AMAZON.UserInput` invocation.
   Ambiguity and unnecessary-clarification continuations now follow the runtime trace shape emitted

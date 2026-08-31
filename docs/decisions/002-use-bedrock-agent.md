@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-28
-- **Last updated:** 2026-08-20
+- **Last updated:** 2026-08-31
 
 ## Context
 
@@ -23,8 +23,11 @@ and AWS-native baseline, and Claude Haiku 4.5 as the Anthropic alternative. Depl
 condition at a time. Keep the prompt, action contract, Lambda implementation, benchmark, session
 policy, and repetition count fixed so that the foundation model is the experimental variable.
 
-The deployment template may continue to allow Nova Pro and Claude Sonnet 4.5 for development or
-future work, but they are not part of this formal evaluation.
+The Nova deployment template may continue to allow Nova Pro for development or future work, but it
+is not part of this formal evaluation. Use a dedicated template for Haiku because Claude Haiku 4.5
+cannot accept the Nova prompt override's simultaneous `Temperature` and `TopP` settings. Keep the
+semantic prompt, action contract, and other resources equivalent across both templates, and update
+the same stack one model condition at a time.
 
 Do not add an Amazon Bedrock Knowledge Base to the baseline architecture. Evaluate it separately
 if the project introduces curated business definitions or other unstructured context.

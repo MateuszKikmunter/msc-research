@@ -44,13 +44,19 @@ folder may require a different recrawl strategy or a manual catalog update.
 
 `infra/conversational-query-agent.yaml` creates:
 
-- a Bedrock Agent using Amazon Nova Lite by default, with Nova Pro, Claude Haiku 4.5, and Claude
-  Sonnet 4.5 also allowed;
+- a Bedrock Agent defaulting to Nova Lite, with Nova Pro also allowed;
 - an action group exposing the `executeAthenaQuery` function with one required SQL parameter;
 - the built-in `AMAZON.UserInput` action group for returning clarification questions to the user;
 - a Node.js 24, ARM64 Lambda function built from `src/lambda/`;
 - least-privilege roles for model invocation and data access; and
 - a deployable Bedrock Agent alias.
+
+`infra/conversational-query-agent-haiku.yaml` contains the same resources and semantic agent
+configuration for updating the existing stack to Claude Haiku 4.5. It fixes the model to the EU
+Haiku inference profile and omits `TopP` while retaining `Temperature: 0`. Claude Haiku 4.5 does
+not accept both sampling parameters in one request. The template deliberately preserves the stack
+resource logical IDs and default agent name, while advancing the alias revision to publish the
+corrected configuration.
 
 The agent prompt contains the current schema and join guidance. It states that the query action is
 already configured with the Glue and Athena infrastructure and asks one clarification question
@@ -76,12 +82,11 @@ stack. Its database and WAL files are ignored by Git. See
 [`conversation-storage.md`](conversation-storage.md) for the schema, verification commands, and
 privacy constraints.
 
-Nova Lite remains the current deployed default. The formal evaluation will also deploy an
-equivalent agent configuration using Claude Haiku 4.5. Both conditions must preserve the same
-prompt, action contract, Lambda implementation, and dataset so the foundation model is the
-experimental variable. Model availability and direct base-model access must be verified in the
-chosen Region before the Claude conditions are collected; a required cross-Region inference
-profile would need additional template and IAM support.
+Nova Lite remains the shared template's default. The dedicated Haiku template uses the documented
+EU cross-Region inference profile and corresponding IAM permissions. Both conditions preserve the
+same prompt, action contract, Lambda implementation, and dataset so the foundation model remains
+the experimental variable; the omission of incompatible `TopP` is a model-required serialization
+difference rather than an experimental prompt change.
 
 ### Lambda action
 
