@@ -27,8 +27,6 @@ Parameters:
         AllowedValues:
             - eu.amazon.nova-lite-v1:0
             - eu.amazon.nova-pro-v1:0
-            - eu.anthropic.claude-haiku-4-5-20251001-v1:0
-            - eu.anthropic.claude-sonnet-4-5-20250929-v1:0
         Description: Foundation model used to orchestrate the Bedrock Agent. The selected model must be available in the deployment Region.
 
     AgentName:
