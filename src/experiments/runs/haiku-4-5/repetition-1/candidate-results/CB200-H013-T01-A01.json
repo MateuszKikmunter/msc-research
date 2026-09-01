@@ -1,0 +1,33 @@
+{
+    "questionId": "CB200-H013",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "2ad9057a-9bde-4d67-b84a-a4a76b8a4f4e",
+    "columns": [
+        {
+            "name": "year",
+            "type": "bigint"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        },
+        {
+            "name": "previous_year_revenue",
+            "type": "float"
+        },
+        {
+            "name": "revenue_change",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["2009", "449.46", null, null],
+        ["2010", "481.45", "449.46", "31.99002"],
+        ["2011", "469.58", "481.45", "-11.870026"],
+        ["2012", "477.53", "469.58", "7.950012"],
+        ["2013", "450.58", "477.53", "-26.950012"]
+    ],
+    "rowCount": 5
+}

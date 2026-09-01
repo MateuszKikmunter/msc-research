@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M013",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "532fc348-2062-4083-80d8-a52453c98973",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["1", "Rock", "1297"]],
+    "rowCount": 1
+}

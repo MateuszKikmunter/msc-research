@@ -1,0 +1,34 @@
+{
+    "questionId": "CB200-A002",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "77111798-2443-4600-a921-cea732d235ae",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "track_name",
+            "type": "varchar"
+        },
+        {
+            "name": "units_sold",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["298", "A Cor Do Sol", "2"],
+        ["2792", "A Melhor Forma", "2"],
+        ["1099", "A Novidade (Live)", "2"],
+        ["1785", "Abraham, Martin And John", "2"],
+        ["1344", "Aces High", "2"],
+        ["2991", "All Along The Watchtower", "2"],
+        ["264", "Amor De Muito", "2"],
+        ["530", "Ando Meio Desligado", "2"],
+        ["671", "As Rosas Não Falam (Beth Carvalho)", "2"],
+        ["871", "Azul", "2"]
+    ],
+    "rowCount": 10
+}

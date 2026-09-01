@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-A013",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "69a8323a-73f6-4d35-9519-8c51a367078d",
+    "columns": [
+        {
+            "name": "country",
+            "type": "varchar"
+        },
+        {
+            "name": "total_quantity",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["USA", "157"]],
+    "rowCount": 1
+}

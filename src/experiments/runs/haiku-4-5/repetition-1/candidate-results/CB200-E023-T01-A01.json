@@ -1,0 +1,43 @@
+{
+    "questionId": "CB200-E023",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "4ba37a26-6c23-47d5-92aa-533a97de6fe3",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "company",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        [
+            "1",
+            "Luís",
+            "Gonçalves",
+            "Embraer - Empresa Brasileira de Aeronáutica S.A."
+        ],
+        ["5", "František", "Wichterlová", "JetBrains s.r.o."],
+        ["10", "Eduardo", "Martins", "Woodstock Discos"],
+        ["11", "Alexandre", "Rocha", "Banco do Brasil S.A."],
+        ["12", "Roberto", "Almeida", "Riotur"],
+        ["14", "Mark", "Philips", "Telus"],
+        ["15", "Jennifer", "Peterson", "Rogers Canada"],
+        ["16", "Frank", "Harris", "Google Inc."],
+        ["17", "Jack", "Smith", "Microsoft Corporation"],
+        ["19", "Tim", "Goyer", "Apple Inc."]
+    ],
+    "rowCount": 10
+}

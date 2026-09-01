@@ -1,0 +1,36 @@
+{
+    "questionId": "CB200-H033",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "a1064de6-30d0-4af0-9582-9e83702d849f",
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["3", "Jane", "Peacock", "833.04"],
+        ["4", "Margaret", "Park", "775.4"],
+        ["5", "Steve", "Johnson", "720.16003"],
+        ["1", "Andrew", "Adams", "0.0"],
+        ["2", "Nancy", "Edwards", "0.0"],
+        ["6", "Michael", "Mitchell", "0.0"],
+        ["7", "Robert", "King", "0.0"],
+        ["8", "Laura", "Callahan", "0.0"]
+    ],
+    "rowCount": 8
+}

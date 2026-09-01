@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E048",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "9facac76-b500-4fef-adfa-02d99f04bbb1",
+    "columns": [
+        {
+            "name": "latest_invoice_date",
+            "type": "timestamp"
+        }
+    ],
+    "rows": [["2013-12-22 00:00:00.000"]],
+    "rowCount": 1
+}

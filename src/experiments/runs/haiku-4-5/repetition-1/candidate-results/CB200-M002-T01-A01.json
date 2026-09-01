@@ -1,0 +1,43 @@
+{
+    "questionId": "CB200-M002",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "217aa246-fc8f-434a-8ff7-9e7cac549dad",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        },
+        {
+            "name": "unit_price",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["23", "Walk On Water", "295680", "0.99"],
+        ["24", "Love In An Elevator", "321828", "0.99"],
+        ["25", "Rag Doll", "264698", "0.99"],
+        ["26", "What It Takes", "310622", "0.99"],
+        ["27", "Dude (Looks Like A Lady)", "264855", "0.99"],
+        ["28", "Janie's Got A Gun", "330736", "0.99"],
+        ["29", "Cryin'", "309263", "0.99"],
+        ["30", "Amazing", "356519", "0.99"],
+        ["31", "Blind Man", "240718", "0.99"],
+        ["32", "Deuces Are Wild", "215875", "0.99"],
+        ["33", "The Other Side", "244375", "0.99"],
+        ["34", "Crazy", "316656", "0.99"],
+        ["35", "Eat The Rich", "251036", "0.99"],
+        ["36", "Angel", "307617", "0.99"],
+        ["37", "Livin' On The Edge", "381231", "0.99"]
+    ],
+    "rowCount": 15
+}

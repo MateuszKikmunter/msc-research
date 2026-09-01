@@ -1,0 +1,35 @@
+{
+    "questionId": "CB200-M056",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "76d7a552-75c2-48ef-bead-fe839c3a1346",
+    "columns": [
+        {
+            "name": "invoice_id",
+            "type": "integer"
+        },
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "customer_country",
+            "type": "varchar"
+        },
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_date",
+            "type": "timestamp"
+        },
+        {
+            "name": "total",
+            "type": "float"
+        }
+    ],
+    "rows": [],
+    "rowCount": 0
+}

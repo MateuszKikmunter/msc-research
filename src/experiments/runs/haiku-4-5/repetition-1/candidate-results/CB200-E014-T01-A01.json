@@ -1,0 +1,33 @@
+{
+    "questionId": "CB200-E014",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "08c5fb00-39ef-401b-96b3-23f8b770faca",
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "title",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["2", "Nancy", "Edwards", "Sales Manager"],
+        ["3", "Jane", "Peacock", "Sales Support Agent"],
+        ["4", "Margaret", "Park", "Sales Support Agent"],
+        ["5", "Steve", "Johnson", "Sales Support Agent"],
+        ["6", "Michael", "Mitchell", "IT Manager"]
+    ],
+    "rowCount": 5
+}

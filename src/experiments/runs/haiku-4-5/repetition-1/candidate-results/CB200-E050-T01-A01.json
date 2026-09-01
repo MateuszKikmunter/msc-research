@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-E050",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "e228ac68-ec6a-4111-bc65-6aa1525c17e8",
+    "columns": [
+        {
+            "name": "invoice_id",
+            "type": "integer"
+        },
+        {
+            "name": "invoice_date",
+            "type": "timestamp"
+        },
+        {
+            "name": "total",
+            "type": "float"
+        }
+    ],
+    "rows": [],
+    "rowCount": 0
+}

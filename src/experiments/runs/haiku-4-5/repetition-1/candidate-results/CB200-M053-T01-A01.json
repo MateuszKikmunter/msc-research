@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-M053",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "d804dbd0-812b-4196-991f-1eb39d9b1031",
+    "columns": [
+        {
+            "name": "distinct_tracks_in_playlists",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["3503"]],
+    "rowCount": 1
+}

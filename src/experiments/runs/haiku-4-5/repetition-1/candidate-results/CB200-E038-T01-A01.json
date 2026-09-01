@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E038",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "91f44dca-f919-437e-b59f-82846885f38a",
+    "columns": [
+        {
+            "name": "count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["3"]],
+    "rowCount": 1
+}

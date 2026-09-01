@@ -1,0 +1,32 @@
+{
+    "questionId": "CB200-M029",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "5341ea53-c48f-413a-8597-dbf059f635b1",
+    "columns": [
+        {
+            "name": "month",
+            "type": "bigint"
+        },
+        {
+            "name": "invoice_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "7"],
+        ["2", "7"],
+        ["3", "7"],
+        ["4", "7"],
+        ["5", "7"],
+        ["6", "7"],
+        ["7", "7"],
+        ["8", "7"],
+        ["9", "7"],
+        ["10", "7"],
+        ["11", "6"],
+        ["12", "7"]
+    ],
+    "rowCount": 12
+}

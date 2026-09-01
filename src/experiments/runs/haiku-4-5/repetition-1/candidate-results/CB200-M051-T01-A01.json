@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M051",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "840c84b3-5ae7-4f54-89fa-7873262ed04a",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "total_duration_hours",
+            "type": "double"
+        }
+    ],
+    "rows": [["149", "Lost", "66.188495"]],
+    "rowCount": 1
+}

@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M059",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "6c7ecfad-7c5e-4300-ae94-5e265dc29ac9",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [],
+    "rowCount": 0
+}

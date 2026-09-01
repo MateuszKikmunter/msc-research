@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E025",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "c86dc370-5c64-458f-9848-50cfbbf3b528",
+    "columns": [
+        {
+            "name": "tracks_without_composer",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["978"]],
+    "rowCount": 1
+}

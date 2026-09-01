@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-H032",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "a7e5dd48-b1b1-4f76-bb60-636f493fe062",
+    "columns": [
+        {
+            "name": "revenue_from_tracks_without_composer",
+            "type": "float"
+        }
+    ],
+    "rows": [["701.04"]],
+    "rowCount": 1
+}

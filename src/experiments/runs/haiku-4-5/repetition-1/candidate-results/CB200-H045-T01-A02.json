@@ -1,0 +1,25 @@
+{
+    "questionId": "CB200-H045",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 2,
+    "queryExecutionId": "fb33950f-ee0b-465d-bf06-ead2562677b5",
+    "columns": [
+        {
+            "name": "year",
+            "type": "bigint"
+        },
+        {
+            "name": "customers_with_multiple_orders",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["2009", "27"],
+        ["2010", "27"],
+        ["2011", "26"],
+        ["2012", "27"],
+        ["2013", "26"]
+    ],
+    "rowCount": 5
+}

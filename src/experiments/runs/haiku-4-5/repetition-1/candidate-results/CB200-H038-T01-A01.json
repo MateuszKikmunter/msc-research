@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-H038",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "274db3cf-b315-40f8-8029-db045bed38f3",
+    "columns": [
+        {
+            "name": "month",
+            "type": "bigint"
+        },
+        {
+            "name": "invoice_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["8", "47.62"]],
+    "rowCount": 1
+}
