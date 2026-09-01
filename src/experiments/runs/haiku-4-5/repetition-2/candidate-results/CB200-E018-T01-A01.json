@@ -1,0 +1,51 @@
+{
+    "questionId": "CB200-E018",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "18983db1-bbcf-4eac-af93-3ece81153d78",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["2461", "É Uma Partida De Futebol", "1071"],
+        ["168", "Now Sports", "4884"],
+        ["170", "A Statistic", "6373"],
+        ["178", "Oprah", "6635"],
+        ["3304", "Commercial 1", "7941"],
+        ["172", "The Real Problem", "11650"],
+        ["3310", "Commercial 2", "21211"],
+        ["2241", "Bossa", "29048"],
+        ["1086", "Casinha Feliz", "32287"],
+        ["246", "Mateus Enter", "33149"],
+        ["975", "Deixa Entrar", "33619"],
+        ["2797", "Homem Primata (Vinheta)", "34168"],
+        ["2793", "Cabeça Dinossauro", "37120"],
+        ["2993", "Freedom For My People", "38164"],
+        ["1968", "Demorou!", "39131"],
+        ["1551", "The Hellion", "41900"],
+        ["3059", "Little Guitars (Intro)", "42240"],
+        ["3001", "The Star Spangled Banner", "43232"],
+        ["1761", "Blanco", "45191"],
+        ["166", "Smoked Pork", "47333"],
+        ["1287", "Intro- Churchill S Speech", "48013"],
+        ["2676", "Intro", "49737"],
+        ["3496", "Étude 1, In C Major - Preludio (Presto) - Liszt", "51780"],
+        ["1986", "Intro", "52218"],
+        ["2174", "Wasted Reprise", "53733"],
+        ["3121", "Cotidiano N 2", "55902"],
+        ["2799", "Polícia (Vinheta)", "56111"]
+    ],
+    "rowCount": 27
+}

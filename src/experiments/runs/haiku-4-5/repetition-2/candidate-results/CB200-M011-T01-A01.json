@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-M011",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "70b4c8f1-dd6c-4060-be7c-8623d07edd3a",
+    "columns": [
+        {
+            "name": "album_id",
+            "type": "integer"
+        },
+        {
+            "name": "title",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["141", "Greatest Hits", "57"]],
+    "rowCount": 1
+}

@@ -1,0 +1,91 @@
+{
+    "questionId": "CB200-M055",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "82fc8d53-fd98-4d78-bacb-644940fdfb4a",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "customer_country",
+            "type": "varchar"
+        },
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["1", "Luís", "Gonçalves", "Brazil", "Brazil"],
+        ["2", "Leonie", "Köhler", "Germany", "Germany"],
+        ["3", "François", "Tremblay", "Canada", "Canada"],
+        ["4", "Bjørn", "Hansen", "Norway", "Norway"],
+        ["5", "František", "Wichterlová", "Czech Republic", "Czech Republic"],
+        ["6", "Helena", "Holý", "Czech Republic", "Czech Republic"],
+        ["7", "Astrid", "Gruber", "Austria", "Austria"],
+        ["8", "Daan", "Peeters", "Belgium", "Belgium"],
+        ["9", "Kara", "Nielsen", "Denmark", "Denmark"],
+        ["10", "Eduardo", "Martins", "Brazil", "Brazil"],
+        ["11", "Alexandre", "Rocha", "Brazil", "Brazil"],
+        ["12", "Roberto", "Almeida", "Brazil", "Brazil"],
+        ["13", "Fernanda", "Ramos", "Brazil", "Brazil"],
+        ["14", "Mark", "Philips", "Canada", "Canada"],
+        ["15", "Jennifer", "Peterson", "Canada", "Canada"],
+        ["16", "Frank", "Harris", "USA", "USA"],
+        ["17", "Jack", "Smith", "USA", "USA"],
+        ["18", "Michelle", "Brooks", "USA", "USA"],
+        ["19", "Tim", "Goyer", "USA", "USA"],
+        ["20", "Dan", "Miller", "USA", "USA"],
+        ["21", "Kathy", "Chase", "USA", "USA"],
+        ["22", "Heather", "Leacock", "USA", "USA"],
+        ["23", "John", "Gordon", "USA", "USA"],
+        ["24", "Frank", "Ralston", "USA", "USA"],
+        ["25", "Victor", "Stevens", "USA", "USA"],
+        ["26", "Richard", "Cunningham", "USA", "USA"],
+        ["27", "Patrick", "Gray", "USA", "USA"],
+        ["28", "Julia", "Barnett", "USA", "USA"],
+        ["29", "Robert", "Brown", "Canada", "Canada"],
+        ["30", "Edward", "Francis", "Canada", "Canada"],
+        ["31", "Martha", "Silk", "Canada", "Canada"],
+        ["32", "Aaron", "Mitchell", "Canada", "Canada"],
+        ["33", "Ellie", "Sullivan", "Canada", "Canada"],
+        ["34", "João", "Fernandes", "Portugal", "Portugal"],
+        ["35", "Madalena", "Sampaio", "Portugal", "Portugal"],
+        ["36", "Hannah", "Schneider", "Germany", "Germany"],
+        ["37", "Fynn", "Zimmermann", "Germany", "Germany"],
+        ["38", "Niklas", "Schröder", "Germany", "Germany"],
+        ["39", "Camille", "Bernard", "France", "France"],
+        ["40", "Dominique", "Lefebvre", "France", "France"],
+        ["41", "Marc", "Dubois", "France", "France"],
+        ["42", "Wyatt", "Girard", "France", "France"],
+        ["43", "Isabelle", "Mercier", "France", "France"],
+        ["44", "Terhi", "Hämäläinen", "Finland", "Finland"],
+        ["45", "Ladislav", "Kovács", "Hungary", "Hungary"],
+        ["46", "Hugh", "O'Reilly", "Ireland", "Ireland"],
+        ["47", "Lucas", "Mancini", "Italy", "Italy"],
+        ["48", "Johannes", "Van der Berg", "Netherlands", "Netherlands"],
+        ["49", "Stanisław", "Wójcik", "Poland", "Poland"],
+        ["50", "Enrique", "Muñoz", "Spain", "Spain"],
+        ["51", "Joakim", "Johansson", "Sweden", "Sweden"],
+        ["52", "Emma", "Jones", "United Kingdom", "United Kingdom"],
+        ["53", "Phil", "Hughes", "United Kingdom", "United Kingdom"],
+        ["54", "Steve", "Murray", "United Kingdom", "United Kingdom"],
+        ["55", "Mark", "Taylor", "Australia", "Australia"],
+        ["56", "Diego", "Gutiérrez", "Argentina", "Argentina"],
+        ["57", "Luis", "Rojas", "Chile", "Chile"],
+        ["58", "Manoj", "Pareek", "India", "India"],
+        ["59", "Puja", "Srivastava", "India", "India"]
+    ],
+    "rowCount": 59
+}

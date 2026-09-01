@@ -1,0 +1,27 @@
+{
+    "questionId": "CB200-C005",
+    "turnNumber": 2,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "c7397736-445a-479b-a095-56270c8e38bd",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "milliseconds",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["1666", "Dazed And Confused", "1612329"],
+        ["620", "Space Truckin'", "1196094"],
+        ["1581", "Dazed And Confused", "1116734"]
+    ],
+    "rowCount": 3
+}

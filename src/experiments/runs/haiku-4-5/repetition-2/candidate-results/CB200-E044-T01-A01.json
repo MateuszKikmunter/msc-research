@@ -1,0 +1,44 @@
+{
+    "questionId": "CB200-E044",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "3707086e-3f0a-4c62-a2e7-d937da40a3b3",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "invoice_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["USA", "91"],
+        ["Canada", "56"],
+        ["France", "35"],
+        ["Brazil", "35"],
+        ["Germany", "28"],
+        ["United Kingdom", "21"],
+        ["Portugal", "14"],
+        ["Czech Republic", "14"],
+        ["India", "13"],
+        ["Austria", "7"],
+        ["Italy", "7"],
+        ["Spain", "7"],
+        ["Poland", "7"],
+        ["Norway", "7"],
+        ["Hungary", "7"],
+        ["Netherlands", "7"],
+        ["Argentina", "7"],
+        ["Belgium", "7"],
+        ["Australia", "7"],
+        ["Ireland", "7"],
+        ["Chile", "7"],
+        ["Sweden", "7"],
+        ["Finland", "7"],
+        ["Denmark", "7"]
+    ],
+    "rowCount": 24
+}

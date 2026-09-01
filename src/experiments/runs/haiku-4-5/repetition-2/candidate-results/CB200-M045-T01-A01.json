@@ -1,0 +1,29 @@
+{
+    "questionId": "CB200-M045",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "81cbf3f3-2e07-42da-9301-258946c36976",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "1297"],
+        ["7", "Latin", "579"],
+        ["3", "Metal", "374"],
+        ["4", "Alternative & Punk", "332"],
+        ["2", "Jazz", "130"]
+    ],
+    "rowCount": 5
+}

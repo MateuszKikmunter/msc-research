@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-C002",
+    "turnNumber": 2,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "1c092c27-fdc1-4841-b1ea-a49534265837",
+    "columns": [
+        {
+            "name": "album_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["21"]],
+    "rowCount": 1
+}

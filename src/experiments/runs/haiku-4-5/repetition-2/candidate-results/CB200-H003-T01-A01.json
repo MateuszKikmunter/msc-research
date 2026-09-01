@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-H003",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "b004633a-4422-4de0-a8e0-b250e25b3b38",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "artist_name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["90", "Iron Maiden", "33.66"]],
+    "rowCount": 1
+}

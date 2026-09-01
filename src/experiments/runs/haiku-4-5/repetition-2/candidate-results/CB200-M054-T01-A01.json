@@ -1,0 +1,19 @@
+{
+    "questionId": "CB200-M054",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "bced13b4-4a8b-4af1-a21a-a7b7c0a7c1b8",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [],
+    "rowCount": 0
+}

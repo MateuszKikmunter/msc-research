@@ -1,0 +1,51 @@
+{
+    "questionId": "CB200-H049",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "6450f541-d2d6-49de-b248-d6a47db116bc",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["1", "Luís", "Gonçalves"],
+        ["2", "Leonie", "Köhler"],
+        ["4", "Bjørn", "Hansen"],
+        ["6", "Helena", "Holý"],
+        ["8", "Daan", "Peeters"],
+        ["9", "Kara", "Nielsen"],
+        ["10", "Eduardo", "Martins"],
+        ["11", "Alexandre", "Rocha"],
+        ["12", "Roberto", "Almeida"],
+        ["13", "Fernanda", "Ramos"],
+        ["15", "Jennifer", "Peterson"],
+        ["24", "Frank", "Ralston"],
+        ["25", "Victor", "Stevens"],
+        ["26", "Richard", "Cunningham"],
+        ["27", "Patrick", "Gray"],
+        ["28", "Julia", "Barnett"],
+        ["29", "Robert", "Brown"],
+        ["33", "Ellie", "Sullivan"],
+        ["34", "João", "Fernandes"],
+        ["36", "Hannah", "Schneider"],
+        ["41", "Marc", "Dubois"],
+        ["45", "Ladislav", "Kovács"],
+        ["47", "Lucas", "Mancini"],
+        ["48", "Johannes", "Van der Berg"],
+        ["52", "Emma", "Jones"],
+        ["55", "Mark", "Taylor"],
+        ["57", "Luis", "Rojas"]
+    ],
+    "rowCount": 27
+}

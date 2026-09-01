@@ -1,0 +1,46 @@
+{
+    "questionId": "CB200-H029",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "f6675509-f580-49a3-9634-0e5462d028bb",
+    "columns": [
+        {
+            "name": "playlist_id",
+            "type": "integer"
+        },
+        {
+            "name": "playlist_name",
+            "type": "varchar"
+        },
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "Music", "1", "Rock", "1297"],
+        ["3", "TV Shows", "19", "TV Shows", "93"],
+        ["5", "90’s Music", "1", "Rock", "621"],
+        ["8", "Music", "1", "Rock", "1297"],
+        ["9", "Music Videos", "23", "Alternative", "1"],
+        ["10", "TV Shows", "19", "TV Shows", "93"],
+        ["11", "Brazilian Music", "7", "Latin", "39"],
+        ["12", "Classical", "24", "Classical", "73"],
+        ["13", "Classical 101 - Deep Cuts", "24", "Classical", "24"],
+        ["14", "Classical 101 - Next Steps", "24", "Classical", "24"],
+        ["15", "Classical 101 - The Basics", "24", "Classical", "25"],
+        ["16", "Grunge", "1", "Rock", "14"],
+        ["17", "Heavy Metal Classic", "3", "Metal", "15"],
+        ["18", "On-The-Go 1", "2", "Jazz", "1"]
+    ],
+    "rowCount": 14
+}

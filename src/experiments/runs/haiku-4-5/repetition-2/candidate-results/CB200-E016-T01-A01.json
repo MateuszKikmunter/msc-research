@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-E016",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "bbb9b520-25d8-4c82-a14d-d5d4636ba4a5",
+    "columns": [
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        },
+        {
+            "name": "unit_price",
+            "type": "float"
+        }
+    ],
+    "rows": [],
+    "rowCount": 0
+}

@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E008",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "4b6daa22-50a5-4087-93b7-78bfe6f206a3",
+    "columns": [
+        {
+            "name": "employee_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["8"]],
+    "rowCount": 1
+}

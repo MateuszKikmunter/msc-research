@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-E001",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "e4777af4-a8a9-49a8-9c1e-0cce91a1e889",
+    "columns": [
+        {
+            "name": "artist_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [["275"]],
+    "rowCount": 1
+}

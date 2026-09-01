@@ -1,0 +1,38 @@
+{
+    "questionId": "CB200-A001",
+    "turnNumber": null,
+    "interactionOrder": 2,
+    "attempt": 1,
+    "queryExecutionId": "95d2ca42-0917-40f6-9bd0-eaae1aee720a",
+    "columns": [
+        {
+            "name": "customer_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["6", "Helena", "Holý", "49.62"],
+        ["26", "Richard", "Cunningham", "47.62"],
+        ["57", "Luis", "Rojas", "46.62"],
+        ["46", "Hugh", "O'Reilly", "45.62"],
+        ["45", "Ladislav", "Kovács", "45.62"],
+        ["24", "Frank", "Ralston", "43.62"],
+        ["37", "Fynn", "Zimmermann", "43.62"],
+        ["28", "Julia", "Barnett", "43.62"],
+        ["25", "Victor", "Stevens", "42.62"],
+        ["7", "Astrid", "Gruber", "42.62"]
+    ],
+    "rowCount": 10
+}

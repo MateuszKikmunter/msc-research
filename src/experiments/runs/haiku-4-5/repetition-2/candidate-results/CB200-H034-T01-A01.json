@@ -1,0 +1,27 @@
+{
+    "questionId": "CB200-H034",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "7856b600-7932-40fc-a728-aeb27b5baa7f",
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "realised_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["4", "Margaret", "Park", "197.2"]],
+    "rowCount": 1
+}

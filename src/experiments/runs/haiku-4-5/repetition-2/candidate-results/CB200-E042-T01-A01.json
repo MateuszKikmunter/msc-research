@@ -1,0 +1,23 @@
+{
+    "questionId": "CB200-E042",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "97f3d500-4d84-40e5-bdbf-7a5eb1ef7334",
+    "columns": [
+        {
+            "name": "album_id",
+            "type": "integer"
+        },
+        {
+            "name": "title",
+            "type": "varchar"
+        },
+        {
+            "name": "artist_id",
+            "type": "integer"
+        }
+    ],
+    "rows": [["5", "Big Ones", "3"]],
+    "rowCount": 1
+}

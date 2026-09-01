@@ -1,0 +1,69 @@
+{
+    "questionId": "CB200-H039",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "b70316a2-748a-40af-8ac5-5d496ccb2e57",
+    "columns": [
+        {
+            "name": "genre_id",
+            "type": "integer"
+        },
+        {
+            "name": "genre_name",
+            "type": "varchar"
+        },
+        {
+            "name": "track_id",
+            "type": "integer"
+        },
+        {
+            "name": "track_name",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["1", "Rock", "2", "Balls to the Wall", "1.98"],
+        ["2", "Jazz", "461", "Surrender", "1.98"],
+        ["3", "Metal", "161", "Snowblind", "1.98"],
+        ["4", "Alternative & Punk", "171", "Bowels Of The Devil", "1.98"],
+        ["5", "Rock And Roll", "117", "Rock 'N' Roll Music", "0.99"],
+        ["6", "Blues", "894", "Sunshine Of Your Love", "1.98"],
+        ["7", "Latin", "217", "Mel", "1.98"],
+        ["8", "Reggae", "298", "A Cor Do Sol", "1.98"],
+        ["9", "Pop", "3256", "Give Peace a Chance", "1.98"],
+        ["10", "Soundtrack", "2136", "Plot 180", "1.98"],
+        ["11", "Bossa Nova", "648", "Onde Anda Você", "1.98"],
+        ["12", "Easy Listening", "1040", "Summer Love", "0.99"],
+        ["13", "Heavy Metal", "1250", "Gates Of Tomorrow", "0.99"],
+        ["14", "R&B/Soul", "1424", "Hey America", "1.98"],
+        ["15", "Electronica/Dance", "1458", "Light Years", "1.98"],
+        ["16", "World", "1544", "Cafezinho", "0.99"],
+        ["17", "Hip Hop/Rap", "2250", "Nega Do Cabelo Duro", "1.98"],
+        ["18", "Science Fiction", "2832", "The Woman King", "3.98"],
+        ["19", "TV Shows", "2868", "Walkabout", "3.98"],
+        ["20", "Sci Fi & Fantasy", "3235", "The Magnificent Warriors", "1.99"],
+        ["21", "Drama", "2850", "The Fix", "3.98"],
+        ["22", "Comedy", "3214", "Phyllis's Wedding", "3.98"],
+        ["23", "Alternative", "3378", "Safe and Sound", "0.99"],
+        [
+            "24",
+            "Classical",
+            "3432",
+            "Scheherazade, Op. 35: I. The Sea and Sindbad's Ship",
+            "1.98"
+        ],
+        [
+            "25",
+            "Opera",
+            "3451",
+            "Die Zauberflöte, K.620: \"Der Hölle Rache Kocht in Meinem Herze\"",
+            "0.0"
+        ]
+    ],
+    "rowCount": 25
+}

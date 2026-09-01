@@ -1,0 +1,61 @@
+{
+    "questionId": "CB200-E039",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "997d8aee-6195-4dda-9a2a-7486a24d0c35",
+    "columns": [
+        {
+            "name": "artist_id",
+            "type": "integer"
+        },
+        {
+            "name": "name",
+            "type": "varchar"
+        }
+    ],
+    "rows": [
+        ["43", "A Cor Do Som"],
+        ["1", "AC/DC"],
+        ["230", "Aaron Copland & London Symphony Orchestra"],
+        ["202", "Aaron Goldberg"],
+        ["214", "Academy of St. Martin in the Fields & Sir Neville Marriner"],
+        [
+            "215",
+            "Academy of St. Martin in the Fields Chamber Ensemble & Sir Neville Marriner"
+        ],
+        [
+            "222",
+            "Academy of St. Martin in the Fields, John Birch, Sir Neville Marriner & Sylvia McNair"
+        ],
+        [
+            "257",
+            "Academy of St. Martin in the Fields, Sir Neville Marriner & Thurston Dart"
+        ],
+        [
+            "239",
+            "Academy of St. Martin in the Fields, Sir Neville Marriner & William Bennett"
+        ],
+        ["2", "Accept"],
+        ["260", "Adrian Leaper & Doreen de Feis"],
+        ["3", "Aerosmith"],
+        ["161", "Aerosmith & Sierra Leone's Refugee Allstars"],
+        ["197", "Aisha Duo"],
+        ["4", "Alanis Morissette"],
+        ["206", "Alberto Turco & Nova Schola Gregoriana"],
+        ["5", "Alice In Chains"],
+        ["252", "Amy Winehouse"],
+        [
+            "209",
+            "Anne-Sophie Mutter, Herbert Von Karajan & Wiener Philharmoniker"
+        ],
+        ["243", "Antal Doráti & London Symphony Orchestra"],
+        ["6", "Antônio Carlos Jobim"],
+        ["7", "Apocalyptica"],
+        ["159", "Aquaman"],
+        ["8", "Audioslave"],
+        ["166", "Avril Lavigne"],
+        ["26", "Azymuth"]
+    ],
+    "rowCount": 26
+}

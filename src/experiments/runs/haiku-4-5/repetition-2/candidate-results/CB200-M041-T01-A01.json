@@ -1,0 +1,36 @@
+{
+    "questionId": "CB200-M041",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "fb47ed81-ab92-4e71-afb1-5674d9bd54aa",
+    "columns": [
+        {
+            "name": "employee_id",
+            "type": "integer"
+        },
+        {
+            "name": "first_name",
+            "type": "varchar"
+        },
+        {
+            "name": "last_name",
+            "type": "varchar"
+        },
+        {
+            "name": "customer_count",
+            "type": "bigint"
+        }
+    ],
+    "rows": [
+        ["1", "Andrew", "Adams", "0"],
+        ["2", "Nancy", "Edwards", "0"],
+        ["3", "Jane", "Peacock", "21"],
+        ["4", "Margaret", "Park", "20"],
+        ["5", "Steve", "Johnson", "18"],
+        ["6", "Michael", "Mitchell", "0"],
+        ["7", "Robert", "King", "0"],
+        ["8", "Laura", "Callahan", "0"]
+    ],
+    "rowCount": 8
+}

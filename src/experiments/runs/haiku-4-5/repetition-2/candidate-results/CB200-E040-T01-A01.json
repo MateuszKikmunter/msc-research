@@ -1,0 +1,32 @@
+{
+    "questionId": "CB200-E040",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "ace69039-c9ae-4627-9dac-c2ebd7b9f2dc",
+    "columns": [
+        {
+            "name": "album_id",
+            "type": "integer"
+        },
+        {
+            "name": "title",
+            "type": "varchar"
+        },
+        {
+            "name": "artist_id",
+            "type": "integer"
+        }
+    ],
+    "rows": [
+        ["36", "Greatest Hits II", "51"],
+        ["37", "Greatest Kiss", "52"],
+        ["67", "Vault: Def Leppard's Greatest Hits", "78"],
+        ["141", "Greatest Hits", "100"],
+        ["162", "Motley Crue Greatest Hits", "109"],
+        ["185", "Greatest Hits I", "51"],
+        ["202", "Rotten Apples: Greatest Hits", "131"],
+        ["215", "The Police Greatest Hits", "141"]
+    ],
+    "rowCount": 8
+}

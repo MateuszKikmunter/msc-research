@@ -1,0 +1,34 @@
+{
+    "questionId": "CB200-H037",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "cd0783a0-0090-4419-bb85-0b9ab5fe3921",
+    "columns": [
+        {
+            "name": "billing_country",
+            "type": "varchar"
+        },
+        {
+            "name": "revenue_2011",
+            "type": "float"
+        },
+        {
+            "name": "revenue_2012",
+            "type": "float"
+        },
+        {
+            "name": "revenue_increase",
+            "type": "float"
+        }
+    ],
+    "rows": [
+        ["Brazil", "19.8", "53.46", "33.66"],
+        ["USA", "103.01", "127.98", "24.970001"],
+        ["Australia", "1.98", "22.77", "20.79"],
+        ["Portugal", "8.91", "24.77", "15.860001"],
+        ["Czech Republic", "12.87", "19.83", "6.96"],
+        ["Chile", "5.94", "6.9300003", "0.99000025"]
+    ],
+    "rowCount": 6
+}

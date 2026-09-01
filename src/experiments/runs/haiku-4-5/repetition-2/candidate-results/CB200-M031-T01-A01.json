@@ -1,0 +1,15 @@
+{
+    "questionId": "CB200-M031",
+    "turnNumber": null,
+    "interactionOrder": 1,
+    "attempt": 1,
+    "queryExecutionId": "c3e18ffd-75f7-49bf-bb17-e6ef1a80ab17",
+    "columns": [
+        {
+            "name": "total_revenue",
+            "type": "float"
+        }
+    ],
+    "rows": [["2328.6"]],
+    "rowCount": 1
+}
