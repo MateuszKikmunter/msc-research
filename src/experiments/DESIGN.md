@@ -1,7 +1,7 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
-> **Status:** golden SQL generation, benchmark runner, and deterministic result comparison
-> implemented; trace-aware evaluation and reporting pending.
+> **Status:** golden SQL generation, benchmark runner, deterministic result comparison, and
+> episode grouping implemented; attempt evaluation and reporting pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -16,7 +16,7 @@ Create a small TypeScript command-line application that:
 3. handles the scripted ambiguity replies and interactive follow-up questions;
 4. saves each server response and retrieves the complete Athena result for every successful SQL
    attempt;
-5. reads the traces already persisted in SQLite;
+5. reads the trace events already saved in `interactions.jsonl`;
 6. compares candidate results with golden results; and
 7. produces JSON and Markdown evaluation results.
 
@@ -56,7 +56,7 @@ The experiment tools use existing project inputs directly:
   rules;
 - the existing root `.env` values for AWS region, Athena database, workgroup, and output location;
 - `http://localhost:8000/api/analytics-pipeline` as the default server endpoint; and
-- `src/backend/data/transcripts.db` for persisted interactions and traces.
+- each run's `interactions.jsonl` and candidate-result JSON files for agent outputs and traces.
 
 The model condition and repetition are Make variables used to organize outputs:
 
@@ -96,10 +96,11 @@ src/experiments/
     run-result-writer.ts
 
   evaluation/
+    run-interaction-loader.ts
+    episode-builder.ts
     result-normalizer.ts
     result-comparator.ts
     # planned
-    trace-parser.ts
     attempt-evaluator.ts
     trajectory-classifier.ts
     error-transition-evaluator.ts
@@ -119,10 +120,6 @@ src/experiments/
 
       benchmark/
         benchmark-loader.ts
-
-      transcripts/
-        # planned
-        transcript-reader.ts
 
   tests/
     fixtures/
@@ -250,8 +247,8 @@ expected. It waits five seconds before each episode after the first. No artifici
 between ambiguity continuations or interactive turns inside the same episode.
 
 Each benchmark case receives a unique session ID. Interactive turns and ambiguity continuations
-reuse the same session ID. This session ID is also used to find the corresponding interactions and
-traces in SQLite, so the backend does not need to return an additional interaction ID.
+reuse the same session ID. The evaluator uses it to group the corresponding lines from
+`interactions.jsonl` into one episode.
 
 After each episode completes, the runner appends its interaction records to
 `interactions.jsonl`, one compact JSON object per line. Each record contains:
@@ -318,9 +315,9 @@ scored.
 
 ## 9. Candidate SQL results
 
-The server response and SQLite traces identify every SQL attempt. For every successful attempt, the
-runner reads its Athena `queryExecutionId` from the observation and immediately retrieves the full
-result through paginated `GetQueryResults`.
+The server response and its trace events identify every SQL attempt. For every successful attempt,
+the runner reads its Athena `queryExecutionId` from the observation and immediately retrieves the
+full result through paginated `GetQueryResults`.
 
 The complete result is saved as JSON under the current run:
 
@@ -351,8 +348,11 @@ runner does not rerun the model or silently re-execute its SQL.
 
 ## 10. Transcript use
 
-After an episode finishes, the evaluator loads interactions and ordered trace events from SQLite by
-the unique session ID.
+The evaluator reads the sanitized trace events embedded in each line of `interactions.jsonl`. It
+groups interactions by session ID, sorts them by `interactionOrder`, and sorts each interaction's
+events by `sequenceNumber`. Trace events remain nested in their original interaction. Their complete
+episode order is represented by the pair `(interactionOrder, sequenceNumber)`, so no additional
+global sequence field or duplicated flattened trace list is needed.
 
 The traces are used to determine:
 
@@ -366,8 +366,8 @@ The traces are used to determine:
 - whether the episode eventually recovered; and
 - whether a safety case invoked Athena.
 
-The rationale text remains stored in SQLite but is not automatically scored or interpreted as
-hidden reasoning.
+The rationale text remains in the saved trace events but is not automatically scored or interpreted
+as hidden reasoning.
 
 ## 11. Result comparison
 
@@ -454,10 +454,9 @@ selected case for diagnostics; it does not resume or contribute a replacement ca
 formal run. The append-only file merely makes completed episodes inspectable if execution is
 cancelled.
 
-If execution is cancelled or fails, generated candidate files under that run directory are removed
-manually before starting again. The server has already persisted completed calls in
-`transcripts.db`, so those partial transcript rows must also be removed separately when a clean
-database is required.
+If execution is cancelled or fails, the partial `interactions.jsonl` and generated candidate files
+under that run directory are removed manually before starting again. The evaluator does not read
+the backend transcript database.
 
 An incomplete run is not evaluated.
 
@@ -560,8 +559,8 @@ The remaining evaluator stages will add coverage for:
 - trajectory classification; and
 - error transition evaluation.
 
-Integration tests will use mocked server and Athena responses plus a temporary SQLite transcript
-database. Normal tests will not call AWS or the deployed agent.
+Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
+will not call AWS or the deployed agent.
 
 ## 17. Implementation progress
 
@@ -575,7 +574,8 @@ database. Normal tests will not call AWS or the deployed agent.
    policies.
 6. **Implemented:** capture complete candidate results for every successful attempt without
    re-executing model SQL.
-7. Read and correlate traces by session ID.
+7. **Implemented:** load `interactions.jsonl`, group interactions by session ID, and order the
+   interactions and their nested trace events.
 8. Derive attempt outcomes, trajectory classes, and error transitions.
 9. Generate JSON and Markdown reports.
 10. Run the small pilot defined in the v3 plan before executing the complete benchmark.

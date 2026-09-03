@@ -1045,12 +1045,9 @@ interaction_order
 
 Interactive and ambiguity episodes may span several server interactions under the same session.
 
-If trace sequence numbers restart per interaction, add:
-
-```text
-global_episode_sequence
-actor = user | agent | tool
-```
+Trace sequence numbers restart per interaction. Keep events nested and determine their complete
+episode order from `(interaction_order, sequence_number)` rather than duplicating them into a
+flattened event list.
 
 Never correlate runs only by timestamp or question text.
 
@@ -1058,15 +1055,12 @@ Never correlate runs only by timestamp or question text.
 
 # 19. Raw evidence preservation
 
-The existing project already persists trace evidence in SQLite.
+The runner already saves sanitized trace evidence inside each line of `interactions.jsonl` and
+saves complete candidate and golden results as separate JSON files. The evaluator uses these run
+artifacts directly; it does not read the backend SQLite database.
 
-Prefer:
-
-- preserving that trace database;
-- enabling raw trace retention if required;
-- storing derived evaluator outputs separately.
-
-Avoid a second storage system unless it adds clear value.
+Preserve the original run files and write derived evaluator outputs separately. Raw unsanitized
+events remain outside the experiment artifacts and are not required by this study.
 
 ---
 
@@ -1634,7 +1628,8 @@ src/experiments/
     run-result-writer
 
   evaluation/
-    trace-parser
+    run-interaction-loader
+    episode-builder
     result-normalizer
     result-comparator
     attempt-evaluator
@@ -1656,9 +1651,6 @@ src/experiments/
       athena-service
     benchmark/
       benchmark-loader
-    transcripts/
-      transcript-reader
-
   runs/
     golden-sql/
 ```
@@ -1682,12 +1674,13 @@ metrics. None of these modules interprets rationale text.
 2. **Implemented:** execute golden SQL, retrieve complete Athena results, and write JSON reference
    files.
 3. **Implemented:** resolve interactive placeholders from preceding golden results.
-4. Implement robust result equivalence with per-case metadata.
+4. **Implemented:** compare complete golden and candidate results using the frozen per-case rules.
 5. **Implemented:** execute benchmark cases sequentially with the four interaction policies and
    required episode/session continuity.
 6. **Implemented:** retrieve and persist complete original candidate results using Athena
    query-execution IDs.
-7. Normalize multi-turn traces into episode-level ordering.
+7. **Implemented:** load JSONL interactions, group them into episodes, and order each interaction's
+   nested traces.
 8. Normalize Athena errors and build observation-to-action transitions.
 9. Derive orthogonal facts and mutually exclusive trajectory classes.
 10. Export JSON and Markdown evaluation results.
@@ -1751,7 +1744,7 @@ The research harness is ready for formal experimentation when it can:
 - continue scripted clarification in the same session;
 - run interactive sequences;
 - enforce no-query safety cases;
-- correlate each run with persisted trace evidence;
+- correlate each run with the trace evidence saved in `interactions.jsonl`;
 - persist the Athena query-execution ID for every successful SQL action;
 - retrieve complete Athena results;
 - save complete golden results as local JSON files;

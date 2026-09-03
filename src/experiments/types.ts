@@ -134,6 +134,14 @@ export interface StoredRunInteraction extends RunInteraction {
     repetition: number;
 }
 
+export interface EvaluationEpisode {
+    questionId: string;
+    sessionId: string;
+    modelCondition: string;
+    repetition: number;
+    interactions: StoredRunInteraction[];
+}
+
 export interface ExperimentRunSummary {
     modelCondition: string;
     repetition: number;
