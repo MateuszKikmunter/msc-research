@@ -1,6 +1,7 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
-> **Status:** golden SQL generation and benchmark runner implemented; evaluator pending.
+> **Status:** golden SQL generation, benchmark runner, and deterministic result comparison
+> implemented; trace-aware evaluation and reporting pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -95,10 +96,10 @@ src/experiments/
     run-result-writer.ts
 
   evaluation/
-    # planned
-    trace-parser.ts
     result-normalizer.ts
     result-comparator.ts
+    # planned
+    trace-parser.ts
     attempt-evaluator.ts
     trajectory-classifier.ts
     error-transition-evaluator.ts
@@ -378,7 +379,7 @@ For the current benchmark:
 
 - candidate and golden results must contain the same number of columns;
 - columns are assigned to `requiredColumns` by position;
-- aliases are ignored because `compareColumnNames` is false; and
+- aliases are always ignored; and
 - extra columns are rejected because `allowExtraColumns` is false.
 
 For example, `revenue`, `total_revenue`, and `realized_revenue` can all be correct aliases for the
@@ -544,12 +545,16 @@ The experiment package uses TypeScript and Jest. Implemented tests cover:
 - trace inspection and sensitive deployment-identifier removal;
 - full candidate-result capture by existing Athena query-execution ID.
 
-The evaluator stage will add coverage for:
+Implemented result-comparison tests cover:
 
 - positional columns and ignored aliases;
 - ordered comparison;
 - unordered multiset comparison with duplicates;
-- NULL, integer, decimal, and timestamp normalization;
+- NULL, integer, decimal, and timestamp normalization; and
+- invalid saved result artifacts failing closed as `evaluator_uncertain`.
+
+The remaining evaluator stages will add coverage for:
+
 - trace-to-attempt correlation;
 - clarification and safety policies;
 - trajectory classification; and
@@ -564,7 +569,8 @@ database. Normal tests will not call AWS or the deployed agent.
 2. **Implemented:** load the benchmark and implement the two explicit interactive bindings.
 3. **Implemented:** provide `make gold` to execute golden SQL and write JSON reference files. The
    command is run manually when those files should be generated or overwritten.
-4. Implement result normalization and comparison with tests.
+4. **Implemented:** normalize and compare complete candidate and golden results according to each
+   benchmark comparison contract, with deterministic Jest coverage.
 5. **Implemented:** execute all benchmark cases sequentially and apply the four interaction
    policies.
 6. **Implemented:** capture complete candidate results for every successful attempt without

@@ -109,6 +109,11 @@ export interface CandidateResultFile extends TabularResult {
     queryExecutionId: string;
 }
 
+export interface ResultComparison {
+    status: 'correct' | 'incorrect' | 'evaluator_uncertain';
+    reason: string | null;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;
