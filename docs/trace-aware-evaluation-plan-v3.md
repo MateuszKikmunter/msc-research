@@ -1630,6 +1630,7 @@ src/experiments/
   evaluation/
     run-interaction-loader
     episode-builder
+    result-artifact-loader
     result-normalizer
     result-comparator
     attempt-evaluator
@@ -1681,14 +1682,16 @@ metrics. None of these modules interprets rationale text.
    query-execution IDs.
 7. **Implemented:** load JSONL interactions, group them into episodes, and order each interaction's
    nested traces.
-8. Normalize Athena errors and build observation-to-action transitions.
-9. Derive orthogonal facts and mutually exclusive trajectory classes.
-10. Export JSON and Markdown evaluation results.
-11. Pilot 20 strategically selected cases across both models.
-12. Complete the bounded manual audit and fix evaluator defects.
-13. Run the first complete benchmark pass per model.
-14. Run the second planned repetition.
-15. Run a third repetition only if time and budget permit.
+8. **Implemented:** load saved result artifacts and derive deterministic outcomes for every
+   recorded SQL attempt.
+9. Normalize Athena errors and build observation-to-action transitions.
+10. Derive orthogonal facts and mutually exclusive trajectory classes.
+11. Export JSON and Markdown evaluation results.
+12. Pilot 20 strategically selected cases across both models.
+13. Complete the bounded manual audit and fix evaluator defects.
+14. Run the first complete benchmark pass per model.
+15. Run the second planned repetition.
+16. Run a third repetition only if time and budget permit.
 
 ---
 

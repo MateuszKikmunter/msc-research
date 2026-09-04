@@ -1,7 +1,7 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
-> **Status:** golden SQL generation, benchmark runner, deterministic result comparison, and
-> episode grouping implemented; attempt evaluation and reporting pending.
+> **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
+> grouping, and per-attempt evaluation implemented; trajectory evaluation and reporting pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -98,10 +98,11 @@ src/experiments/
   evaluation/
     run-interaction-loader.ts
     episode-builder.ts
+    result-artifact-loader.ts
     result-normalizer.ts
     result-comparator.ts
-    # planned
     attempt-evaluator.ts
+    # planned
     trajectory-classifier.ts
     error-transition-evaluator.ts
     report-generator.ts
@@ -400,18 +401,30 @@ duplicate rows are preserved.
 
 When `orderMatters` is true, rows are compared one by one in their returned order.
 
-The comparison result is one of:
+The result comparator returns one of:
 
 ```text
 correct
 incorrect
-execution_error
-no_sql
 evaluator_uncertain
 ```
 
 An incorrect comparison also records a short reason such as different column count, different row
 count, missing row, extra row, or first ordered-row difference.
+
+The attempt evaluator combines this comparison with the saved SQL execution status and
+candidate-result reference. Each actual SQL attempt receives one of:
+
+```text
+correct
+semantic_error
+execution_error
+evaluator_uncertain
+```
+
+An interaction without SQL produces no attempt records. The later episode evaluator determines
+whether that represents required clarification, compliant safety behaviour, or `NO_SQL` where SQL
+was required.
 
 ## 12. Trajectory evaluation
 
@@ -552,9 +565,17 @@ Implemented result-comparison tests cover:
 - NULL, integer, decimal, and timestamp normalization; and
 - invalid saved result artifacts failing closed as `evaluator_uncertain`.
 
+Implemented attempt-evaluation tests cover:
+
+- successful gold-equivalent and executable-but-incorrect results;
+- Athena execution failures and later successful attempts;
+- interactions without SQL attempts;
+- missing candidate-result references and files;
+- candidate-result capture errors; and
+- attempts without a final execution status.
+
 The remaining evaluator stages will add coverage for:
 
-- trace-to-attempt correlation;
 - clarification and safety policies;
 - trajectory classification; and
 - error transition evaluation.
@@ -576,9 +597,11 @@ will not call AWS or the deployed agent.
    re-executing model SQL.
 7. **Implemented:** load `interactions.jsonl`, group interactions by session ID, and order the
    interactions and their nested trace events.
-8. Derive attempt outcomes, trajectory classes, and error transitions.
-9. Generate JSON and Markdown reports.
-10. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+8. **Implemented:** load saved golden and candidate JSON artifacts and derive an outcome for every
+   recorded SQL attempt.
+9. Derive trajectory facts, classes, and error transitions.
+10. Generate JSON and Markdown reports.
+11. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 

@@ -114,6 +114,22 @@ export interface ResultComparison {
     reason: string | null;
 }
 
+export interface AttemptEvaluation {
+    interactionOrder: number;
+    turnNumber: number | null;
+    attempt: number;
+    query: string;
+    executionStatus: 'pending' | 'succeeded' | 'failed';
+    outcome:
+        | 'correct'
+        | 'semantic_error'
+        | 'execution_error'
+        | 'evaluator_uncertain';
+    resultCorrect: boolean | null;
+    queryExecutionId: string | null;
+    reason: string | null;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;

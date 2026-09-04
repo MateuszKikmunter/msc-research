@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-04** — Added the first deterministic evaluator stages. The evaluator reads each run's
+  `interactions.jsonl`, groups interactions into session-based episodes, preserves nested trace
+  ordering, and loads the saved golden and candidate JSON artifacts without reading SQLite. Result
+  comparison supports positional aliases, ordered or unordered multiset rows, exact integer and
+  tolerant numeric comparison, NULLs, and Athena timestamps. Each recorded SQL attempt is now
+  classified independently as correct, semantic error, execution error, or evaluator-uncertain.
+  Added focused Jest coverage and verified the implementation against a saved Haiku run. Trajectory
+  classes, aggregate metrics, and reports remain pending.
+
 - **2026-08-31** — Added a dedicated Claude Haiku 4.5 conversational-agent template that preserves
   the existing stack's resource identities and semantic configuration but uses the EU Haiku
   inference profile and only `Temperature: 0`. Omitting `TopP` resolves Haiku's validation failure
