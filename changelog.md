@@ -12,8 +12,15 @@ All notable changes to this project will be documented in this file.
   comparison supports positional aliases, ordered or unordered multiset rows, exact integer and
   tolerant numeric comparison, NULLs, and Athena timestamps. Each recorded SQL attempt is now
   classified independently as correct, semantic error, execution error, or evaluator-uncertain.
-  Added focused Jest coverage and verified the implementation against a saved Haiku run. Trajectory
-  classes, aggregate metrics, and reports remain pending.
+  The seven Trino-style execution-error prefixes observed across the saved Nova Lite and Haiku
+  runs are normalized into stable study-specific signatures; unobserved prefixes remain identifiable
+  as `OTHER:<original_code>`. These are documented separately from AWS Athena's official numeric
+  error types. Failed observations are correlated with subsequent SQL attempts and outcomes using
+  trace IDs and sequence order. This
+  records changed or unchanged retries, repeated errors, resolved errors, newly introduced errors,
+  and missing retry observations without interpreting rationale text. Added focused Jest coverage
+  and verified the implementation against a saved Haiku recovery. Trajectory classes, aggregate
+  metrics, and reports remain pending.
 
 - **2026-08-31** — Added a dedicated Claude Haiku 4.5 conversational-agent template that preserves
   the existing stack's resource identities and semantic configuration but uses the EU Haiku

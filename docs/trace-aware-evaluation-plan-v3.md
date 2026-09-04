@@ -795,22 +795,30 @@ next SQL attempt if one exists, and the next execution observation. This produce
 error transition**. The analysis uses observable tool feedback and actions; it does not score the
 model's rationale text.
 
-Normalize error signatures before comparison, for example:
+The normalizer uses the Trino-style symbolic prefixes observed in the two Nova Lite and two Haiku
+saved runs. These are study-specific supported signatures, not AWS Athena's official `ErrorType`
+enum. AWS exposes numeric error types through the
+[Athena error catalogue](https://docs.aws.amazon.com/athena/latest/ug/error-reference.html), while
+Athena DML is based on Trino and the observed prefixes correspond to
+[Trino standard error codes](https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java).
+
+The observed signatures are:
 
 ```text
 COLUMN_NOT_FOUND:<identifier>
 TABLE_NOT_FOUND:<identifier>
-SYNTAX_ERROR
 TYPE_MISMATCH
 FUNCTION_NOT_FOUND:<identifier>
 AMBIGUOUS_NAME:<identifier>
-PERMISSION_ERROR
-TIMEOUT
+EXPRESSION_NOT_AGGREGATE
+NESTED_AGGREGATION
 OTHER:<stable_normalized_code>
 ```
 
 Remove volatile values such as line numbers, request IDs, timestamps, and generated execution IDs
-from normalized signatures. Preserve the original error text as raw evidence.
+from normalized signatures. Preserve the original error text as raw evidence. Any prefix not in
+the frozen observed list is retained as `OTHER:<original_code>` instead of being guessed or
+discarded.
 
 ### Retry Response Rate
 
@@ -1634,9 +1642,10 @@ src/experiments/
     result-normalizer
     result-comparator
     attempt-evaluator
+    athena-error-normalizer
+    error-transition-evaluator
     trajectory-facts
     trajectory-classifier
-    error-transition-evaluator
     clarification-evaluator
     safety-evaluator
     report-generator
@@ -1662,10 +1671,11 @@ src/experiments/
 
 `trajectory-facts` derives orthogonal facts before `trajectory-classifier` derives presentation classes.
 
-`error-normalizer` removes volatile error details and produces versioned signatures.
-`error-transition-builder` correlates each Athena error observation with the preceding and following
-SQL actions. `error-response-evaluator` calculates the deterministic transition and episode-level
-metrics. None of these modules interprets rationale text.
+`athena-error-normalizer` removes volatile error details and produces stable signatures.
+`error-transition-evaluator` correlates each failed Athena observation with its SQL invocation and
+the next SQL invocation and observation in the same interaction. Invocation and observation events
+are paired by trace ID and ordered by sequence number. A retry with no matching observation is
+marked evaluator-uncertain. None of these modules interprets rationale text.
 
 ---
 
@@ -1684,7 +1694,7 @@ metrics. None of these modules interprets rationale text.
    nested traces.
 8. **Implemented:** load saved result artifacts and derive deterministic outcomes for every
    recorded SQL attempt.
-9. Normalize Athena errors and build observation-to-action transitions.
+9. **Implemented:** normalize Athena errors and build observation-to-action transitions.
 10. Derive orthogonal facts and mutually exclusive trajectory classes.
 11. Export JSON and Markdown evaluation results.
 12. Pilot 20 strategically selected cases across both models.

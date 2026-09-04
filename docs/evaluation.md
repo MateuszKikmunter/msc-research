@@ -286,22 +286,27 @@ For each persisted Athena execution-error observation, correlate:
 preceding SQL -> normalized Athena error -> next SQL -> next execution observation
 ```
 
-Normalize stable error signatures, for example:
+The normalizer uses the Trino-style symbolic prefixes observed in the saved Nova Lite and Haiku
+runs. They are study-specific supported signatures, not AWS Athena's official numeric `ErrorType`
+values. See the [Athena error catalogue](https://docs.aws.amazon.com/athena/latest/ug/error-reference.html)
+and [Trino standard error codes](https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java).
+
+The observed signatures are:
 
 ```text
 COLUMN_NOT_FOUND:<identifier>
 TABLE_NOT_FOUND:<identifier>
-SYNTAX_ERROR
 TYPE_MISMATCH
 FUNCTION_NOT_FOUND:<identifier>
 AMBIGUOUS_NAME:<identifier>
-PERMISSION_ERROR
-TIMEOUT
+EXPRESSION_NOT_AGGREGATE
+NESTED_AGGREGATION
 OTHER:<stable_code>
 ```
 
 Remove volatile request IDs, line numbers, timestamps, and query execution IDs from normalized
-signatures while retaining the original error text as evidence.
+signatures while retaining the original error text as evidence. Preserve an unobserved prefix as
+`OTHER:<original_code>` rather than assigning it to a guessed category.
 
 Calculate:
 

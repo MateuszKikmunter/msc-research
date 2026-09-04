@@ -1,7 +1,8 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
-> grouping, and per-attempt evaluation implemented; trajectory evaluation and reporting pending.
+> grouping, per-attempt evaluation, and error-transition extraction implemented; trajectory
+> classification and reporting pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -102,9 +103,10 @@ src/experiments/
     result-normalizer.ts
     result-comparator.ts
     attempt-evaluator.ts
+    athena-error-normalizer.ts
+    error-transition-evaluator.ts
     # planned
     trajectory-classifier.ts
-    error-transition-evaluator.ts
     report-generator.ts
 
   golden-results/
@@ -455,6 +457,33 @@ NO_SQL
 SYSTEM_ERROR
 ```
 
+### 12.1 Error transitions
+
+The implemented error-transition evaluator uses the ordered trace events inside each interaction.
+For every failed Athena observation, it:
+
+1. pairs the SQL invocation and observation by their shared trace ID;
+2. normalizes the raw error into a stable, observed Trino-style signature, retaining a relevant
+   column, table, or function identifier where available;
+3. finds the next SQL invocation in sequence; and
+4. pairs that retry with its observation to determine whether it succeeded, repeated the same
+   normalized error, or produced a different error.
+
+`retryProduced` shows whether another SQL action followed. `sqlChanged` ignores whitespace-only
+changes and a trailing semicolon. `previousErrorResolved` means only that the original error did
+not recur: when a different error replaces it, `newErrorIntroduced` is also true. These transition
+facts do not by themselves establish result correctness.
+
+An error with no retry is a complete observable outcome and is not uncertain. A retry without a
+matching observation is `transitionUncertain` because its execution result cannot be inferred.
+The original error text is retained beside its normalized signature for auditability. Rationale
+text is not read or scored.
+
+The supported symbolic prefixes are the seven types observed in the saved Nova Lite and Haiku
+trace corpus. They are not presented as AWS Athena's official error enum: AWS publishes numeric
+`ErrorType` values, while Athena DML is based on Trino. Unobserved prefixes are retained as
+`OTHER:<original_code>`.
+
 `SYSTEM_ERROR` is reserved for missing or unusable evidence that prevents evaluation. Local server
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
 runner stops and prints the current question and session. The incomplete run is discarded.
@@ -574,11 +603,20 @@ Implemented attempt-evaluation tests cover:
 - candidate-result capture errors; and
 - attempts without a final execution status.
 
+Implemented error-transition tests cover:
+
+- removal of volatile Athena line and column positions from error signatures;
+- observed, identifier-bearing, and unknown Trino-style error prefixes;
+- changed and formatting-equivalent retry SQL;
+- successful retries, repeated errors, and different newly introduced errors;
+- errors with no retry; and
+- retries whose matching execution observation is missing.
+
 The remaining evaluator stages will add coverage for:
 
 - clarification and safety policies;
 - trajectory classification; and
-- error transition evaluation.
+- aggregate reporting.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
 will not call AWS or the deployed agent.
@@ -599,9 +637,13 @@ will not call AWS or the deployed agent.
    interactions and their nested trace events.
 8. **Implemented:** load saved golden and candidate JSON artifacts and derive an outcome for every
    recorded SQL attempt.
-9. Derive trajectory facts, classes, and error transitions.
-10. Generate JSON and Markdown reports.
-11. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+9. **Implemented:** normalize Athena execution errors and correlate each failed execution
+   observation with the next SQL attempt and its observation. Correlation uses ordered trace events
+   and their shared trace IDs; rationale text is not evaluated. A retry without its matching
+   observation is marked uncertain rather than inferred.
+10. Derive trajectory facts and classes.
+11. Generate JSON and Markdown reports.
+12. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 

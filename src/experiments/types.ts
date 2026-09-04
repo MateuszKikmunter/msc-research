@@ -130,6 +130,24 @@ export interface AttemptEvaluation {
     reason: string | null;
 }
 
+export interface ErrorTransition {
+    interactionOrder: number;
+    observationSequence: number;
+    precedingAttempt: number;
+    rawError: string;
+    normalizedError: string;
+    nextAttempt: number | null;
+    retryProduced: boolean;
+    sqlChanged: boolean | null;
+    nextExecutionStatus: 'succeeded' | 'failed' | 'pending' | null;
+    nextNormalizedError: string | null;
+    sameErrorRepeated: boolean | null;
+    previousErrorResolved: boolean | null;
+    newErrorIntroduced: boolean | null;
+    transitionUncertain: boolean;
+    uncertaintyReason: string | null;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;
