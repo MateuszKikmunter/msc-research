@@ -148,6 +148,41 @@ export interface ErrorTransition {
     uncertaintyReason: string | null;
 }
 
+export type TrajectoryOutcome =
+    | 'correct'
+    | 'semantic_error'
+    | 'execution_error'
+    | 'no_sql'
+    | 'system_error';
+
+export type TrajectoryClass =
+    | 'DIRECT_SUCCESS'
+    | 'EXECUTION_ERROR_RECOVERED'
+    | 'SEMANTIC_REVISION_SUCCESS'
+    | 'EXECUTED_SEMANTIC_FAILURE'
+    | 'UNRECOVERED_EXECUTION_FAILURE'
+    | 'NO_SQL'
+    | 'SYSTEM_ERROR';
+
+export interface TrajectoryFacts {
+    firstAttemptOutcome: TrajectoryOutcome;
+    terminalOutcome: TrajectoryOutcome;
+    firstAttemptExecutedSuccessfully: boolean | null;
+    firstAttemptResultCorrect: boolean | null;
+    terminalAttemptExecutedSuccessfully: boolean | null;
+    terminalResultCorrect: boolean | null;
+    executionErrorObserved: boolean;
+    retryAttempted: boolean;
+    retryPolicyExceeded: boolean;
+    recovered: boolean;
+    redundantActionObserved: boolean;
+    regressedAfterCorrectAttempt: boolean;
+    traceComplete: boolean;
+    evaluationComplete: boolean;
+    sqlAttemptCount: number;
+    athenaErrorCount: number;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;

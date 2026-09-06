@@ -396,16 +396,18 @@ Recommended internal representation:
 
 ```json
 {
-    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql",
-    "terminalOutcome": "correct | incorrect | no_sql | system_error",
+    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
+    "terminalOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
     "executionErrorObserved": true,
     "retryAttempted": true,
+    "retryPolicyExceeded": false,
     "recovered": true,
     "redundantActionObserved": false,
     "regressedAfterCorrectAttempt": false,
     "clarification": "appropriate | unnecessary | missed | not_applicable | uncertain",
     "contractCompliant": true,
-    "traceComplete": true
+    "traceComplete": true,
+    "evaluationComplete": true
 }
 ```
 
@@ -429,7 +431,7 @@ SYSTEM_ERROR
 
 ### Classification precedence
 
-Apply this order so every completed episode receives at most one class:
+Apply this order so every completed SQL-required evaluation unit receives at most one class:
 
 ```text
 1. If infrastructure, runner, persistence, or evaluator failure prevents an outcome:
@@ -459,9 +461,11 @@ incorrect SQL is `EXECUTED_SEMANTIC_FAILURE` with `executionErrorObserved = true
 attempt followed by an incorrect terminal attempt is also `EXECUTED_SEMANTIC_FAILURE` with
 `regressedAfterCorrectAttempt = true`.
 
-The **terminal SQL attempt** is the last SQL invocation in the episode. FSR is based on that
-attempt's captured or retrieved result. An earlier correct result followed by a failed or incorrect
-SQL attempt is not counted as terminal success.
+The **terminal SQL attempt** is the last SQL invocation in one SQL-required evaluation unit. A unit
+is one standalone case, one resolved ambiguity task, or one interactive authored turn. FSR is based
+on that attempt's captured or retrieved result. An earlier correct result followed by a failed or
+incorrect SQL attempt is not counted as terminal success. Separate authored interactive turns are
+not treated as retries of each other.
 
 ## DIRECT_SUCCESS
 
@@ -536,8 +540,12 @@ Use only auditable definitions of a redundant or prohibited action:
 
 - equivalent SQL repeated without new user information or an intervening error that justifies it;
 - a database invocation after the terminal gold-equivalent result;
-- a database invocation forbidden by the case policy; or
-- a retry beyond the frozen retry limit.
+- or a database invocation forbidden by the case policy.
+
+Record a retry beyond the frozen prompt limit separately as `retryPolicyExceeded`. Multiple
+changed corrections can represent meaningful multi-step recovery and must not be labelled
+redundant solely because of their count. Preserve every attempt and report the attempt-count
+distribution.
 
 Do not mark a different exploratory query as unnecessary solely through subjective judgement. Such
 actions are excluded from the primary CDSR rule and may only be described within the bounded
@@ -926,6 +934,7 @@ Also record distributions for:
 
 ```text
 sql_attempt_count
+retry_policy_exceeded
 athena_execution_count
 athena_error_count
 tool_call_count
@@ -1099,10 +1108,12 @@ events remain outside the experiment artifacts and are not required by this stud
     "trajectory": {
         "executionErrorObserved": true,
         "retryAttempted": true,
+        "retryPolicyExceeded": false,
         "recovered": true,
         "redundantActionObserved": false,
         "regressedAfterCorrectAttempt": false,
         "traceComplete": true,
+        "evaluationComplete": true,
         "derivedClass": "EXECUTION_ERROR_RECOVERED",
         "sqlAttemptCount": 2,
         "athenaExecutionCount": 2,
@@ -1644,7 +1655,7 @@ src/experiments/
     attempt-evaluator
     athena-error-normalizer
     error-transition-evaluator
-    trajectory-facts
+    trajectory-facts-builder
     trajectory-classifier
     clarification-evaluator
     safety-evaluator
@@ -1669,7 +1680,9 @@ src/experiments/
 
 `result-comparator` is a critical research instrument and must implement per-case semantics.
 
-`trajectory-facts` derives orthogonal facts before `trajectory-classifier` derives presentation classes.
+`trajectory-facts-builder` derives orthogonal facts before `trajectory-classifier` derives
+presentation classes. The builder keeps trace completeness separate from result-evaluation
+completeness; either incomplete condition fails closed to `SYSTEM_ERROR`.
 
 `athena-error-normalizer` removes volatile error details and produces stable signatures.
 `error-transition-evaluator` correlates each failed Athena observation with its SQL invocation and
@@ -1695,7 +1708,7 @@ marked evaluator-uncertain. None of these modules interprets rationale text.
 8. **Implemented:** load saved result artifacts and derive deterministic outcomes for every
    recorded SQL attempt.
 9. **Implemented:** normalize Athena errors and build observation-to-action transitions.
-10. Derive orthogonal facts and mutually exclusive trajectory classes.
+10. **Implemented:** derive orthogonal facts and mutually exclusive trajectory classes.
 11. Export JSON and Markdown evaluation results.
 12. Pilot 20 strategically selected cases across both models.
 13. Complete the bounded manual audit and fix evaluator defects.

@@ -131,6 +131,41 @@ describe('AttemptEvaluator', () => {
         ]);
     });
 
+    it('evaluates multiple failed attempts without candidate-result files', async () => {
+        const interaction = createStoredRunInteraction({
+            response: {
+                ...createStoredRunInteraction().response,
+                sqlAttempts: [
+                    {
+                        attempt: 1,
+                        query: 'SELECT missing FROM artists',
+                        status: 'failed',
+                        error: 'COLUMN_NOT_FOUND: missing'
+                    },
+                    {
+                        attempt: 2,
+                        query: 'SELECT other_missing FROM artists',
+                        status: 'failed',
+                        error: 'COLUMN_NOT_FOUND: other_missing'
+                    }
+                ]
+            },
+            candidateResults: []
+        });
+
+        const evaluations = await attemptEvaluator.evaluate({
+            interaction,
+            goldDefinition
+        });
+
+        expect(evaluations.map(({ outcome }) => outcome)).toEqual([
+            'execution_error',
+            'execution_error'
+        ]);
+        expect(artifactLoader.loadGoldenResult).not.toHaveBeenCalled();
+        expect(artifactLoader.loadCandidateResult).not.toHaveBeenCalled();
+    });
+
     it('marks an executable but different result as a semantic error', async () => {
         jest.spyOn(artifactLoader, 'loadCandidateResult').mockResolvedValue({
             ...candidateResult,

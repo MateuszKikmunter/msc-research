@@ -105,22 +105,29 @@ Store orthogonal facts before assigning a presentation class:
 
 ```json
 {
-    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql",
-    "terminalOutcome": "correct | incorrect | no_sql | system_error",
+    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
+    "terminalOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
     "executionErrorObserved": true,
     "retryAttempted": true,
+    "retryPolicyExceeded": false,
     "recovered": true,
     "redundantActionObserved": false,
     "regressedAfterCorrectAttempt": false,
     "clarification": "appropriate | unnecessary | missed | not_applicable | uncertain",
     "contractCompliant": true,
-    "traceComplete": true
+    "traceComplete": true,
+    "evaluationComplete": true
 }
 ```
 
-The terminal SQL attempt is the **last SQL invocation in the episode**, not the last successful
-invocation. An earlier correct result followed by an incorrect or failing SQL invocation is not a
-terminal success.
+Build these facts for one SQL-required evaluation unit: a standalone case, a resolved ambiguity
+task, or one interactive authored turn. The terminal SQL attempt is the **last SQL invocation in
+that unit**, not the last successful invocation. An earlier correct result followed by an incorrect
+or failing SQL invocation is not a terminal success. Separate interactive turns are not retries.
+
+`traceComplete` means every recorded execution error has a complete trace transition.
+`evaluationComplete` means every SQL attempt has a deterministic result evaluation. If either is
+false, classification fails closed to `SYSTEM_ERROR`.
 
 ## Trajectory classes
 
@@ -152,6 +159,10 @@ Apply this precedence:
 
 Clarification is orthogonal to these classes. A run can have a direct SQL trajectory but fail the
 interaction contract because it asked an unnecessary question.
+
+`retryPolicyExceeded` records more than one retry in a single interaction because the frozen agent
+prompt permits one. It is a prompt-contract fact, not proof that the additional corrections were
+redundant. Changed retries remain part of the observable recovery trajectory.
 
 ## Core metrics
 
@@ -264,6 +275,7 @@ Record distributions for:
 
 ```text
 sql_attempt_count
+retry_policy_exceeded
 athena_execution_count
 athena_error_count
 tool_call_count
@@ -324,6 +336,10 @@ answering the wrong question.
 ## Result evaluation
 
 ### Complete candidate results
+
+Failed attempts are evaluated directly from `response.sqlAttempts` and their trace observations in
+`interactions.jsonl`; they do not require candidate-result files because no result set exists.
+Candidate-result files are required only after a successful Athena execution.
 
 For every successful action:
 

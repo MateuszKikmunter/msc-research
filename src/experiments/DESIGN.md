@@ -1,8 +1,8 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
-> grouping, per-attempt evaluation, and error-transition extraction implemented; trajectory
-> classification and reporting pending.
+> grouping, per-attempt evaluation, error-transition extraction, and SQL-trajectory classification
+> implemented; clarification/safety evaluation and reporting pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -105,8 +105,9 @@ src/experiments/
     attempt-evaluator.ts
     athena-error-normalizer.ts
     error-transition-evaluator.ts
-    # planned
+    trajectory-facts-builder.ts
     trajectory-classifier.ts
+    # planned
     report-generator.ts
 
   golden-results/
@@ -430,7 +431,11 @@ was required.
 
 ## 12. Trajectory evaluation
 
-The evaluator first records independent facts:
+The implemented trajectory builder operates on one SQL-required evaluation unit: a standalone
+case, a resolved ambiguity task, or one interactive authored turn. This boundary is important:
+separate interactive turns are not retries of each other.
+
+It first records independent facts:
 
 ```text
 first attempt executed successfully
@@ -439,10 +444,12 @@ terminal attempt executed successfully
 terminal result correct
 execution error observed
 retry attempted
+retry policy exceeded
 recovered
-clarification requested
-fallback used
+redundant SQL action observed
+regression after a correct result
 trace complete
+evaluation complete
 ```
 
 It then assigns the class defined in the v3 evaluation plan:
@@ -456,6 +463,18 @@ UNRECOVERED_EXECUTION_FAILURE
 NO_SQL
 SYSTEM_ERROR
 ```
+
+Attempts are ordered by `(interactionOrder, attempt)`, and the terminal attempt is the last SQL
+attempt in that evaluation unit. `traceComplete` requires every recorded execution error to have a
+corresponding error transition and no uncertain transition. `evaluationComplete` requires every
+attempt result to have a deterministic evaluation. Either incomplete condition takes precedence as
+`SYSTEM_ERROR`.
+
+The SQL-only redundancy flag is deterministic. It is true when another SQL action follows an
+already correct result or an error is followed by an unchanged SQL retry. Exceeding the prompt's
+limit of one retry is recorded separately as `retryPolicyExceeded`; it does not by itself make a
+changed SQL correction redundant. Clarification and safety contract checks remain separate and can
+add other contract violations later.
 
 ### 12.1 Error transitions
 
@@ -612,10 +631,18 @@ Implemented error-transition tests cover:
 - errors with no retry; and
 - retries whose matching execution observation is missing.
 
+Implemented trajectory tests cover:
+
+- direct success, execution-error recovery, and semantic revision;
+- terminal semantic and execution failures;
+- no-SQL and system-error precedence;
+- regression after an earlier correct result;
+- unchanged retries and separately recorded retry-policy violations; and
+- separate trace and result-evaluation completeness.
+
 The remaining evaluator stages will add coverage for:
 
 - clarification and safety policies;
-- trajectory classification; and
 - aggregate reporting.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
@@ -641,7 +668,8 @@ will not call AWS or the deployed agent.
    observation with the next SQL attempt and its observation. Correlation uses ordered trace events
    and their shared trace IDs; rationale text is not evaluated. A retry without its matching
    observation is marked uncertain rather than inferred.
-10. Derive trajectory facts and classes.
+10. **Implemented:** derive orthogonal SQL-trajectory facts and apply the frozen mutually exclusive
+    class precedence for one SQL-required evaluation unit.
 11. Generate JSON and Markdown reports.
 12. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 

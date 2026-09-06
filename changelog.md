@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-05** — Added deterministic SQL-trajectory fact derivation and mutually exclusive
+  classification. Attempt evaluations are ordered within one SQL-required evaluation unit to
+  distinguish direct success, execution-error recovery, semantic revision, terminal semantic
+  failure, unrecovered execution failure, no SQL, and system error. Trace completeness and result-
+  evaluation completeness are recorded separately, and either incomplete condition fails closed.
+  The builder also detects regression after an earlier correct result and auditable redundant SQL
+  actions such as unchanged retries and actions after correctness. Exceeding the prompt's one-retry
+  limit is recorded separately as `retryPolicyExceeded`, without automatically treating changed
+  multi-step correction as redundant. Failed attempts are evaluated from the JSONL interaction and
+  require no candidate-result file. Added focused Jest coverage; clarification, safety,
+  aggregation, and reporting remain separate later phases.
+
 - **2026-09-04** — Added the first deterministic evaluator stages. The evaluator reads each run's
   `interactions.jsonl`, groups interactions into session-based episodes, preserves nested trace
   ordering, and loads the saved golden and candidate JSON artifacts without reading SQLite. Result
