@@ -1653,6 +1653,7 @@ src/experiments/
     result-normalizer
     result-comparator
     attempt-evaluator
+    episode-evaluator
     athena-error-normalizer
     error-transition-evaluator
     trajectory-facts-builder
@@ -1684,6 +1685,11 @@ src/experiments/
 presentation classes. The builder keeps trace completeness separate from result-evaluation
 completeness; either incomplete condition fails closed to `SYSTEM_ERROR`.
 
+`episode-evaluator` coordinates these components for one already grouped episode. Standalone and
+resolved ambiguity interactions form one SQL trajectory, including any fallback or scripted
+continuation. Interactive authored turns are evaluated separately. Safety/no-query compliance is
+handled by the dedicated contract stage rather than producing a SQL trajectory result here.
+
 `athena-error-normalizer` removes volatile error details and produces stable signatures.
 `error-transition-evaluator` correlates each failed Athena observation with its SQL invocation and
 the next SQL invocation and observation in the same interaction. Invocation and observation events
@@ -1709,12 +1715,15 @@ marked evaluator-uncertain. None of these modules interprets rationale text.
    recorded SQL attempt.
 9. **Implemented:** normalize Athena errors and build observation-to-action transitions.
 10. **Implemented:** derive orthogonal facts and mutually exclusive trajectory classes.
-11. Export JSON and Markdown evaluation results.
-12. Pilot 20 strategically selected cases across both models.
-13. Complete the bounded manual audit and fix evaluator defects.
-14. Run the first complete benchmark pass per model.
-15. Run the second planned repetition.
-16. Run a third repetition only if time and budget permit.
+11. **Implemented:** coordinate standalone, resolved ambiguity, and per-turn interactive SQL
+    evaluation within one grouped episode.
+12. Add clarification and safety contract evaluation.
+13. Match a complete run to the benchmark and export JSON and Markdown evaluation results.
+14. Pilot 20 strategically selected cases across both models.
+15. Complete the bounded manual audit and fix evaluator defects.
+16. Run the first complete benchmark pass per model.
+17. Run the second planned repetition.
+18. Run a third repetition only if time and budget permit.
 
 ---
 

@@ -164,6 +164,12 @@ interaction contract because it asked an unnecessary question.
 prompt permits one. It is a prompt-contract fact, not proof that the additional corrections were
 redundant. Changed retries remain part of the observable recovery trajectory.
 
+The implemented episode coordinator applies this evaluation to an already grouped episode. It
+combines all standalone or resolved ambiguity interactions into one SQL trajectory, including a
+fallback or scripted continuation, and evaluates interactive authored turns separately. It returns
+attempt outcomes, error transitions, trajectory facts, and the derived class without reading or
+writing files. Safety/no-query compliance remains a separate deterministic contract evaluation.
+
 ## Core metrics
 
 Use the 160 standalone executable cases as the denominator for headline metrics.

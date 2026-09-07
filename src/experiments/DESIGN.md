@@ -103,6 +103,7 @@ src/experiments/
     result-normalizer.ts
     result-comparator.ts
     attempt-evaluator.ts
+    episode-evaluator.ts
     athena-error-normalizer.ts
     error-transition-evaluator.ts
     trajectory-facts-builder.ts
@@ -503,6 +504,22 @@ trace corpus. They are not presented as AWS Athena's official error enum: AWS pu
 `ErrorType` values, while Athena DML is based on Trino. Unobserved prefixes are retained as
 `OTHER:<original_code>`.
 
+### 12.2 Episode coordination
+
+The episode evaluator is the in-memory coordinator for one benchmark episode. It receives an
+already grouped `EvaluationEpisode`, the matching benchmark record, and golden definitions. It
+does not read or write files.
+
+For a standalone or resolved ambiguity episode, it evaluates every interaction as one SQL
+trajectory. This preserves a fallback or scripted continuation while keeping SQL attempt ordering
+by interaction. For an interactive episode, it evaluates each authored turn separately against
+that turn's golden definition. Failed attempts remain valid evaluator input without candidate
+files; successful attempts still require their saved candidate artifacts.
+
+The episode evaluator returns the attempt evaluations, error transitions, trajectory facts, and
+derived class. Safety cases currently return no SQL evaluation record because deterministic
+no-query compliance belongs to the later safety-contract stage.
+
 `SYSTEM_ERROR` is reserved for missing or unusable evidence that prevents evaluation. Local server
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
 runner stops and prints the current question and session. The incomplete run is discarded.
@@ -643,6 +660,7 @@ Implemented trajectory tests cover:
 The remaining evaluator stages will add coverage for:
 
 - clarification and safety policies;
+- run-level episode matching and incomplete-run detection; and
 - aggregate reporting.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
@@ -670,8 +688,11 @@ will not call AWS or the deployed agent.
    observation is marked uncertain rather than inferred.
 10. **Implemented:** derive orthogonal SQL-trajectory facts and apply the frozen mutually exclusive
     class precedence for one SQL-required evaluation unit.
-11. Generate JSON and Markdown reports.
-12. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+11. **Implemented:** coordinate attempt, error-transition, fact, and class evaluation for
+    standalone, resolved ambiguity, and per-turn interactive units.
+12. Add clarification and safety contract evaluation.
+13. Match complete runs to the benchmark and generate JSON and Markdown reports.
+14. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 

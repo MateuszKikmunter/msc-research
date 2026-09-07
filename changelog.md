@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-07** — Added in-memory episode evaluation that coordinates the existing attempt,
+  error-transition, trajectory-fact, and classification components. Standalone and resolved
+  ambiguity interactions are evaluated as one SQL trajectory, while interactive authored turns are
+  evaluated separately against their corresponding golden definitions. Failed-only episodes need
+  no candidate-result files; successful attempts retain fail-closed artifact handling. Added Jest
+  coverage for direct success, repeated execution failure, recovery, missing successful artifacts,
+  fallback and scripted continuations, interactive turns, and deferred safety evaluation. Verified
+  the complete path against Nova Lite repetition 1 `CB200-H004`, preserving all 23 failed attempts
+  and classifying the episode as `UNRECOVERED_EXECUTION_FAILURE`.
+
 - **2026-09-05** — Added deterministic SQL-trajectory fact derivation and mutually exclusive
   classification. Attempt evaluations are ordered within one SQL-required evaluation unit to
   distinguish direct success, execution-error recovery, semantic revision, terminal semantic

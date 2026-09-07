@@ -183,6 +183,15 @@ export interface TrajectoryFacts {
     athenaErrorCount: number;
 }
 
+export interface EpisodeEvaluationResult {
+    questionId: string;
+    turnNumber: number | null;
+    attemptEvaluations: AttemptEvaluation[];
+    errorTransitions: ErrorTransition[];
+    trajectoryFacts: TrajectoryFacts;
+    trajectoryClass: TrajectoryClass;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;
