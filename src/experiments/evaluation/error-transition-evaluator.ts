@@ -3,6 +3,8 @@ import type {
     StoredRunInteraction,
     StoredTraceEvent
 } from '../types';
+import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { isRecord } from '../shared/type-guards';
 import { AthenaErrorNormalizer } from './athena-error-normalizer';
 
 interface SqlInvocation {
@@ -22,7 +24,8 @@ interface CreateTransitionOptions {
 
 export class ErrorTransitionEvaluator {
     public constructor(
-        private readonly errorNormalizer: AthenaErrorNormalizer
+        private readonly errorNormalizer: AthenaErrorNormalizer,
+        private readonly traceEventInspector = new TraceEventInspector()
     ) {}
 
     public evaluate(interaction: StoredRunInteraction): ErrorTransition[] {
@@ -60,7 +63,7 @@ export class ErrorTransitionEvaluator {
         const invocations: SqlInvocation[] = [];
 
         for (const event of events) {
-            const query = this.getSqlQuery(event);
+            const query = this.traceEventInspector.getSqlQuery(event);
             if (query) {
                 invocations.push({
                     attempt: invocations.length + 1,
@@ -164,38 +167,12 @@ export class ErrorTransitionEvaluator {
         );
     }
 
-    private getSqlQuery(event: StoredTraceEvent): string | null {
-        if (
-            event.eventType !== 'INVOCATION' ||
-            !this.isObject(event.actionInput)
-        ) {
-            return null;
-        }
-
-        const parameters = event.actionInput.parameters;
-        if (!Array.isArray(parameters)) {
-            return null;
-        }
-
-        for (const parameter of parameters) {
-            if (
-                this.isObject(parameter) &&
-                parameter.name === 'query' &&
-                typeof parameter.value === 'string'
-            ) {
-                return parameter.value;
-            }
-        }
-
-        return null;
-    }
-
     private getObservationError(event: StoredTraceEvent): string | null {
         if (typeof event.observation === 'string') {
             return event.observation;
         }
 
-        return this.isObject(event.observation) &&
+        return isRecord(event.observation) &&
             typeof event.observation.error === 'string'
             ? event.observation.error
             : null;
@@ -207,11 +184,5 @@ export class ErrorTransitionEvaluator {
         return normalizedQuery.endsWith(';')
             ? normalizedQuery.slice(0, -1).trimEnd()
             : normalizedQuery;
-    }
-
-    private isObject(value: unknown): value is Record<string, unknown> {
-        return (
-            Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-        );
     }
 }

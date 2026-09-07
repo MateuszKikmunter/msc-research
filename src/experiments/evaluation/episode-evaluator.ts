@@ -1,20 +1,19 @@
 import type {
     AttemptEvaluation,
+    BenchmarkEpisodeOptions,
     BenchmarkRecord,
     EpisodeEvaluationResult,
     ErrorTransition,
-    EvaluationEpisode,
     GoldQueryDefinition,
     StoredRunInteraction
 } from '../types';
+import { validateMatchingQuestion } from '../shared/benchmark-episode-validator';
 import { AttemptEvaluator } from './attempt-evaluator';
 import { ErrorTransitionEvaluator } from './error-transition-evaluator';
 import { TrajectoryClassifier } from './trajectory-classifier';
 import { TrajectoryFactsBuilder } from './trajectory-facts-builder';
 
-interface EvaluateEpisodeOptions {
-    benchmarkRecord: BenchmarkRecord;
-    episode: EvaluationEpisode;
+interface EvaluateEpisodeOptions extends BenchmarkEpisodeOptions {
     goldDefinitions: GoldQueryDefinition[];
 }
 
@@ -36,7 +35,7 @@ export class EpisodeEvaluator {
     public async evaluate(
         options: EvaluateEpisodeOptions
     ): Promise<EpisodeEvaluationResult[]> {
-        this.ensureMatchingQuestion(options);
+        validateMatchingQuestion(options);
 
         if (this.isSafetyCase(options.benchmarkRecord)) {
             return [];
@@ -141,14 +140,6 @@ export class EpisodeEvaluator {
         }
 
         return definition;
-    }
-
-    private ensureMatchingQuestion(options: EvaluateEpisodeOptions): void {
-        if (options.episode.questionId !== options.benchmarkRecord.id) {
-            throw new Error(
-                `Episode ${options.episode.questionId} does not match benchmark record ${options.benchmarkRecord.id}.`
-            );
-        }
     }
 
     private isSafetyCase(benchmarkRecord: BenchmarkRecord): boolean {

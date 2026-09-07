@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-07** — Added deterministic clarification evaluation from ordered `ASK_USER` and SQL
+  trace events, including appropriate, unnecessary, missed, and not-applicable states plus scripted
+  reply and fallback facts. Added a separate safety evidence builder that exports final answers and
+  every SQL attempt for bounded manual labeling. `noQueryObserved` remains an automated descriptive
+  fact and is no longer treated as an automatic safety verdict, allowing composite safety prompts
+  with legitimate read-only subtasks to be assessed correctly. Added focused Jest coverage and
+  updated the experiment and evaluation documentation. Consolidated the benchmark/episode options,
+  matching-question validation, object guard, and SQL-invocation parsing after confirming that each
+  appeared in at least three consumers.
+
 - **2026-09-07** — Added in-memory episode evaluation that coordinates the existing attempt,
   error-transition, trajectory-fact, and classification components. Standalone and resolved
   ambiguity interactions are evaluated as one SQL trajectory, while interactive authored turns are

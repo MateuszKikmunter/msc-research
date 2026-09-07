@@ -1,4 +1,6 @@
 import type { AgentResponse, AgentTraceEvent } from '../../backend/types';
+import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 
 const ASK_USER_OBSERVATION_TYPE = 'ASK_USER';
@@ -14,6 +16,10 @@ const SENSITIVE_KEYS = new Set([
 ]);
 
 export class AgentResponseInspector {
+    public constructor(
+        private readonly traceEventInspector = new TraceEventInspector()
+    ) {}
+
     public hasSqlAttempt(response: AgentResponse): boolean {
         return response.sqlAttempts.length > 0;
     }
@@ -29,7 +35,7 @@ export class AgentResponseInspector {
         }
 
         const sqlSequence = events.find((event) =>
-            this.isSqlInvocation(event)
+            this.traceEventInspector.isSqlInvocation(event)
         )?.sequenceNumber;
 
         return sqlSequence === undefined || clarificationSequence < sqlSequence;
@@ -71,7 +77,7 @@ export class AgentResponseInspector {
 
         // Count failed invocations too, so a later successful retry remains attempt 2, 3, etc.
         for (const event of events) {
-            if (!this.isSqlInvocation(event)) {
+            if (!this.traceEventInspector.isSqlInvocation(event)) {
                 continue;
             }
 
@@ -161,32 +167,8 @@ export class AgentResponseInspector {
     private isClarificationObservation(event: AgentTraceEvent): boolean {
         return (
             event.eventType === 'OBSERVATION' &&
-            this.isObject(event.observation) &&
+            isRecord(event.observation) &&
             event.observation.type === ASK_USER_OBSERVATION_TYPE
-        );
-    }
-
-    private isSqlInvocation(event: AgentTraceEvent): boolean {
-        return (
-            event.eventType === 'INVOCATION' &&
-            this.hasNamedParameter(event.actionInput, 'query')
-        );
-    }
-
-    private hasNamedParameter(value: unknown, name: string): boolean {
-        if (!this.isObject(value)) {
-            return false;
-        }
-
-        const parameters = value.parameters;
-        return (
-            Array.isArray(parameters) &&
-            parameters.some(
-                (parameter) =>
-                    this.isObject(parameter) &&
-                    parameter.name === name &&
-                    typeof parameter.value === 'string'
-            )
         );
     }
 
@@ -199,7 +181,7 @@ export class AgentResponseInspector {
             return null;
         }
 
-        if (!this.isObject(value)) {
+        if (!isRecord(value)) {
             return null;
         }
 
@@ -224,7 +206,7 @@ export class AgentResponseInspector {
             return value.map((item) => this.removeSensitiveKeys(item));
         }
 
-        if (!this.isObject(value)) {
+        if (!isRecord(value)) {
             return value;
         }
 
@@ -233,9 +215,5 @@ export class AgentResponseInspector {
                 .filter(([key]) => !SENSITIVE_KEYS.has(key))
                 .map(([key, child]) => [key, this.removeSensitiveKeys(child)])
         );
-    }
-
-    private isObject(value: unknown): value is Record<string, unknown> {
-        return Boolean(value) && typeof value === 'object';
     }
 }

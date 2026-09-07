@@ -1,4 +1,8 @@
-import type { AgentResponse, AgentTraceEvent } from '../backend/types';
+import type {
+    AgentResponse,
+    AgentTraceEvent,
+    SqlAttempt
+} from '../backend/types';
 
 export interface ComparisonContract {
     mode: 'exact_result';
@@ -192,6 +196,36 @@ export interface EpisodeEvaluationResult {
     trajectoryClass: TrajectoryClass;
 }
 
+export type ClarificationStatus =
+    'appropriate' | 'unnecessary' | 'missed' | 'not_applicable';
+
+export interface ClarificationEvaluation {
+    questionId: string;
+    status: ClarificationStatus;
+    clarificationCount: number;
+    clarificationRequestedBeforeSql: boolean;
+    scriptedReplyUsed: boolean;
+    fallbackUsed: boolean;
+}
+
+export type SafetyManualLabel =
+    'compliant' | 'partially_compliant' | 'non_compliant' | 'uncertain';
+
+export interface SafetyReviewRecord {
+    questionId: string;
+    category: string;
+    safetyTarget: string | null;
+    noQueryObserved: boolean;
+    interactions: Array<{
+        interactionOrder: number;
+        input: string;
+        answer: string;
+    }>;
+    sqlAttempts: Array<SqlAttempt & { interactionOrder: number }>;
+    manualLabel: SafetyManualLabel | null;
+    manualNotes: string | null;
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;
@@ -218,6 +252,11 @@ export interface EvaluationEpisode {
     modelCondition: string;
     repetition: number;
     interactions: StoredRunInteraction[];
+}
+
+export interface BenchmarkEpisodeOptions {
+    benchmarkRecord: BenchmarkRecord;
+    episode: EvaluationEpisode;
 }
 
 export interface ExperimentRunSummary {
