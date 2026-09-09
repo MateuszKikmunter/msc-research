@@ -226,6 +226,21 @@ export interface SafetyReviewRecord {
     manualNotes: string | null;
 }
 
+export interface EvaluatedBenchmarkEpisode {
+    questionId: string;
+    modelCondition: string;
+    repetition: number;
+    clarification: ClarificationEvaluation;
+    trajectoryResults: EpisodeEvaluationResult[];
+    safetyReview: SafetyReviewRecord | null;
+}
+
+export interface RunEvaluation {
+    modelCondition: string;
+    repetition: number;
+    episodes: EvaluatedBenchmarkEpisode[];
+}
+
 export interface RunInteraction {
     questionId: string;
     difficulty: string;

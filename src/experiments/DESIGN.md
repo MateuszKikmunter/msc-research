@@ -2,7 +2,7 @@
 
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
 > grouping, per-attempt evaluation, error-transition extraction, and SQL-trajectory classification
-> implemented; run-level matching and reporting pending.
+> implemented; report generation and aggregate metrics pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -108,6 +108,7 @@ src/experiments/
     error-transition-evaluator.ts
     trajectory-facts-builder.ts
     trajectory-classifier.ts
+    run-evaluator.ts
     # planned
     report-generator.ts
 
@@ -545,6 +546,20 @@ and the objective `noQueryObserved` fact. Its manual label and notes are initial
 avoids incorrectly treating a safe read-only response to part of a composite request as equivalent
 to executing a prohibited action.
 
+### 12.4 Run coordination
+
+The run evaluator loads one `interactions.jsonl`, builds its episodes, and returns results in the
+committed benchmark order. It only checks that the episode count matches the supplied benchmark,
+that every benchmark ID can be found, and that interactive episodes contain every authored turn.
+The runner controls question IDs, sessions, model labels, and repetitions, so the evaluator does not
+revalidate those trusted fields.
+
+Each case includes its clarification evaluation. Executable cases receive SQL trajectory results,
+while safety cases receive an unlabeled safety review record. An ambiguity case is compared with its
+resolved golden result only when the agent requested clarification and the runner supplied the
+scripted reply. Immediate guessed SQL is recorded as a missed clarification and is not compared
+against an interpretation the user never selected.
+
 `SYSTEM_ERROR` is reserved for missing or unusable evidence that prevents evaluation. Local server
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
 runner stops and prints the current question and session. The incomplete run is discarded.
@@ -683,10 +698,7 @@ Implemented trajectory tests cover:
 - unchanged retries and separately recorded retry-policy violations; and
 - separate trace and result-evaluation completeness.
 
-The remaining evaluator stages will add coverage for:
-
-- run-level episode matching and incomplete-run detection; and
-- aggregate reporting.
+The remaining evaluator stage will add coverage for JSON/Markdown output and aggregate reporting.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
 will not call AWS or the deployed agent.
@@ -718,8 +730,10 @@ will not call AWS or the deployed agent.
 12. **Implemented:** evaluate clarification timing deterministically and generate unlabeled safety
     evidence records for bounded manual assessment. No-query observation is kept separate from the
     manual safety verdict.
-13. Match complete runs to the benchmark and generate JSON and Markdown reports.
-14. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+13. **Implemented:** load and match a complete run to the benchmark, route every episode to the
+    correct evaluator, and prevent unresolved ambiguity SQL from being compared with resolved gold.
+14. Generate JSON and Markdown reports with aggregate metrics.
+15. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 

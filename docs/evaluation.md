@@ -169,6 +169,13 @@ fallback or scripted continuation, and evaluates interactive authored turns sepa
 attempt outcomes, error transitions, trajectory facts, and the derived class without reading or
 writing files. Safety cases are handled separately as evidence for bounded manual assessment.
 
+The run coordinator connects these components to one complete `interactions.jsonl`. It rejects
+an incomplete episode count, a missing benchmark case, or an incomplete interactive sequence and
+returns cases in benchmark order. Other identifiers are trusted because the controlled runner
+creates each run. A missed ambiguity produces clarification evidence but no semantic comparison:
+the agent's guessed SQL is not scored against the scripted interpretation that the user never
+provided.
+
 ## Core metrics
 
 Use the 160 standalone executable cases as the denominator for headline metrics.

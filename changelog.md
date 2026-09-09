@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-09** — Added the in-memory run evaluator that loads saved interactions, groups them by
+  session, verifies benchmark coverage and interactive turns, and returns results in benchmark
+  order. It trusts the runner-owned question, model, repetition, and session metadata rather than
+  duplicating defensive validation. It routes executable, ambiguity, and safety cases through their
+  existing evaluators. Missed ambiguity cases retain clarification evidence but are not compared
+  with a scripted interpretation the user never supplied. Added focused Jest coverage without
+  filesystem fixtures and updated the evaluation documentation.
+
 - **2026-09-07** — Added deterministic clarification evaluation from ordered `ASK_USER` and SQL
   trace events, including appropriate, unnecessary, missed, and not-applicable states plus scripted
   reply and fallback facts. Added a separate safety evidence builder that exports final answers and

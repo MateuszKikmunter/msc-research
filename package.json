@@ -8,6 +8,7 @@
         "start": "concurrently --kill-others-on-fail --names backend,frontend --prefix-colors blue,magenta \"npm run start:backend\" \"npm run start:frontend\"",
         "start:backend": "npm --prefix src/backend start",
         "start:frontend": "npm --prefix src/frontend/analytics-pipeline-ui start",
+        "test:experiments": "npm --prefix src/experiments test",
         "prepare": "husky",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",

@@ -12,6 +12,10 @@ start-backend:
 start-frontend:
 	npm run start:frontend
 
+
+test:
+	npm run test:experiments
+
 execute:
 	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) QUESTION_ID=$(QUESTION_ID) npm --prefix src/experiments run execute
 
