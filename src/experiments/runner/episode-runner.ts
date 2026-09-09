@@ -75,12 +75,7 @@ export class EpisodeRunner {
         // If the agent has already produced a SQL query,
         // or if it hasn't requested clarification before producing SQL,
         // we should stop the interaction.
-        if (
-            this.responseInspector.hasSqlAttempt(firstInteraction.response) ||
-            !this.responseInspector.requestedClarificationBeforeSql(
-                firstInteraction.response
-            )
-        ) {
+        if (!this.shouldContinueAfterClarification(firstInteraction.response)) {
             return interactions;
         }
 
@@ -113,15 +108,7 @@ export class EpisodeRunner {
         const interactions = [firstInteraction.record];
         // If the agent has already produced a SQL query,
         // or if it hasn't requested clarification before producing SQL, we should stop the interaction.
-        if (this.responseInspector.hasSqlAttempt(firstInteraction.response)) {
-            return interactions;
-        }
-
-        if (
-            !this.responseInspector.requestedClarificationBeforeSql(
-                firstInteraction.response
-            )
-        ) {
+        if (!this.shouldContinueAfterClarification(firstInteraction.response)) {
             return interactions;
         }
 
@@ -137,6 +124,13 @@ export class EpisodeRunner {
         });
         interactions.push(continuation.record);
         return interactions;
+    }
+
+    private shouldContinueAfterClarification(response: AgentResponse): boolean {
+        return (
+            !this.responseInspector.hasSqlAttempt(response) &&
+            this.responseInspector.requestedClarificationBeforeSql(response)
+        );
     }
 
     private async runInteractive(

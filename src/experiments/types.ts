@@ -17,24 +17,47 @@ export interface ComparisonContract {
     allowExtraColumns: boolean;
 }
 
-export type ExpectedBehavior =
-    | 'execute'
-    | 'clarify_then_execute'
-    | 'execute_sequence'
-    | 'refuse_without_query'
-    | 'decline_without_query';
+export interface QuestionReference {
+    questionId: string;
+}
 
-export interface BenchmarkTurn {
-    question: string;
-    gold_sql: string;
+export interface QuestionTurnReference extends QuestionReference {
+    turnNumber: number | null;
+}
+
+export interface RunIdentity {
+    modelCondition: string;
+    repetition: number;
+}
+
+export interface ComparisonDefinition {
     comparison: ComparisonContract;
 }
 
-export interface AmbiguityResolution {
+export interface SqlComparisonDefinition extends ComparisonDefinition {
+    sql: string;
+}
+
+export interface GoldSqlComparisonDefinition extends ComparisonDefinition {
+    gold_sql: string;
+}
+
+export type ExecutionExpectedBehavior =
+    'execute' | 'clarify_then_execute' | 'execute_sequence';
+
+export type SafetyExpectedBehavior =
+    'refuse_without_query' | 'decline_without_query';
+
+export type ExpectedBehavior =
+    ExecutionExpectedBehavior | SafetyExpectedBehavior;
+
+export interface BenchmarkTurn extends GoldSqlComparisonDefinition {
+    question: string;
+}
+
+export interface AmbiguityResolution extends GoldSqlComparisonDefinition {
     acceptedSlots: string[];
     scriptedReply: string;
-    gold_sql: string;
-    comparison: ComparisonContract;
 }
 
 export interface BenchmarkRecord {
@@ -51,12 +74,9 @@ export interface BenchmarkRecord {
     turns?: BenchmarkTurn[];
 }
 
-export interface GoldQueryDefinition {
+export interface GoldQueryDefinition
+    extends QuestionTurnReference, SqlComparisonDefinition {
     artifactId: string;
-    questionId: string;
-    turnNumber: number | null;
-    sql: string;
-    comparison: ComparisonContract;
 }
 
 export interface ResultColumn {
@@ -74,10 +94,8 @@ export interface AthenaQueryResult extends TabularResult {
     queryExecutionId: string;
 }
 
-export interface GoldenResultFile extends TabularResult {
-    questionId: string;
-    turnNumber: number | null;
-}
+export interface GoldenResultFile
+    extends TabularResult, QuestionTurnReference {}
 
 export type RunnerInputType = 'question' | 'fallback' | 'scripted_reply';
 
@@ -97,20 +115,15 @@ export interface CandidateQueryExecution {
     queryExecutionId: string;
 }
 
-export interface CandidateResultReference {
-    attempt: number;
-    queryExecutionId: string;
+export interface CandidateResultReference extends CandidateQueryExecution {
     status: 'saved' | 'evaluator_uncertain';
     file: string | null;
     error: string | null;
 }
 
-export interface CandidateResultFile extends TabularResult {
-    questionId: string;
-    turnNumber: number | null;
+export interface CandidateResultFile
+    extends TabularResult, QuestionTurnReference, CandidateQueryExecution {
     interactionOrder: number;
-    attempt: number;
-    queryExecutionId: string;
 }
 
 export interface ResultComparison {
@@ -123,7 +136,7 @@ export interface AttemptEvaluation {
     turnNumber: number | null;
     attempt: number;
     query: string;
-    executionStatus: 'pending' | 'succeeded' | 'failed';
+    executionStatus: SqlAttempt['status'];
     outcome:
         | 'correct'
         | 'semantic_error'
@@ -187,9 +200,7 @@ export interface TrajectoryFacts {
     athenaErrorCount: number;
 }
 
-export interface EpisodeEvaluationResult {
-    questionId: string;
-    turnNumber: number | null;
+export interface EpisodeEvaluationResult extends QuestionTurnReference {
     attemptEvaluations: AttemptEvaluation[];
     errorTransitions: ErrorTransition[];
     trajectoryFacts: TrajectoryFacts;
@@ -199,8 +210,7 @@ export interface EpisodeEvaluationResult {
 export type ClarificationStatus =
     'appropriate' | 'unnecessary' | 'missed' | 'not_applicable';
 
-export interface ClarificationEvaluation {
-    questionId: string;
+export interface ClarificationEvaluation extends QuestionReference {
     status: ClarificationStatus;
     clarificationCount: number;
     clarificationRequestedBeforeSql: boolean;
@@ -211,8 +221,7 @@ export interface ClarificationEvaluation {
 export type SafetyManualLabel =
     'compliant' | 'partially_compliant' | 'non_compliant' | 'uncertain';
 
-export interface SafetyReviewRecord {
-    questionId: string;
+export interface SafetyReviewRecord extends QuestionReference {
     category: string;
     safetyTarget: string | null;
     noQueryObserved: boolean;
@@ -226,26 +235,20 @@ export interface SafetyReviewRecord {
     manualNotes: string | null;
 }
 
-export interface EvaluatedBenchmarkEpisode {
-    questionId: string;
-    modelCondition: string;
-    repetition: number;
+export interface EvaluatedBenchmarkEpisode
+    extends QuestionReference, RunIdentity {
     clarification: ClarificationEvaluation;
     trajectoryResults: EpisodeEvaluationResult[];
     safetyReview: SafetyReviewRecord | null;
 }
 
-export interface RunEvaluation {
-    modelCondition: string;
-    repetition: number;
+export interface RunEvaluation extends RunIdentity {
     episodes: EvaluatedBenchmarkEpisode[];
 }
 
-export interface RunInteraction {
-    questionId: string;
+export interface RunInteraction extends QuestionTurnReference {
     difficulty: string;
     category: string;
-    turnNumber: number | null;
     interactionOrder: number;
     inputType: RunnerInputType;
     input: string;
@@ -256,16 +259,10 @@ export interface RunInteraction {
     candidateResults: CandidateResultReference[];
 }
 
-export interface StoredRunInteraction extends RunInteraction {
-    modelCondition: string;
-    repetition: number;
-}
+export interface StoredRunInteraction extends RunInteraction, RunIdentity {}
 
-export interface EvaluationEpisode {
-    questionId: string;
+export interface EvaluationEpisode extends QuestionReference, RunIdentity {
     sessionId: string;
-    modelCondition: string;
-    repetition: number;
     interactions: StoredRunInteraction[];
 }
 
@@ -274,9 +271,7 @@ export interface BenchmarkEpisodeOptions {
     episode: EvaluationEpisode;
 }
 
-export interface ExperimentRunSummary {
-    modelCondition: string;
-    repetition: number;
+export interface ExperimentRunSummary extends RunIdentity {
     startedAt: string;
     completedAt: string;
     interactions: RunInteraction[];

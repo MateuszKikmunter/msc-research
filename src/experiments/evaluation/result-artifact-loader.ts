@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { readJsonFile } from '../shared/services/storage/json-file-reader';
 import type { CandidateResultFile, GoldenResultFile } from '../types';
 
 export class ResultArtifactLoader {
@@ -16,19 +16,14 @@ export class ResultArtifactLoader {
             this.goldenResultDirectory,
             `${artifactId}.json`
         );
-        return this.load<GoldenResultFile>(inputPath);
+        return readJsonFile<GoldenResultFile>(inputPath);
     }
 
     public async loadCandidateResult(
         relativePath: string
     ): Promise<CandidateResultFile> {
-        return this.load<CandidateResultFile>(
+        return readJsonFile<CandidateResultFile>(
             path.join(this.runDirectory, relativePath)
         );
-    }
-
-    private async load<Result>(inputPath: string): Promise<Result> {
-        const contents = await readFile(inputPath, 'utf8');
-        return JSON.parse(contents) as Result;
     }
 }

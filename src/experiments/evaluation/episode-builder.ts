@@ -1,6 +1,11 @@
 import type { EvaluationEpisode, StoredRunInteraction } from '../types';
+import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
 
 export class EpisodeBuilder {
+    public constructor(
+        private readonly traceEventInspector = new TraceEventInspector()
+    ) {}
+
     public build(interactions: StoredRunInteraction[]): EvaluationEpisode[] {
         const interactionsBySession = new Map<string, StoredRunInteraction[]>();
 
@@ -45,8 +50,8 @@ export class EpisodeBuilder {
             ...interaction,
             response: {
                 ...interaction.response,
-                traceEvents: [...interaction.response.traceEvents].sort(
-                    (left, right) => left.sequenceNumber - right.sequenceNumber
+                traceEvents: this.traceEventInspector.orderEvents(
+                    interaction.response.traceEvents
                 )
             }
         };

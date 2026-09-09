@@ -1,4 +1,5 @@
 import type { SqlAttempt } from '../../backend/types';
+import { getErrorMessage } from '../shared/error-message';
 import type {
     AttemptEvaluation,
     CandidateResultReference,
@@ -17,12 +18,10 @@ interface EvaluateAttemptOptions extends EvaluateAttemptsOptions {
     attempt: SqlAttempt;
 }
 
-interface UncertainAttemptOptions {
-    interaction: StoredRunInteraction;
-    attempt: SqlAttempt;
-    reference: CandidateResultReference | null;
-    reason: string;
-}
+type AttemptEvaluationBase = Pick<
+    AttemptEvaluation,
+    'interactionOrder' | 'turnNumber' | 'attempt' | 'query' | 'executionStatus'
+>;
 
 export class AttemptEvaluator {
     public constructor(
@@ -54,13 +53,10 @@ export class AttemptEvaluator {
     private async evaluateAttempt(
         options: EvaluateAttemptOptions
     ): Promise<AttemptEvaluation> {
-        const baseEvaluation = {
-            interactionOrder: options.interaction.interactionOrder,
-            turnNumber: options.interaction.turnNumber,
-            attempt: options.attempt.attempt,
-            query: options.attempt.query,
-            executionStatus: options.attempt.status
-        };
+        const baseEvaluation = this.createBaseEvaluation(
+            options.interaction,
+            options.attempt
+        );
 
         if (options.attempt.status === 'failed') {
             return {
@@ -87,21 +83,19 @@ export class AttemptEvaluator {
                 candidateResult.attempt === options.attempt.attempt
         );
         if (!reference) {
-            return this.uncertain({
-                interaction: options.interaction,
-                attempt: options.attempt,
-                reference: null,
-                reason: 'Successful SQL attempt has no candidate-result reference.'
-            });
+            return this.uncertain(
+                baseEvaluation,
+                null,
+                'Successful SQL attempt has no candidate-result reference.'
+            );
         }
 
         if (reference.status === 'evaluator_uncertain' || !reference.file) {
-            return this.uncertain({
-                interaction: options.interaction,
-                attempt: options.attempt,
+            return this.uncertain(
+                baseEvaluation,
                 reference,
-                reason: reference.error ?? 'Candidate result was not saved.'
-            });
+                reference.error ?? 'Candidate result was not saved.'
+            );
         }
 
         let goldenResult;
@@ -110,12 +104,11 @@ export class AttemptEvaluator {
                 options.goldDefinition.artifactId
             );
         } catch (error) {
-            return this.uncertain({
-                interaction: options.interaction,
-                attempt: options.attempt,
+            return this.uncertain(
+                baseEvaluation,
                 reference,
-                reason: `Could not load golden result: ${this.toError(error).message}`
-            });
+                `Could not load golden result: ${getErrorMessage(error)}`
+            );
         }
 
         let candidateResult;
@@ -125,12 +118,11 @@ export class AttemptEvaluator {
                     reference.file
                 );
         } catch (error) {
-            return this.uncertain({
-                interaction: options.interaction,
-                attempt: options.attempt,
+            return this.uncertain(
+                baseEvaluation,
                 reference,
-                reason: `Could not load candidate result: ${this.toError(error).message}`
-            });
+                `Could not load candidate result: ${getErrorMessage(error)}`
+            );
         }
 
         const comparison = this.resultComparator.compare(
@@ -159,29 +151,37 @@ export class AttemptEvaluator {
             };
         }
 
-        return this.uncertain({
-            interaction: options.interaction,
-            attempt: options.attempt,
+        return this.uncertain(
+            baseEvaluation,
             reference,
-            reason: comparison.reason ?? 'Result comparison was uncertain.'
-        });
+            comparison.reason ?? 'Result comparison was uncertain.'
+        );
     }
 
-    private uncertain(options: UncertainAttemptOptions): AttemptEvaluation {
+    private createBaseEvaluation(
+        interaction: StoredRunInteraction,
+        attempt: SqlAttempt
+    ): AttemptEvaluationBase {
         return {
-            interactionOrder: options.interaction.interactionOrder,
-            turnNumber: options.interaction.turnNumber,
-            attempt: options.attempt.attempt,
-            query: options.attempt.query,
-            executionStatus: options.attempt.status,
-            outcome: 'evaluator_uncertain',
-            resultCorrect: null,
-            queryExecutionId: options.reference?.queryExecutionId ?? null,
-            reason: options.reason
+            interactionOrder: interaction.interactionOrder,
+            turnNumber: interaction.turnNumber,
+            attempt: attempt.attempt,
+            query: attempt.query,
+            executionStatus: attempt.status
         };
     }
 
-    private toError(error: unknown): Error {
-        return error instanceof Error ? error : new Error(String(error));
+    private uncertain(
+        baseEvaluation: AttemptEvaluationBase,
+        reference: CandidateResultReference | null,
+        reason: string
+    ): AttemptEvaluation {
+        return {
+            ...baseEvaluation,
+            outcome: 'evaluator_uncertain',
+            resultCorrect: null,
+            queryExecutionId: reference?.queryExecutionId ?? null,
+            reason
+        };
     }
 }

@@ -1,7 +1,7 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { BenchmarkRecord } from '../../../types';
+import { readJsonFile } from '../storage/json-file-reader';
 
 export class BenchmarkLoader {
     private static readonly DEFAULT_BENCHMARK_PATH = path.resolve(
@@ -12,7 +12,6 @@ export class BenchmarkLoader {
     public static async load(
         benchmarkPath = BenchmarkLoader.DEFAULT_BENCHMARK_PATH
     ): Promise<BenchmarkRecord[]> {
-        const contents = await readFile(benchmarkPath, 'utf8');
-        return JSON.parse(contents) as BenchmarkRecord[];
+        return readJsonFile<BenchmarkRecord[]>(benchmarkPath);
     }
 }

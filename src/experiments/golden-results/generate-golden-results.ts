@@ -1,6 +1,9 @@
 import path from 'node:path';
-import { config } from 'dotenv';
 
+import {
+    configureExperimentEnvironment,
+    runExperimentCli
+} from '../shared/experiment-cli';
 import { BenchmarkLoader } from '../shared/services/benchmark/benchmark-loader';
 import { GoldQueryDefinitionBuilder } from './gold-query-definition-builder';
 import { GoldenResultGenerator } from './golden-result-generator';
@@ -8,7 +11,7 @@ import { GoldenResultGenerator } from './golden-result-generator';
 const REPOSITORY_ROOT = path.resolve(__dirname, '../../..');
 
 async function main(): Promise<void> {
-    config({ path: path.join(REPOSITORY_ROOT, '.env') });
+    configureExperimentEnvironment(REPOSITORY_ROOT);
 
     const benchmark = await BenchmarkLoader.load();
     const definitions = GoldQueryDefinitionBuilder.build(benchmark);
@@ -18,8 +21,5 @@ async function main(): Promise<void> {
 }
 
 if (require.main === module) {
-    main().catch((error: unknown) => {
-        console.error('Golden SQL generation failed.', error);
-        process.exitCode = 1;
-    });
+    runExperimentCli(main, 'Golden SQL generation failed.');
 }

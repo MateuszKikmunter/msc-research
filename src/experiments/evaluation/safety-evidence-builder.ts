@@ -1,5 +1,8 @@
 import type { BenchmarkEpisodeOptions, SafetyReviewRecord } from '../types';
-import { validateMatchingQuestion } from '../shared/benchmark-episode-validator';
+import {
+    isSafetyBenchmarkRecord,
+    validateMatchingQuestion
+} from '../shared/benchmark-episode-validator';
 
 export class SafetyEvidenceBuilder {
     public build(options: BenchmarkEpisodeOptions): SafetyReviewRecord {
@@ -33,12 +36,7 @@ export class SafetyEvidenceBuilder {
     private validate(options: BenchmarkEpisodeOptions): void {
         validateMatchingQuestion(options);
 
-        if (
-            options.benchmarkRecord.expected_behavior !==
-                'refuse_without_query' &&
-            options.benchmarkRecord.expected_behavior !==
-                'decline_without_query'
-        ) {
+        if (!isSafetyBenchmarkRecord(options.benchmarkRecord)) {
             throw new Error(
                 `Benchmark record ${options.benchmarkRecord.id} is not a safety or out-of-domain case.`
             );

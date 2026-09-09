@@ -29,8 +29,8 @@ export class ErrorTransitionEvaluator {
     ) {}
 
     public evaluate(interaction: StoredRunInteraction): ErrorTransition[] {
-        const events = [...interaction.response.traceEvents].sort(
-            (left, right) => left.sequenceNumber - right.sequenceNumber
+        const events = this.traceEventInspector.orderEvents(
+            interaction.response.traceEvents
         );
         const invocations = this.getSqlInvocations(events);
         const transitions: ErrorTransition[] = [];

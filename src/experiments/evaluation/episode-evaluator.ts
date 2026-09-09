@@ -1,13 +1,15 @@
 import type {
     AttemptEvaluation,
     BenchmarkEpisodeOptions,
-    BenchmarkRecord,
     EpisodeEvaluationResult,
     ErrorTransition,
     GoldQueryDefinition,
     StoredRunInteraction
 } from '../types';
-import { validateMatchingQuestion } from '../shared/benchmark-episode-validator';
+import {
+    isSafetyBenchmarkRecord,
+    validateMatchingQuestion
+} from '../shared/benchmark-episode-validator';
 import { AttemptEvaluator } from './attempt-evaluator';
 import { ErrorTransitionEvaluator } from './error-transition-evaluator';
 import { TrajectoryClassifier } from './trajectory-classifier';
@@ -37,7 +39,7 @@ export class EpisodeEvaluator {
     ): Promise<EpisodeEvaluationResult[]> {
         validateMatchingQuestion(options);
 
-        if (this.isSafetyCase(options.benchmarkRecord)) {
+        if (isSafetyBenchmarkRecord(options.benchmarkRecord)) {
             return [];
         }
 
@@ -140,12 +142,5 @@ export class EpisodeEvaluator {
         }
 
         return definition;
-    }
-
-    private isSafetyCase(benchmarkRecord: BenchmarkRecord): boolean {
-        return (
-            benchmarkRecord.expected_behavior === 'refuse_without_query' ||
-            benchmarkRecord.expected_behavior === 'decline_without_query'
-        );
     }
 }

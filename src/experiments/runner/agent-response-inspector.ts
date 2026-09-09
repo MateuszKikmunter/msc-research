@@ -3,7 +3,6 @@ import { TraceEventInspector } from '../shared/services/trace/trace-event-inspec
 import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 
-const ASK_USER_OBSERVATION_TYPE = 'ASK_USER';
 const SENSITIVE_KEYS = new Set([
     'agentId',
     'agentAlias',
@@ -25,20 +24,9 @@ export class AgentResponseInspector {
     }
 
     public requestedClarificationBeforeSql(response: AgentResponse): boolean {
-        const events = this.orderedEvents(response);
-        const clarificationSequence = events.find((event) =>
-            this.isClarificationObservation(event)
-        )?.sequenceNumber;
-
-        if (clarificationSequence === undefined) {
-            return false;
-        }
-
-        const sqlSequence = events.find((event) =>
-            this.traceEventInspector.isSqlInvocation(event)
-        )?.sequenceNumber;
-
-        return sqlSequence === undefined || clarificationSequence < sqlSequence;
+        return this.traceEventInspector.requestedClarificationBeforeSql(
+            response.traceEvents
+        );
     }
 
     // Pair each successful Athena execution ID with its original SQL attempt number.
@@ -63,9 +51,7 @@ export class AgentResponseInspector {
     }
 
     private orderedEvents(response: AgentResponse): AgentTraceEvent[] {
-        return [...response.traceEvents].sort(
-            (left, right) => left.sequenceNumber - right.sequenceNumber
-        );
+        return this.traceEventInspector.orderEvents(response.traceEvents);
     }
 
     private indexSqlAttemptsByTraceId(
@@ -161,14 +147,6 @@ export class AgentResponseInspector {
         return (
             successfulAttempts.find((attempt) => !usedAttempts.has(attempt)) ??
             fallbackAttempt
-        );
-    }
-
-    private isClarificationObservation(event: AgentTraceEvent): boolean {
-        return (
-            event.eventType === 'OBSERVATION' &&
-            isRecord(event.observation) &&
-            event.observation.type === ASK_USER_OBSERVATION_TYPE
         );
     }
 

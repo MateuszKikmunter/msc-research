@@ -3,8 +3,8 @@ import type {
     ResultComparison,
     TabularResult
 } from '../types';
+import { getErrorMessage } from '../shared/error-message';
 import {
-    ResultNormalizationError,
     ResultNormalizer,
     type NormalizedRow,
     type NormalizedValue
@@ -30,7 +30,7 @@ export class ResultComparator {
             );
         } catch (error) {
             return this.uncertain(
-                `Could not normalize golden result: ${this.errorMessage(error)}`
+                `Could not normalize golden result: ${getErrorMessage(error)}`
             );
         }
 
@@ -42,7 +42,7 @@ export class ResultComparator {
             );
         } catch (error) {
             return this.incorrect(
-                `Candidate value does not match the expected type: ${this.errorMessage(error)}`
+                `Candidate value does not match the expected type: ${getErrorMessage(error)}`
             );
         }
 
@@ -194,13 +194,6 @@ export class ResultComparator {
         }
 
         return golden.value === candidate.value;
-    }
-
-    private errorMessage(error: unknown): string {
-        return error instanceof ResultNormalizationError ||
-            error instanceof Error
-            ? error.message
-            : String(error);
     }
 
     private correct(): ResultComparison {

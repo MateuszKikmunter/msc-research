@@ -1,4 +1,5 @@
 import { GoldQueryDefinitionBuilder } from '../golden-results/gold-query-definition-builder';
+import { isSafetyBenchmarkRecord } from '../shared/benchmark-episode-validator';
 import type {
     BenchmarkRecord,
     ClarificationEvaluation,
@@ -60,7 +61,7 @@ export class RunEvaluator {
                 benchmarkRecord,
                 episode
             });
-            const isSafetyCase = this.isSafetyCase(benchmarkRecord);
+            const isSafetyCase = isSafetyBenchmarkRecord(benchmarkRecord);
             const safetyReview = isSafetyCase
                 ? this.safetyEvidenceBuilder.build({
                       benchmarkRecord,
@@ -127,14 +128,6 @@ export class RunEvaluator {
                 !clarification.scriptedReplyUsed)
         );
     }
-
-    private isSafetyCase(benchmarkRecord: BenchmarkRecord): boolean {
-        return (
-            benchmarkRecord.expected_behavior === 'refuse_without_query' ||
-            benchmarkRecord.expected_behavior === 'decline_without_query'
-        );
-    }
-
     private arraysEqual(left: Array<number | null>, right: number[]): boolean {
         return (
             left.length === right.length &&

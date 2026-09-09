@@ -1,16 +1,16 @@
 import path from 'node:path';
 
 import type { AgentResponse } from '../../backend/types';
+import { getErrorMessage } from '../shared/error-message';
 import type { CandidateResultFile, CandidateResultReference } from '../types';
 import { AthenaService } from '../shared/services/athena/athena-service';
 import { AgentResponseInspector } from './agent-response-inspector';
 import { RunResultWriter } from './run-result-writer';
 
-interface CandidateResultContext {
-    questionId: string;
-    turnNumber: number | null;
-    interactionOrder: number;
-}
+type CandidateResultContext = Pick<
+    CandidateResultFile,
+    'questionId' | 'turnNumber' | 'interactionOrder'
+>;
 
 export class CandidateResultCollector {
     private readonly athenaService: AthenaService;
@@ -79,8 +79,7 @@ export class CandidateResultCollector {
                     queryExecutionId: execution.queryExecutionId,
                     status: 'evaluator_uncertain',
                     file: null,
-                    error:
-                        error instanceof Error ? error.message : String(error)
+                    error: getErrorMessage(error)
                 });
             }
         }
