@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-10** — Added the pure in-memory run metrics calculator for the focused trace-aware
+  analysis. It reports auditable numerator/denominator/rate values for final success, clean direct
+  success, their gap, recovered-success contribution, recovery, clarification, interactive turns,
+  and descriptive no-query behaviour; separates execution-error and semantic-revision recoveries;
+  produces mutually exclusive error-response counts plus episode-level observation-conditioned
+  recovery; and provides bounded by-difficulty summaries. Safety compliance remains manually
+  labelled, zero denominators produce `null`, and operational metrics are not promoted into the
+  formal study. Added focused Jest coverage and aligned the evaluation plan and design documents.
+
 - **2026-09-09** — Added the in-memory run evaluator that loads saved interactions, groups them by
   session, verifies benchmark coverage and interactive turns, and returns results in benchmark
   order. It trusts the runner-owned question, model, repetition, and session metadata rather than

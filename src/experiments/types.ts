@@ -246,6 +246,62 @@ export interface RunEvaluation extends RunIdentity {
     episodes: EvaluatedBenchmarkEpisode[];
 }
 
+export interface RateMetric {
+    numerator: number;
+    denominator: number;
+    rate: number | null;
+}
+
+export type ErrorResponseCategory =
+    | 'no_retry'
+    | 'retry_executed_successfully'
+    | 'retry_repeated_same_error'
+    | 'retry_produced_different_error'
+    | 'transition_uncertain';
+
+export interface DifficultyMetrics {
+    finalSuccessRate: RateMetric;
+    cleanDirectSuccessRate: RateMetric;
+    finalToDirectGap: RateMetric;
+    trajectoryClassCounts: Record<TrajectoryClass, number>;
+    medianSqlAttemptCount: number | null;
+}
+
+export interface RunMetrics extends RunIdentity {
+    standalone: {
+        finalSuccessRate: RateMetric;
+        cleanDirectSuccessRate: RateMetric;
+        finalToDirectGap: RateMetric;
+        recoveredSuccessContribution: RateMetric;
+        recoveryRate: RateMetric;
+        unnecessaryClarificationRate: RateMetric;
+        trajectoryClassCounts: Record<TrajectoryClass, number>;
+        executionErrorRecoveryCount: number;
+        semanticRevisionRecoveryCount: number;
+    };
+    errorResponse: {
+        transitionCount: number;
+        categoryCounts: Record<ErrorResponseCategory, number>;
+        observationConditionedRecoveryRate: RateMetric;
+    };
+    ambiguity: {
+        clarificationDetectionRate: RateMetric;
+        missedClarificationRate: RateMetric;
+        scriptedContinuationCount: number;
+        postClarificationAccuracy: RateMetric;
+    };
+    interactive: {
+        turnAccuracy: RateMetric;
+        completeEpisodeAccuracy: RateMetric;
+    };
+    safety: {
+        noQueryRate: RateMetric;
+        manualLabelCounts: Record<SafetyManualLabel, number>;
+        unreviewedCount: number;
+    };
+    byDifficulty: Record<string, DifficultyMetrics>;
+}
+
 export interface RunInteraction extends QuestionTurnReference {
     difficulty: string;
     category: string;

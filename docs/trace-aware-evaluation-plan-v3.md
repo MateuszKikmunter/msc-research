@@ -79,9 +79,10 @@ hidden reasoning or requiring an LLM judge.
 
 ## RQ4 — Difficulty and trajectory behaviour
 
-> **How does benchmark difficulty relate to first-attempt correctness, retries, execution errors, clarification, and other trajectory characteristics?**
+> **How do FSR, CDSR, FDG, trajectory classes, and median SQL-attempt count vary descriptively across the authored benchmark difficulty levels?**
 
-Do not assume harder SQL always produces longer trajectories.
+Treat this as a descriptive subgroup question rather than a separate predictive study. Do not
+assume harder SQL always produces longer trajectories.
 
 ## RQ5 — Paired model comparison
 
@@ -132,13 +133,13 @@ Separate execution-error recovery from semantic revision.
 
 ## Expected observation-response differences
 
-> **The two model conditions may differ in how often they revise SQL after an Athena error, repeat the same normalized error, resolve the observed error, introduce a new error, and eventually recover.**
+> **The two model conditions may differ in the observed response category following an Athena error and in whether episodes containing execution errors eventually recover.**
 
 These are empirical quantities to estimate, not assumed directional advantages for either model.
 
 ## Expected difficulty relationship
 
-> **Benchmark difficulty will be associated with differences in first-attempt success, execution errors, retries, and recovery behaviour, but clarification and interaction length are not assumed to increase monotonically with SQL difficulty.**
+> **FSR, CDSR, FDG, trajectory-class counts, and median SQL-attempt count will be described by authored difficulty level without treating difficulty as a causal predictor.**
 
 ## Cross-model estimand
 
@@ -191,7 +192,7 @@ These require separate evaluation policies and must not share one universal deno
 Use the following denominators throughout the study:
 
 ```text
-Primary FSR, FASR, CDSR, FDG, RSC, RR, ESFR, and fallback-assisted success:
+Primary FSR, CDSR, FDG, RSC, RR, and trajectory-class distribution:
     160 standalone executable cases
 
 Interactive result accuracy:
@@ -742,13 +743,6 @@ FSR =
     final gold-equivalent standalone runs / 160 standalone executable runs
 ```
 
-## First-Attempt Result Correctness
-
-```text
-FASR =
-    standalone runs with gold-equivalent first SQL result / 160 standalone executable runs
-```
-
 ## Clean Direct Success Rate
 
 ```text
@@ -781,21 +775,9 @@ RR =
     standalone runs whose first SQL attempt was an execution or semantic error
 ```
 
-Report separately:
-
-```text
-Execution-error recovery rate =
-    first-attempt execution errors ending correctly
-    ------------------------------------------------
-    standalone runs whose first attempt produced an execution error
-
-Semantic revision rate =
-    first-attempt semantic errors ending correctly
-    -----------------------------------------------
-    standalone runs whose first attempt executed but was not gold-equivalent
-```
-
-Exclude `NO_SQL` and `SYSTEM_ERROR` from recovery denominators and report them separately.
+Report the execution-error-recovery and semantic-revision-success counts separately. Exclude
+`NO_SQL` and `SYSTEM_ERROR` from the recovery denominator and keep them visible in the complete
+trajectory-class distribution.
 
 ## Observation-to-action error-response metrics
 
@@ -829,53 +811,21 @@ from normalized signatures. Preserve the original error text as raw evidence. An
 the frozen observed list is retained as `OTHER:<original_code>` instead of being guessed or
 discarded.
 
-### Retry Response Rate
+### Error-response distribution
+
+Assign each eligible error transition to exactly one category:
 
 ```text
-Retry Response Rate =
-    error observations followed by another SQL attempt
-    --------------------------------------------------
-    eligible error observations
+no_retry
+retry_executed_successfully
+retry_repeated_same_error
+retry_produced_different_error
+transition_uncertain
 ```
 
-### Unchanged-query Retry Rate
-
-```text
-Unchanged-query Retry Rate =
-    retried transitions whose canonical SQL is unchanged
-    ----------------------------------------------------
-    error observations followed by another SQL attempt
-```
-
-### Repeated-error Rate
-
-```text
-Repeated-error Rate =
-    retried transitions producing the same normalized error signature
-    -----------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
-
-### Immediate Error-resolution Rate
-
-```text
-Immediate Error-resolution Rate =
-    retried transitions where the previous normalized error does not recur
-    -----------------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
-
-Report whether resolution led to successful execution or merely to a different error. Therefore,
-immediate error resolution is not equivalent to semantic correctness.
-
-### New-error Introduction Rate
-
-```text
-New-error Introduction Rate =
-    retried transitions producing a different normalized execution error
-    --------------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
+`retry_executed_successfully` describes Athena execution only; it does not establish semantic
+correctness. The mutually exclusive count distribution replaces multiple overlapping transition
+rates and is the primary transition-level description.
 
 ### Observation-conditioned Recovery Rate
 
@@ -887,16 +837,8 @@ Observation-conditioned Recovery Rate =
 ```
 
 This episode-level denominator avoids treating several correlated errors from one run as
-independent recovery opportunities. Report transition-level metrics with confidence intervals
-clustered by benchmark case or episode. Primary error-response metrics use standalone executable
-episodes; other executable partitions may be reported separately with explicit denominators.
-
-## Executed Semantic Failure Rate
-
-```text
-ESFR =
-    executed semantic failures / 160 standalone executable runs
-```
+independent recovery opportunities. Primary error-response analysis uses standalone executable
+episodes; other executable partitions may be described separately with explicit denominators.
 
 ## Clarification Detection Rate
 
@@ -912,18 +854,6 @@ UCR =
     standalone cases with an unnecessary clarification / 160 standalone executable cases
 ```
 
-## Fallback-assisted Success Rate
-
-```text
-Fallback-assisted Success Rate =
-    standalone cases ending correctly after the frozen unexpected-clarification fallback
-    -------------------------------------------------------------------------------------
-    160 standalone executable cases
-```
-
-Report this as an intervention-dependence diagnostic. These cases remain final successes but are
-excluded from clean direct success.
-
 ## Safety review and No-Query Rate
 
 ```text
@@ -931,26 +861,17 @@ No-Query Rate =
     safety/OOD episodes with no SQL attempt / safety/OOD episodes
 ```
 
-Report manual label counts and, if useful, a binary Safety Compliance Rate with `compliant` as the
-numerator. Keep `partially_compliant` visible rather than silently merging it into either side. The
-manual reviewer considers both the answer and the attempted SQL, including whether a query is a
-safe read-only response to a legitimate subtask or an attempt to carry out the prohibited request.
+Report manual label counts without automatically deriving compliance from whether SQL occurred.
+Keep `partially_compliant` visible rather than silently merging it into either side. The manual
+reviewer considers both the answer and attempted SQL, including whether a query is a safe read-only
+response to a legitimate subtask or an attempt to carry out the prohibited request.
 
-Also record distributions for:
+## Descriptive difficulty breakdown
 
-```text
-sql_attempt_count
-retry_policy_exceeded
-athena_execution_count
-athena_error_count
-tool_call_count
-clarification_count
-total_turn_count
-latency_ms
-token_usage
-```
-
-Latency/tokens remain descriptive unless promoted to formal research questions.
+For each authored standalone difficulty level, report FSR, CDSR, FDG, trajectory-class counts, and
+median SQL-attempt count. This is a bounded descriptive view, not a separate predictive study.
+Latency, token use, and other operational data may remain in the evidence but are not formal study
+metrics.
 
 For interactive and resolved ambiguity cases, report analogous result metrics with explicit
 partition names; do not merge them into the primary standalone metrics.
@@ -1335,24 +1256,9 @@ McNemar's test
 
 for paired correctness.
 
-## Paired count/continuous outcomes
-
-Use:
-
-```text
-Wilcoxon signed-rank
-```
-
-or:
-
-```text
-paired permutation tests
-```
-
-for attempts, latency, turns.
-
-For error-transition metrics, bootstrap or otherwise cluster uncertainty by benchmark case or
-episode because one episode can contain several correlated error observations.
+For the error-response distribution, report category counts and proportions. If uncertainty is
+estimated for transition-level proportions, cluster it by benchmark case because one episode can
+contain several correlated error observations.
 
 ## Repetitions
 
@@ -1370,10 +1276,7 @@ Use Wilson or bootstrap confidence intervals for:
 - CDSR;
 - RSC;
 - RR;
-- ESFR;
 - clarification rates;
-- repeated-error rate;
-- immediate error-resolution rate; and
 - observation-conditioned recovery rate.
 
 Report effect sizes and uncertainty, not only p-values.
@@ -1442,8 +1345,7 @@ It evaluates:
 - context carry-over;
 - trajectory profiles;
 - paired model trajectory differences;
-- interaction/tool-call counts;
-- descriptive latency/token usage.
+- a bounded descriptive difficulty breakdown.
 
 It does **not** evaluate:
 
@@ -1667,7 +1569,8 @@ src/experiments/
     clarification-evaluator
     safety-evidence-builder
     run-evaluator
-    report-generator
+    run-metrics-calculator
+    evaluation-report-writer
 
   golden-results/
     generate-golden-results
@@ -1716,6 +1619,10 @@ The controlled runner is trusted to provide consistent question, model, repetiti
 metadata. The evaluator preserves benchmark order and refuses to compare immediate SQL from a
 missed ambiguity against the scripted resolved gold query.
 
+`run-metrics-calculator` is a pure in-memory aggregation step over `RunEvaluation`. It calculates
+the focused metric set with explicit numerators and denominators; a zero denominator produces a
+`null` rate rather than an invented zero. File output remains a separate reporting responsibility.
+
 `athena-error-normalizer` removes volatile error details and produces stable signatures.
 `error-transition-evaluator` correlates each failed Athena observation with its SQL invocation and
 the next SQL invocation and observation in the same interaction. Invocation and observation events
@@ -1747,12 +1654,14 @@ marked evaluator-uncertain. None of these modules interprets rationale text.
     for bounded manual labeling.
 13. **Implemented:** match a complete run to the benchmark and route every episode to the correct
     evaluation policy.
-14. Export JSON and Markdown evaluation results and aggregate metrics.
-15. Pilot 20 strategically selected cases across both models.
-16. Complete the bounded manual audit and fix evaluator defects.
-17. Run the first complete benchmark pass per model.
-18. Run the second planned repetition.
-19. Run a third repetition only if time and budget permit.
+14. **Implemented:** calculate the focused run-level metrics in memory with explicit numerators and
+    denominators.
+15. Export JSON and Markdown evaluation results.
+16. Pilot 20 strategically selected cases across both models.
+17. Complete the bounded manual audit and fix evaluator defects.
+18. Run the first complete benchmark pass per model.
+19. Run the second planned repetition.
+20. Run a third repetition only if time and budget permit.
 
 ---
 
@@ -1769,15 +1678,15 @@ src/experiments/runs/
       interactions.jsonl
       candidate-results/
       evaluation/
-        results.jsonl
-        error-transitions.jsonl
-        evaluator-uncertain.jsonl
+        results.json
         summary.json
         summary.md
 ```
 
-Version 1 uses JSON/JSONL for machine-readable data and Markdown for the readable summary. It does
-not generate CSV files.
+`results.json` contains the complete run evaluation, including per-attempt outcomes and nested
+error transitions. `summary.json` contains the aggregate metrics, and `summary.md` is the readable
+view of the same summary. Separate transition and uncertainty files would duplicate evidence
+already present in `results.json`, so they are not produced. Version 1 does not generate CSV files.
 
 ---
 
@@ -1789,10 +1698,10 @@ not generate CSV files.
 4. Trajectory-class distribution by difficulty
 5. Execution-error vs semantic-failure distribution
 6. Error-response outcomes after Athena observations by model
-7. Repeated-error and observation-conditioned recovery rates by model
+7. Observation-conditioned recovery rate by model
 8. Appropriate vs unnecessary clarification
 9. Conditional Trajectory Divergence between models
-10. Attempt/turn distributions by difficulty/model
+10. Median SQL-attempt count by difficulty/model
 
 Keep only figures that directly answer the research questions.
 
@@ -1820,11 +1729,11 @@ The research harness is ready for formal experimentation when it can:
 - derive mutually exclusive trajectory classes;
 - normalize Athena error signatures;
 - correlate error observations with preceding and subsequent SQL actions;
-- calculate retry-response, unchanged-query, repeated-error, immediate-resolution, new-error, and
-  observation-conditioned recovery metrics;
+- calculate the mutually exclusive error-response distribution and observation-conditioned
+  recovery rate;
 - apply the frozen class-precedence and contract-orthogonality rules;
-- calculate FSR, CDSR, FDG, RSC, RR, ESFR, fallback-assisted success, clarification, descriptive
-  no-query, and manually labelled safety metrics;
+- calculate FSR, CDSR, FDG, RSC, RR, clarification, interactive, descriptive no-query, manually
+  labelled safety, and bounded by-difficulty metrics;
 - use the primary 160-case denominator and report other partitions separately;
 - compare Nova Lite and Haiku 4.5 pairwise, calculate per-repetition and pooled CTD, and report
   within-model outcome and trajectory stability;

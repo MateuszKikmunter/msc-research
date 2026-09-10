@@ -24,13 +24,12 @@ The secondary questions are:
 2. How much final success is attributable to recovery from execution errors or semantic mistakes?
 3. How do agents respond to Athena execution-error observations, and which observable response
    patterns lead to recovery or repeated failure?
-4. How is benchmark difficulty associated with first-attempt correctness, retries, execution
-   errors, and recovery?
+4. How do FSR, CDSR, FDG, trajectory classes, and median SQL-attempt count vary descriptively by
+   authored benchmark difficulty?
 5. When both models reach the same final outcome on a case, how often do their trajectory classes
    differ?
 
-Latency, token usage, and cost are descriptive operational measurements, not primary research
-questions.
+Latency, token usage, and cost may remain in raw evidence but are not formal study metrics.
 
 ## Experimental conditions
 
@@ -186,22 +185,14 @@ Use the 160 standalone executable cases as the denominator for headline metrics.
 FSR = terminal gold-equivalent runs / 160 standalone runs
 ```
 
-### First-Attempt Result Correctness
-
-```text
-FASR = gold-equivalent first SQL results / 160 standalone runs
-```
-
 ### Clean Direct Success Rate
 
 A clean direct success requires:
 
-- first and terminal SQL results are gold-equivalent;
-- exactly one necessary SQL attempt;
-- no execution error;
-- no deterministically redundant or prohibited action;
-- no unnecessary clarification; and
-- no interaction or safety-contract violation.
+- a `DIRECT_SUCCESS` trajectory;
+- exactly one SQL attempt;
+- no redundant action; and
+- no unnecessary clarification.
 
 ```text
 CDSR = clean direct-success runs / 160 standalone runs
@@ -233,11 +224,9 @@ RR = initially unsuccessful SQL runs that recover
 Report execution-error recovery and semantic revision separately. Exclude `NO_SQL` and
 `SYSTEM_ERROR` from recovery denominators and report them independently.
 
-### Executed Semantic Failure Rate
-
-```text
-ESFR = executed semantic failures / 160 standalone runs
-```
+Also report the count of every mutually exclusive trajectory class. This keeps execution-error
+recovery, semantic revision, terminal semantic failure, terminal execution failure, no-SQL, and
+system-error outcomes visible without creating a separate headline rate for each class.
 
 ### Clarification metrics
 
@@ -249,7 +238,6 @@ question itself is available in `finalResponse.text`. Report:
 
 - clarification-request rate on the 20 ambiguity cases;
 - unnecessary-clarification rate on the 160 standalone cases;
-- fallback-assisted success on standalone cases; and
 - post-clarification result accuracy on entered scripted continuations.
 
 `acceptedSlots` remains benchmark metadata and is not an implemented automatic scoring mechanism.
@@ -270,8 +258,8 @@ The original request is fully specified. The query action is already configured 
 database and schema. Execute the request without asking another clarification question.
 ```
 
-A correct result after this intervention contributes to FSR and fallback-assisted success but not
-to CDSR. A second clarification without SQL terminates as `NO_SQL`.
+A correct result after this intervention contributes to FSR but not to CDSR. A second
+clarification without SQL terminates as `NO_SQL`.
 
 ### Interactive and safety metrics
 
@@ -286,27 +274,6 @@ to CDSR. A second clarification without SQL terminates as `NO_SQL`.
   legitimate read-only subtask.
 
 Do not include safety cases in SQL execution accuracy.
-
-### Descriptive operational metrics
-
-Record distributions for:
-
-```text
-sql_attempt_count
-retry_policy_exceeded
-athena_execution_count
-athena_error_count
-tool_call_count
-clarification_count
-total_turn_count
-latency_ms
-token_usage
-bytes_scanned
-estimated_cost
-```
-
-Calculate cost using the recorded AWS Region and contemporaneous pricing date. Do not label
-endpoint latency as BIRD's Valid Efficiency Score.
 
 ## Observation-to-action error-response analysis
 
@@ -338,18 +305,33 @@ Remove volatile request IDs, line numbers, timestamps, and query execution IDs f
 signatures while retaining the original error text as evidence. Preserve an unobserved prefix as
 `OTHER:<original_code>` rather than assigning it to a guessed category.
 
-Calculate:
+Assign every correlated transition to exactly one descriptive response category:
 
-- **Retry Response Rate:** error observations followed by another SQL attempt;
-- **Unchanged-query Retry Rate:** retries whose canonical SQL did not change;
-- **Repeated-error Rate:** retries producing the same normalized error;
-- **Immediate Error-resolution Rate:** retries where the preceding normalized error does not recur;
-- **New-error Introduction Rate:** retries producing a different execution error; and
-- **Observation-conditioned Recovery Rate:** standalone episodes containing an execution error
-  that eventually end correctly.
+- `no_retry`;
+- `retry_executed_successfully`;
+- `retry_repeated_same_error`;
+- `retry_produced_different_error`; or
+- `transition_uncertain`.
 
-Immediate error resolution does not imply semantic correctness; the next SQL may execute while
-answering the wrong question.
+Here, `retry_executed_successfully` means that Athena accepted the next SQL. It does not mean the
+result was semantically correct. Report the five category counts together with:
+
+```text
+Observation-conditioned Recovery Rate =
+    standalone episodes containing an execution error that end correctly
+    ---------------------------------------------------------------------
+    standalone episodes containing an execution error
+```
+
+This smaller distribution directly describes what happened after observable Athena feedback and
+avoids presenting several overlapping transition rates as independent measures.
+
+## Descriptive breakdowns
+
+For each authored standalone difficulty level, report FSR, CDSR, FDG, the trajectory-class counts,
+and median SQL-attempt count. These are descriptive subgroup results, not a separate predictive
+study of difficulty. Operational data such as latency or tokens may remain in the raw evidence but
+is not part of the formal metric set.
 
 ## Result evaluation
 
@@ -491,16 +473,16 @@ study.
 
 Report:
 
-- FSR, FASR, CDSR, FDG, RSC, RR, and ESFR on the 160 standalone cases;
+- FSR, CDSR, FDG, RSC, and RR on the 160 standalone cases;
 - all seven trajectory-class distributions;
-- execution-error and semantic-revision recovery separately;
-- observation-to-action error-response metrics;
-- clarification requests, unnecessary clarification, fallback-assisted success, and resolved
-  ambiguity accuracy;
+- execution-error and semantic-revision recovery counts separately;
+- the five-category observation-to-action error-response distribution and
+  observation-conditioned recovery rate;
+- clarification detection, missed and unnecessary clarification, and resolved ambiguity accuracy;
 - interactive turn and interaction accuracy;
 - descriptive no-query behaviour and manually labelled safety compliance;
 - Conditional Trajectory Divergence and within-model stability;
-- descriptive latency, tokens, tool calls, retries, bytes scanned, and cost;
+- descriptive by-difficulty results;
 - uncertainty intervals and completed denominators; and
 - bounded validation agreement and unresolved evaluator uncertainty.
 

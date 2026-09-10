@@ -1,8 +1,8 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
-> grouping, per-attempt evaluation, error-transition extraction, and SQL-trajectory classification
-> implemented; report generation and aggregate metrics pending.
+> grouping, per-attempt evaluation, error-transition extraction, SQL-trajectory classification,
+> and focused aggregate metrics implemented; report generation pending.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -109,8 +109,9 @@ src/experiments/
     trajectory-facts-builder.ts
     trajectory-classifier.ts
     run-evaluator.ts
+    run-metrics-calculator.ts
     # planned
-    report-generator.ts
+    evaluation-report-writer.ts
 
   golden-results/
     generate-golden-results.ts
@@ -290,8 +291,9 @@ For `expected_behavior: execute`:
    fallback reply once in the same session; and
 4. if it asks again without executing SQL, finish the case as `NO_SQL`.
 
-The evaluator records unnecessary clarification and fallback-assisted success separately from SQL
-correctness.
+The evaluator records unnecessary clarification and fallback use separately from SQL correctness.
+Fallback use remains per-episode evidence; the focused aggregate metrics exclude those episodes
+from clean direct success without introducing a separate fallback-success rate.
 
 ### 8.2 Ambiguous questions
 
@@ -564,6 +566,16 @@ against an interpretation the user never selected.
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
 runner stops and prints the current question and session. The incomplete run is discarded.
 
+### 12.5 Run metrics
+
+The run metrics calculator is a pure in-memory step after `RunEvaluator`. It joins evaluated
+episodes to their benchmark definitions, separates the four benchmark partitions, and calculates
+only the focused measures in section 15. It performs no file access and no report formatting.
+
+Every rate includes its raw numerator and denominator so a reported score can be audited. A zero
+denominator produces `null`. Error observations are reduced to one mutually exclusive response
+category per transition, while eventual recovery is measured separately at episode level.
+
 ## 13. Cancellation and incomplete runs
 
 There is no pause, checkpoint, progress, or resume behaviour. An unfiltered invocation starts from
@@ -588,17 +600,15 @@ runs/nova-lite/repetition-1/
   candidate-results/
     <question-turn-attempt>.json
   evaluation/
-    results.jsonl
-    error-transitions.jsonl
-    evaluator-uncertain.jsonl
+    results.json
     summary.json
     summary.md
 ```
 
-`results.jsonl` contains one evaluated record per standalone or ambiguity episode and one record
-per interactive turn. It includes the question ID, model label, repetition, correctness, attempt
-facts, clarification facts, trajectory class, and token/latency metrics already returned by the
-server.
+`results.json` will contain the complete `RunEvaluation`, with attempt outcomes and error
+transitions nested under their episodes. `summary.json` will contain the focused aggregate scores,
+and `summary.md` will present the same summary for reading. Separate error-transition and
+evaluator-uncertain files would duplicate evidence already contained in `results.json`.
 
 No CSV output is generated in version 1.
 
@@ -609,14 +619,11 @@ The evaluator calculates the metrics already defined in the v3 plan with separat
 ### Standalone questions
 
 - Final Success Rate;
-- First-Attempt Result Correctness;
 - Clean Direct Success Rate;
 - Final-to-Direct Success Gap;
 - Recovered Success Contribution;
 - Recovery Rate;
-- Executed Semantic Failure Rate;
 - unnecessary clarification rate;
-- fallback-assisted success rate; and
 - trajectory-class distribution.
 
 ### Ambiguous questions
@@ -638,13 +645,18 @@ The evaluator calculates the metrics already defined in the v3 plan with separat
 
 ### Trace and error behaviour
 
-- SQL attempt count;
-- Athena error count;
-- retry-after-error rate;
-- unchanged-query retry rate;
-- repeated-error rate;
-- immediate error-resolution rate; and
-- recovery after an observed error.
+- mutually exclusive counts for no retry, successful retry execution, repeated error, different
+  error, and uncertain transition; and
+- observation-conditioned recovery rate.
+
+### Descriptive difficulty breakdown
+
+- Final Success Rate, Clean Direct Success Rate, and Final-to-Direct Success Gap;
+- trajectory-class counts; and
+- median SQL-attempt count.
+
+Every calculated rate stores its numerator and denominator. A zero denominator is represented by
+`rate: null` rather than zero.
 
 The later Haiku run can be compared with Nova Lite by matching the same question ID and repetition.
 No agent deployment identifiers are required for that comparison.
@@ -698,7 +710,15 @@ Implemented trajectory tests cover:
 - unchanged retries and separately recorded retry-policy violations; and
 - separate trace and result-evaluation completeness.
 
-The remaining evaluator stage will add coverage for JSON/Markdown output and aggregate reporting.
+Implemented aggregate-metric tests cover:
+
+- final success versus clean direct success and the resulting gap;
+- recovery contribution and recovery rate;
+- mutually exclusive error-response categories and observation-conditioned recovery;
+- ambiguity, interactive, safety, and by-difficulty partitions; and
+- zero denominators producing `null` rates.
+
+The remaining evaluator stage will add coverage for JSON/Markdown report output.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
 will not call AWS or the deployed agent.
@@ -732,8 +752,10 @@ will not call AWS or the deployed agent.
     manual safety verdict.
 13. **Implemented:** load and match a complete run to the benchmark, route every episode to the
     correct evaluator, and prevent unresolved ambiguity SQL from being compared with resolved gold.
-14. Generate JSON and Markdown reports with aggregate metrics.
-15. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+14. **Implemented:** calculate the focused run metrics in memory with explicit numerators and
+    denominators.
+15. Generate JSON and Markdown reports.
+16. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 
