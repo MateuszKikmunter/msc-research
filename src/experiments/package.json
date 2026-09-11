@@ -4,6 +4,7 @@
     "private": true,
     "type": "commonjs",
     "scripts": {
+        "evaluate": "tsx evaluation/evaluate-run.ts",
         "execute": "tsx runner/run-benchmark.ts",
         "gold": "tsx golden-results/generate-golden-results.ts",
         "test": "jest --silent",

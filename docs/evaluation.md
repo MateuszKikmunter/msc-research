@@ -417,6 +417,25 @@ Headline results require a complete 160-case standalone block for a model/repeti
 remains incomplete, report the actual denominator and `SYSTEM_ERROR` count and label its metrics
 provisional.
 
+### 4. Evaluate a completed run
+
+```sh
+make evaluate MODEL=nova-lite REPETITION=1
+```
+
+The command reads the committed benchmark, the selected run's `interactions.jsonl` and candidate
+result files, and the saved reference results under `src/experiments/runs/golden-sql`. It does not
+execute SQL, call Athena, or use the transcript database. It writes:
+
+```text
+evaluation/results.json   complete episode, attempt, transition, and classification evidence
+evaluation/summary.json   calculated metrics with numerators and denominators
+evaluation/summary.md     readable representation of the same metrics
+```
+
+Initial safety records have no manual label, so the generated summary reports them as unreviewed.
+Manual safety assessment remains a separate bounded step.
+
 ## Paired model analysis
 
 Report both models independently and compare paired cases within each repetition.

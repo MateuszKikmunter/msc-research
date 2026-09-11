@@ -2,7 +2,7 @@
 
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
 > grouping, per-attempt evaluation, error-transition extraction, SQL-trajectory classification,
-> and focused aggregate metrics implemented; report generation pending.
+> focused aggregate metrics, and JSON/Markdown report generation implemented.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -110,8 +110,8 @@ src/experiments/
     trajectory-classifier.ts
     run-evaluator.ts
     run-metrics-calculator.ts
-    # planned
     evaluation-report-writer.ts
+    evaluate-run.ts
 
   golden-results/
     generate-golden-results.ts
@@ -163,16 +163,18 @@ execute    Send benchmark questions to the local server
 evaluate   Compare one completed run and generate reports
 ```
 
-The root `Makefile` exposes the implemented generation and execution entry points:
+The root `Makefile` exposes all three entry points:
 
 ```sh
 make gold
 make execute MODEL=nova-lite REPETITION=1
 make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
+make evaluate MODEL=nova-lite REPETITION=1
 ```
 
-`make evaluate` will be added with the evaluator. The commands remain separate so evaluation logic
-can be corrected and rerun without sending the 200 questions to Bedrock again.
+The commands remain separate so evaluation logic can be corrected and rerun without sending the
+200 questions to Bedrock again. Evaluation reads the saved golden and candidate JSON files; it
+does not execute SQL, call Athena, or read SQLite.
 
 ## 6. Golden SQL execution
 
@@ -576,6 +578,18 @@ Every rate includes its raw numerator and denominator so a reported score can be
 denominator produces `null`. Error observations are reduced to one mutually exclusive response
 category per transition, while eventual recovery is measured separately at episode level.
 
+### 12.6 Report generation
+
+`evaluate-run.ts` loads the committed benchmark and selected run's `interactions.jsonl`. The
+existing `ResultArtifactLoader` supplies `AttemptEvaluator` with reference results from
+`runs/golden-sql` and candidate results from the selected model/repetition directory. Failed SQL
+attempts are evaluated from interactions and require no result artifact.
+
+After evaluation, `EvaluationReportWriter` writes the complete `RunEvaluation` to `results.json`,
+the calculated `RunMetrics` to `summary.json`, and a readable representation of the same metrics to
+`summary.md`. Each invocation replaces those three reports for the selected run. It does not alter
+the interaction or candidate files.
+
 ## 13. Cancellation and incomplete runs
 
 There is no pause, checkpoint, progress, or resume behaviour. An unfiltered invocation starts from
@@ -605,9 +619,9 @@ runs/nova-lite/repetition-1/
     summary.md
 ```
 
-`results.json` will contain the complete `RunEvaluation`, with attempt outcomes and error
-transitions nested under their episodes. `summary.json` will contain the focused aggregate scores,
-and `summary.md` will present the same summary for reading. Separate error-transition and
+`results.json` contains the complete `RunEvaluation`, with attempt outcomes and error transitions
+nested under their episodes. `summary.json` contains the focused aggregate scores, and
+`summary.md` presents the same summary for reading. Separate error-transition and
 evaluator-uncertain files would duplicate evidence already contained in `results.json`.
 
 No CSV output is generated in version 1.
@@ -718,7 +732,11 @@ Implemented aggregate-metric tests cover:
 - ambiguity, interactive, safety, and by-difficulty partitions; and
 - zero denominators producing `null` rates.
 
-The remaining evaluator stage will add coverage for JSON/Markdown report output.
+Implemented report tests mock filesystem operations and cover:
+
+- the three agreed output paths;
+- complete evaluation and metric JSON serialization; and
+- Markdown percentages, raw fractions, counts, and unavailable rates.
 
 Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
 will not call AWS or the deployed agent.
@@ -754,7 +772,8 @@ will not call AWS or the deployed agent.
     correct evaluator, and prevent unresolved ambiguity SQL from being compared with resolved gold.
 14. **Implemented:** calculate the focused run metrics in memory with explicit numerators and
     denominators.
-15. Generate JSON and Markdown reports.
+15. **Implemented:** evaluate a selected saved run and generate JSON and Markdown reports through
+    `make evaluate MODEL=<condition> REPETITION=<number>`.
 16. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions

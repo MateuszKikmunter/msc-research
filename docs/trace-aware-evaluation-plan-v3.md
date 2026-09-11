@@ -1571,6 +1571,7 @@ src/experiments/
     run-evaluator
     run-metrics-calculator
     evaluation-report-writer
+    evaluate-run
 
   golden-results/
     generate-golden-results
@@ -1656,7 +1657,8 @@ marked evaluator-uncertain. None of these modules interprets rationale text.
     evaluation policy.
 14. **Implemented:** calculate the focused run-level metrics in memory with explicit numerators and
     denominators.
-15. Export JSON and Markdown evaluation results.
+15. **Implemented:** load a selected completed run, read its saved golden and candidate results,
+    and export JSON and Markdown evaluation reports without calling Athena or SQLite.
 16. Pilot 20 strategically selected cases across both models.
 17. Complete the bounded manual audit and fix evaluator defects.
 18. Run the first complete benchmark pass per model.

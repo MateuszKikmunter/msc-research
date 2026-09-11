@@ -1,4 +1,4 @@
-.PHONY: start start-backend start-frontend execute gold test-experiments typecheck-experiments
+.PHONY: start start-backend start-frontend evaluate execute gold test-experiments typecheck-experiments
 
 MODEL ?= nova-lite
 REPETITION ?= 1
@@ -18,6 +18,9 @@ test:
 
 execute:
 	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) QUESTION_ID=$(QUESTION_ID) npm --prefix src/experiments run execute
+
+evaluate:
+	MODEL_CONDITION=$(MODEL) REPETITION=$(REPETITION) npm --prefix src/experiments run evaluate
 
 gold:
 	npm --prefix src/experiments run gold

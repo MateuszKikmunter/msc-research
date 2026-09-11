@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **2026-09-11** — Added the saved-run evaluation command and report writer. The new `make evaluate`
+  target accepts the selected model condition and repetition, loads the committed benchmark,
+  interactions, complete candidate results, and saved golden-result JSON files, and runs the
+  deterministic evaluator and focused metrics calculator without calling Athena or SQLite. It
+  writes `results.json`, `summary.json`, and `summary.md` under the selected run's evaluation
+  directory. The Markdown report includes percentages together with raw fractions, trajectory and
+  error-response counts, separate ambiguity/interactive/safety sections, and by-difficulty
+  results. Added filesystem-mocked Jest coverage and updated the experiment and evaluation
+  documentation.
+
 - **2026-09-10** — Added the pure in-memory run metrics calculator for the focused trace-aware
   analysis. It reports auditable numerator/denominator/rate values for final success, clean direct
   success, their gap, recovered-success contribution, recovery, clarification, interactive turns,
