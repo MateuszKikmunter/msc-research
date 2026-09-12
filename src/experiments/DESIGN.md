@@ -672,6 +672,12 @@ The evaluator calculates the metrics already defined in the v3 plan with separat
 Every calculated rate stores its numerator and denominator. A zero denominator is represented by
 `rate: null` rather than zero.
 
+`SYSTEM_ERROR` outcomes remain in trajectory-class counts and detailed evaluation artifacts,
+but are excluded from model-metric numerators and denominators, error-response summaries,
+and SQL-attempt medians. Interactive turn accuracy includes evaluable turns; complete-episode
+accuracy excludes episodes containing any system-error turn. Standalone Markdown summaries
+with system-error exclusions are marked provisional and show the actual evaluable denominator.
+
 The later Haiku run can be compared with Nova Lite by matching the same question ID and repetition.
 No agent deployment identifiers are required for that comparison.
 

@@ -68,7 +68,10 @@ export class RunMetricsCalculator {
             )
         );
 
-        const standaloneEpisodes = standalone.map(({ episode }) => episode);
+        const allStandaloneEpisodes = standalone.map(({ episode }) => episode);
+        const standaloneEpisodes = allStandaloneEpisodes.filter((episode) =>
+            this.hasEvaluableOutcome(episode)
+        );
 
         const standaloneTrajectoryResults = standaloneEpisodes.flatMap(
             ({ trajectoryResults }) => trajectoryResults
@@ -97,10 +100,9 @@ export class RunMetricsCalculator {
             executionErrorRecoveryCount + semanticRevisionRecoveryCount;
 
         const recoverableFailureCount = standaloneTrajectoryResults.filter(
-            ({ trajectoryClass, trajectoryFacts }) =>
-                trajectoryClass !== 'SYSTEM_ERROR' &&
-                (trajectoryFacts.firstAttemptOutcome === 'execution_error' ||
-                    trajectoryFacts.firstAttemptOutcome === 'semantic_error')
+            ({ trajectoryFacts }) =>
+                trajectoryFacts.firstAttemptOutcome === 'execution_error' ||
+                trajectoryFacts.firstAttemptOutcome === 'semantic_error'
         ).length;
 
         const errorTransitions = standaloneTrajectoryResults.flatMap(
@@ -142,8 +144,9 @@ export class RunMetricsCalculator {
                     ).length,
                     standaloneEpisodes.length
                 ),
-                trajectoryClassCounts:
-                    this.countTrajectoryClasses(standaloneEpisodes),
+                trajectoryClassCounts: this.countTrajectoryClasses(
+                    allStandaloneEpisodes
+                ),
                 executionErrorRecoveryCount,
                 semanticRevisionRecoveryCount
             },
@@ -160,7 +163,9 @@ export class RunMetricsCalculator {
                 )
             },
             ambiguity: this.calculateAmbiguityMetrics(
-                ambiguity.map(({ episode }) => episode)
+                ambiguity
+                    .map(({ episode }) => episode)
+                    .filter((episode) => this.hasEvaluableOutcome(episode))
             ),
             interactive: this.calculateInteractiveMetrics(
                 interactive.map(({ episode }) => episode)
@@ -206,8 +211,13 @@ export class RunMetricsCalculator {
     private calculateInteractiveMetrics(
         episodes: EvaluatedBenchmarkEpisode[]
     ): RunMetrics['interactive'] {
-        const turns = episodes.flatMap(
-            ({ trajectoryResults }) => trajectoryResults
+        const turns = episodes.flatMap(({ trajectoryResults }) =>
+            trajectoryResults.filter(
+                ({ trajectoryClass }) => trajectoryClass !== 'SYSTEM_ERROR'
+            )
+        );
+        const evaluableEpisodes = episodes.filter((episode) =>
+            this.hasEvaluableOutcome(episode)
         );
 
         return {
@@ -219,15 +229,10 @@ export class RunMetricsCalculator {
                 turns.length
             ),
             completeEpisodeAccuracy: this.rate(
-                episodes.filter(
-                    ({ trajectoryResults }) =>
-                        trajectoryResults.length > 0 &&
-                        trajectoryResults.every(
-                            ({ trajectoryFacts }) =>
-                                trajectoryFacts.terminalResultCorrect === true
-                        )
+                evaluableEpisodes.filter((episode) =>
+                    this.isFinalSuccess(episode)
                 ).length,
-                episodes.length
+                evaluableEpisodes.length
             )
         };
     }
@@ -275,7 +280,10 @@ export class RunMetricsCalculator {
 
         return Object.fromEntries(
             [...episodesByDifficulty.entries()].map(
-                ([difficulty, episodes]) => {
+                ([difficulty, allEpisodes]) => {
+                    const episodes = allEpisodes.filter((episode) =>
+                        this.hasEvaluableOutcome(episode)
+                    );
                     const finalSuccessCount = episodes.filter((episode) =>
                         this.isFinalSuccess(episode)
                     ).length;
@@ -306,12 +314,20 @@ export class RunMetricsCalculator {
                                 episodes.length
                             ),
                             trajectoryClassCounts:
-                                this.countTrajectoryClasses(episodes),
+                                this.countTrajectoryClasses(allEpisodes),
                             medianSqlAttemptCount: this.median(attemptCounts)
                         }
                     ];
                 }
             )
+        );
+    }
+
+    // A correct terminal result does not make an incomplete trace evaluable.
+    // Keep these episodes in audit counts, but exclude them from scored rates.
+    private hasEvaluableOutcome(episode: EvaluatedBenchmarkEpisode): boolean {
+        return episode.trajectoryResults.every(
+            ({ trajectoryClass }) => trajectoryClass !== 'SYSTEM_ERROR'
         );
     }
 

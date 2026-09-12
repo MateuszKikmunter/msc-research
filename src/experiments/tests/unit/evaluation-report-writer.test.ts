@@ -58,6 +58,11 @@ describe('EvaluationReportWriter', () => {
         const markdown = jest.mocked(writeFile).mock.calls[2]?.[1];
         expect(markdown).toEqual(
             expect.stringContaining(
+                'Provisional: system-error cases are excluded'
+            )
+        );
+        expect(markdown).toEqual(
+            expect.stringContaining(
                 '- Observation-conditioned Recovery Rate: N/A (0/0)'
             )
         );
@@ -100,7 +105,7 @@ function createRunMetrics(): RunMetrics {
                 SEMANTIC_REVISION_SUCCESS: 8,
                 EXECUTED_SEMANTIC_FAILURE: 20,
                 UNRECOVERED_EXECUTION_FAILURE: 10,
-                NO_SQL: 5,
+                NO_SQL: 10,
                 SYSTEM_ERROR: 5
             }),
             executionErrorRecoveryCount: 12,

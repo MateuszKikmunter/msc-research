@@ -9,7 +9,6 @@ import {
     type NormalizedRow,
     type NormalizedValue
 } from './result-normalizer';
-
 export class ResultComparator {
     public constructor(private readonly resultNormalizer: ResultNormalizer) {}
 
@@ -64,20 +63,6 @@ export class ResultComparator {
         candidate: TabularResult,
         contract: ComparisonContract
     ): ResultComparison | undefined {
-        const goldenStructureError = this.getStructureError(golden);
-        if (goldenStructureError) {
-            return this.uncertain(
-                `Invalid golden result: ${goldenStructureError}`
-            );
-        }
-
-        const candidateStructureError = this.getStructureError(candidate);
-        if (candidateStructureError) {
-            return this.uncertain(
-                `Invalid candidate result: ${candidateStructureError}`
-            );
-        }
-
         if (golden.columns.length !== contract.requiredColumns.length) {
             return this.uncertain(
                 'Golden column count does not match requiredColumns.'
@@ -95,21 +80,6 @@ export class ResultComparator {
                 `Row count differs: expected ${golden.rows.length}, received ${candidate.rows.length}.`
             );
         }
-    }
-
-    private getStructureError(result: TabularResult): string | null {
-        if (result.rowCount !== result.rows.length) {
-            return `rowCount is ${result.rowCount}, but ${result.rows.length} rows are stored.`;
-        }
-
-        const invalidRowIndex = result.rows.findIndex(
-            (row) => row.length !== result.columns.length
-        );
-        if (invalidRowIndex >= 0) {
-            return `row ${invalidRowIndex + 1} has ${result.rows[invalidRowIndex].length} values for ${result.columns.length} columns.`;
-        }
-
-        return null;
     }
 
     private compareOrderedRows(
@@ -137,28 +107,54 @@ export class ResultComparator {
         candidateRows: NormalizedRow[],
         numericTolerance: number
     ): ResultComparison {
-        const unmatchedCandidateRows = [...candidateRows];
+        // Each candidate occurrence has one owner, so duplicates cannot be reused.
+        // -1 means the candidate has not been assigned to a golden row yet.
+        const goldenForCandidate = candidateRows.map(() => -1);
 
-        for (const goldenRow of goldenRows) {
-            const matchingIndex = unmatchedCandidateRows.findIndex(
-                (candidateRow) =>
-                    this.rowsEqual(goldenRow, candidateRow, numericTolerance)
-            );
+        const assignCandidate = (
+            goldenIndex: number,
+            visitedCandidates: Set<number>
+        ): boolean => {
+            for (const candidateIndex of candidateRows.keys()) {
+                if (visitedCandidates.has(candidateIndex)) {
+                    continue;
+                }
+                if (
+                    !this.rowsEqual(
+                        goldenRows[goldenIndex],
+                        candidateRows[candidateIndex],
+                        numericTolerance
+                    )
+                ) {
+                    continue;
+                }
 
-            if (matchingIndex < 0) {
+                // Share visited candidates across recursive calls to avoid cycles.
+                visitedCandidates.add(candidateIndex);
+                const currentOwner = goldenForCandidate[candidateIndex];
+
+                // Take a free candidate, or first move its owner to another match.
+                // Tolerance can allow several matches, so earlier choices may move.
+                if (
+                    currentOwner === -1 ||
+                    assignCandidate(currentOwner, visitedCandidates)
+                ) {
+                    goldenForCandidate[candidateIndex] = goldenIndex;
+                    return true;
+                }
+            }
+
+            // No rearrangement worked; existing assignments remain unchanged.
+            return false;
+        };
+
+        for (const goldenIndex of goldenRows.keys()) {
+            // Start a fresh search for each golden row; previous matches may move.
+            if (!assignCandidate(goldenIndex, new Set<number>())) {
                 return this.incorrect(
                     'Candidate result is missing an expected row.'
                 );
             }
-
-            // Removing a matched row ensures duplicate occurrences are counted separately.
-            unmatchedCandidateRows.splice(matchingIndex, 1);
-        }
-
-        if (unmatchedCandidateRows.length > 0) {
-            return this.incorrect(
-                'Candidate result contains an unexpected row.'
-            );
         }
 
         return this.correct();

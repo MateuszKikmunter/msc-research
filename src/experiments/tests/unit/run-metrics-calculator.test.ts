@@ -221,6 +221,103 @@ describe('RunMetricsCalculator', () => {
         expect(metrics.standalone.trajectoryClassCounts.SYSTEM_ERROR).toBe(1);
     });
 
+    it('excludes system errors even when their terminal SQL result is correct', () => {
+        const records = [
+            benchmarkRecord('E1', 'execute', 'easy'),
+            benchmarkRecord('E2', 'execute', 'easy'),
+            benchmarkRecord('A1', 'clarify_then_execute', 'ambiguous'),
+            benchmarkRecord('A2', 'clarify_then_execute', 'ambiguous'),
+            benchmarkRecord('C1', 'execute_sequence', 'interactive'),
+            benchmarkRecord('C2', 'execute_sequence', 'interactive')
+        ];
+        const systemError = trajectory(
+            'SYSTEM_ERROR',
+            {
+                terminalResultCorrect: true,
+                firstAttemptOutcome: 'execution_error',
+                executionErrorObserved: true,
+                traceComplete: false,
+                sqlAttemptCount: 20
+            },
+            [errorTransition({ transitionUncertain: true })]
+        );
+        const metrics = calculator.calculate({
+            benchmarkRecords: records,
+            runEvaluation: runEvaluation([
+                episode('E1', [trajectory('DIRECT_SUCCESS')]),
+                episode('E2', [systemError], 'unnecessary'),
+                episode(
+                    'A1',
+                    [trajectory('DIRECT_SUCCESS')],
+                    'appropriate',
+                    true
+                ),
+                episode('A2', [systemError], 'appropriate', true),
+                episode('C1', [trajectory('DIRECT_SUCCESS')]),
+                episode('C2', [trajectory('DIRECT_SUCCESS'), systemError])
+            ])
+        });
+
+        expect(metrics.standalone.finalSuccessRate).toEqual({
+            numerator: 1,
+            denominator: 1,
+            rate: 1
+        });
+        expect(metrics.standalone.cleanDirectSuccessRate).toEqual({
+            numerator: 1,
+            denominator: 1,
+            rate: 1
+        });
+        expect(metrics.standalone.unnecessaryClarificationRate.numerator).toBe(
+            0
+        );
+        expect(metrics.standalone.trajectoryClassCounts.SYSTEM_ERROR).toBe(1);
+        expect(metrics.errorResponse.transitionCount).toBe(0);
+        expect(
+            metrics.errorResponse.observationConditionedRecoveryRate.denominator
+        ).toBe(0);
+        expect(metrics.byDifficulty.easy.finalSuccessRate.denominator).toBe(1);
+        expect(metrics.byDifficulty.easy.medianSqlAttemptCount).toBe(1);
+        expect(
+            metrics.byDifficulty.easy.trajectoryClassCounts.SYSTEM_ERROR
+        ).toBe(1);
+        expect(metrics.ambiguity.clarificationDetectionRate.denominator).toBe(
+            1
+        );
+        expect(metrics.ambiguity.scriptedContinuationCount).toBe(1);
+        expect(metrics.ambiguity.postClarificationAccuracy).toEqual({
+            numerator: 1,
+            denominator: 1,
+            rate: 1
+        });
+        expect(metrics.interactive.turnAccuracy).toEqual({
+            numerator: 2,
+            denominator: 2,
+            rate: 1
+        });
+        expect(metrics.interactive.completeEpisodeAccuracy).toEqual({
+            numerator: 1,
+            denominator: 1,
+            rate: 1
+        });
+    });
+
+    it('reports no scored standalone cases when every outcome is a system error', () => {
+        const metrics = calculator.calculate({
+            benchmarkRecords: [benchmarkRecord('E1', 'execute', 'easy')],
+            runEvaluation: runEvaluation([
+                episode('E1', [trajectory('SYSTEM_ERROR')])
+            ])
+        });
+        expect(metrics.standalone.finalSuccessRate).toEqual({
+            numerator: 0,
+            denominator: 0,
+            rate: null
+        });
+        expect(metrics.byDifficulty.easy.medianSqlAttemptCount).toBeNull();
+        expect(metrics.standalone.trajectoryClassCounts.SYSTEM_ERROR).toBe(1);
+    });
+
     it('reports ambiguity and interactive behavior separately', () => {
         const records = [
             benchmarkRecord('A1', 'clarify_then_execute', 'ambiguous'),

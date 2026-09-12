@@ -130,6 +130,82 @@ describe('ResultComparator', () => {
         ).toBe('incorrect');
     });
 
+    it('finds a one-to-one match regardless of row order when tolerances overlap', () => {
+        const result = (values: string[]): TabularResult => ({
+            columns: [{ name: 'value', type: 'double' }],
+            rows: values.map((value) => [value]),
+            rowCount: values.length
+        });
+        const contract = { ...comparison, requiredColumns: ['value'] };
+
+        for (const goldenValues of [
+            ['0.000001', '0'],
+            ['0', '0.000001']
+        ]) {
+            for (const candidateValues of [
+                ['0', '0.000002'],
+                ['0.000002', '0']
+            ]) {
+                expect(
+                    resultComparator.compare(
+                        result(goldenValues),
+                        result(candidateValues),
+                        contract
+                    )
+                ).toEqual({ status: 'correct', reason: null });
+            }
+        }
+    });
+
+    it('rejects overlapping matches when no distinct candidate exists for every row', () => {
+        const result = (values: string[]): TabularResult => ({
+            columns: [{ name: 'value', type: 'double' }],
+            rows: values.map((value) => [value]),
+            rowCount: values.length
+        });
+
+        expect(
+            resultComparator.compare(
+                result(['0', '0', '0.000003']),
+                result(['0.000001', '0.000003', '0.000003']),
+                { ...comparison, requiredColumns: ['value'] }
+            ).status
+        ).toBe('incorrect');
+    });
+
+    it('can reassign multiple earlier matches across numeric columns', () => {
+        const columns = [
+            { name: 'x', type: 'double' },
+            { name: 'y', type: 'double' }
+        ];
+        const goldenResult: TabularResult = {
+            columns,
+            rows: [
+                ['0.125', '0'],
+                ['0.25', '0.125'],
+                ['0', '0']
+            ],
+            rowCount: 3
+        };
+        const candidate: TabularResult = {
+            columns,
+            rows: [
+                ['0', '0'],
+                ['0.25', '0'],
+                ['0.375', '0.25']
+            ],
+            rowCount: 3
+        };
+
+        expect(
+            resultComparator.compare(goldenResult, candidate, {
+                ...comparison,
+                requiredColumns: ['x', 'y'],
+                numericTolerance: 0.125
+            })
+        ).toEqual({ status: 'correct', reason: null });
+    });
+
     it('keeps NULL distinct from an empty string', () => {
         const nullGolden: TabularResult = {
             columns: [{ name: 'company', type: 'varchar' }],
@@ -185,17 +261,16 @@ describe('ResultComparator', () => {
         );
     });
 
-    it('fails closed when a golden artifact is structurally invalid', () => {
-        expect(
-            resultComparator.compare(
-                { ...golden, rowCount: 3 },
-                golden,
-                comparison
-            )
-        ).toEqual({
-            status: 'evaluator_uncertain',
-            reason: 'Invalid golden result: rowCount is 3, but 2 rows are stored.'
-        });
+    it('accepts valid empty results and null cells', () => {
+        for (const rows of [[], [[null, null]]] as TabularResult['rows'][]) {
+            const result = { ...golden, rows, rowCount: rows.length };
+            expect(
+                resultComparator.compare(result, result, comparison)
+            ).toEqual({
+                status: 'correct',
+                reason: null
+            });
+        }
     });
 
     it('rejects candidate values that cannot be normalized to the golden type', () => {

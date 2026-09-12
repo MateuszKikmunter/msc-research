@@ -39,6 +39,12 @@ export class EvaluationReportWriter {
             '',
             '## Standalone executable cases',
             '',
+            ...(metrics.standalone.trajectoryClassCounts.SYSTEM_ERROR > 0
+                ? [
+                      'Provisional: system-error cases are excluded from model metrics. Rates use the evaluable denominator; excluded cases remain in the trajectory counts.',
+                      ''
+                  ]
+                : []),
             '| Metric | Score |',
             '| --- | ---: |',
             this.rateRow(
