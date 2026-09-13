@@ -1582,13 +1582,13 @@ src/experiments/
   shared/
     benchmark-episode-validator
     type-guards
-    services/
-      athena/
-        athena-service
-      benchmark/
-        benchmark-loader
-      trace/
-        trace-event-inspector
+    athena-service
+    benchmark-loader
+    trace-event-inspector
+    json-file-reader
+    json-file-writer
+    experiment-cli
+    error-message
   runs/
     golden-sql/
 ```

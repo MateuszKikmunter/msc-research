@@ -4,8 +4,8 @@ import {
     configureExperimentEnvironment,
     runExperimentCli
 } from '../shared/experiment-cli';
-import { AthenaService } from '../shared/services/athena/athena-service';
-import { BenchmarkLoader } from '../shared/services/benchmark/benchmark-loader';
+import { AthenaService } from '../shared/athena-service';
+import { loadBenchmark } from '../shared/benchmark-loader';
 import { AgentResponseInspector } from './agent-response-inspector';
 import { CandidateResultCollector } from './candidate-result-collector';
 import { EpisodeRunner } from './episode-runner';
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
         runDirectory
     );
 
-    const benchmark = await BenchmarkLoader.load();
+    const benchmark = await loadBenchmark();
     const run = await questionRunner.run(
         benchmark,
         modelCondition,

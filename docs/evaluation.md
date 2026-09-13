@@ -550,3 +550,11 @@ Text-to-SQL pipeline, including a paired Nova Lite/Haiku 4.5 comparison.
 Mitigate these threats with committed benchmark definitions, fresh sessions, the same deployed
 data and protocol, complete result retrieval, repeated paired runs, explicit uncertainty states,
 and bounded manual validation.
+
+### Implementation maintenance (2026-09-13)
+
+The runner now shares its standalone/ambiguity continuation flow without changing messages or session
+policy. `loadBenchmark`, `buildGoldQueryDefinitions`, and `classifyTrajectory` are functions; common
+I/O and trace modules are under `src/experiments/shared/`. These structural changes do not change
+saved-result scoring or require model reruns. See `src/experiments/DESIGN.md` for retained evaluator
+fixes and deferred work. Study-level paired analysis and uncertainty intervals remain the final step.

@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import type { GoldenResultFile, GoldQueryDefinition } from '../types';
-import { AthenaService } from '../shared/services/athena/athena-service';
+import { AthenaService } from '../shared/athena-service';
 import { GoldSqlResolver } from './gold-sql-resolver';
 import { GoldenResultWriter } from './golden-result-writer';
 

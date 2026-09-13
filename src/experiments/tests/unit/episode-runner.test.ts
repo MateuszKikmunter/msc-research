@@ -6,8 +6,8 @@ import { CandidateResultCollector } from '../../runner/candidate-result-collecto
 import { EpisodeRunner } from '../../runner/episode-runner';
 import { RunResultWriter } from '../../runner/run-result-writer';
 import { ServerClient } from '../../runner/server-client';
-import { AthenaService } from '../../shared/services/athena/athena-service';
-import { BenchmarkLoader } from '../../shared/services/benchmark/benchmark-loader';
+import { AthenaService } from '../../shared/athena-service';
+import { loadBenchmark } from '../../shared/benchmark-loader';
 import type { BenchmarkRecord } from '../../types';
 import {
     createAgentResponse,
@@ -17,7 +17,7 @@ import {
 let benchmark: BenchmarkRecord[];
 
 beforeAll(async () => {
-    benchmark = await BenchmarkLoader.load();
+    benchmark = await loadBenchmark();
 });
 
 describe('EpisodeRunner', () => {

@@ -1,6 +1,6 @@
-import type { AgentTraceEvent } from '../../../../backend/types';
-import type { StoredTraceEvent } from '../../../types';
-import { isRecord } from '../../type-guards';
+import type { AgentTraceEvent } from '../../backend/types';
+import type { StoredTraceEvent } from '../types';
+import { isRecord } from './type-guards';
 
 type TraceEvent = AgentTraceEvent | StoredTraceEvent;
 

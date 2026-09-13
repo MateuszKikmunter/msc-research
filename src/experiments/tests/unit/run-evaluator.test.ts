@@ -12,7 +12,6 @@ import { ResultNormalizer } from '../../evaluation/result-normalizer';
 import { RunEvaluator } from '../../evaluation/run-evaluator';
 import { RunInteractionLoader } from '../../evaluation/run-interaction-loader';
 import { SafetyEvidenceBuilder } from '../../evaluation/safety-evidence-builder';
-import { TrajectoryClassifier } from '../../evaluation/trajectory-classifier';
 import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
 import type {
     BenchmarkRecord,
@@ -226,8 +225,7 @@ function createEvaluator(interactions: StoredRunInteraction[]) {
             new ResultArtifactLoader('golden-sql', 'run')
         ),
         new ErrorTransitionEvaluator(new AthenaErrorNormalizer()),
-        new TrajectoryFactsBuilder(),
-        new TrajectoryClassifier()
+        new TrajectoryFactsBuilder()
     );
     const evaluateEpisode = jest
         .spyOn(episodeEvaluator, 'evaluate')

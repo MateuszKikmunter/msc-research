@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { readJsonFile } from '../shared/services/storage/json-file-reader';
+import { readJsonFile } from '../shared/json-file-reader';
 import type { CandidateResultFile, GoldenResultFile } from '../types';
 
 export class ResultArtifactLoader {

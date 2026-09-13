@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { writeJsonFile } from '../shared/services/storage/json-file-writer';
+import { writeJsonFile } from '../shared/json-file-writer';
 import type { GoldenResultFile } from '../types';
 
 export class GoldenResultWriter {

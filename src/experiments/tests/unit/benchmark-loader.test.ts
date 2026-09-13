@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { BenchmarkLoader } from '../../shared/services/benchmark/benchmark-loader';
-import { GoldQueryDefinitionBuilder } from '../../golden-results/gold-query-definition-builder';
+import { loadBenchmark } from '../../shared/benchmark-loader';
+import { buildGoldQueryDefinitions } from '../../golden-results/gold-query-definition-builder';
 
 const EXPECTED_BENCHMARK_QUESTION_COUNT = 195;
 const EXPECTED_GOLD_QUERY_DEFINITION_COUNT = 190;
@@ -12,8 +12,8 @@ const EXPECTED_CONVERSATIONAL_TURN_NUMBER = 2;
 
 describe('benchmark loader', () => {
     it('loads the committed benchmark and exposes each golden query', async () => {
-        const benchmark = await BenchmarkLoader.load();
-        const definitions = GoldQueryDefinitionBuilder.build(benchmark);
+        const benchmark = await loadBenchmark();
+        const definitions = buildGoldQueryDefinitions(benchmark);
 
         expect(benchmark).toHaveLength(EXPECTED_BENCHMARK_QUESTION_COUNT);
         expect(definitions).toHaveLength(EXPECTED_GOLD_QUERY_DEFINITION_COUNT);

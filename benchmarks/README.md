@@ -73,16 +73,16 @@ Complete paginated results are written as JSON under
 `CB200-E012.json` and `CB200-A001.json`. Interactive files also include the turn number, such as
 `CB200-C001-T01.json`.
 
-The generator uses named static services for each step:
+The generator uses named functions and components for each step:
 
-- `BenchmarkLoader` reads the committed JSON;
-- `GoldQueryDefinitionBuilder` extracts executable definitions;
+- `loadBenchmark` reads the committed JSON;
+- `buildGoldQueryDefinitions` extracts executable definitions;
 - `GoldSqlResolver` resolves the two interactive placeholders from preceding golden results;
 - `AthenaService` executes SQL and retrieves every result page;
 - `GoldenResultGenerator` coordinates execution; and
 - `GoldenResultWriter` writes JSON reference results.
 
-AWS query access remains isolated in `shared/services/athena/`. Golden-result definition building,
+AWS query access remains isolated in `shared/athena-service.ts`. Golden-result definition building,
 placeholder resolution, orchestration, and writing live in `src/experiments/golden-results/`.
 
 No CSV, manifest, hash, or separate cache is generated. Running `make gold` again overwrites the

@@ -12,7 +12,7 @@ import {
 } from '../shared/benchmark-episode-validator';
 import { AttemptEvaluator } from './attempt-evaluator';
 import { ErrorTransitionEvaluator } from './error-transition-evaluator';
-import { TrajectoryClassifier } from './trajectory-classifier';
+import { classifyTrajectory } from './trajectory-classifier';
 import { TrajectoryFactsBuilder } from './trajectory-facts-builder';
 
 interface EvaluateEpisodeOptions extends BenchmarkEpisodeOptions {
@@ -30,8 +30,7 @@ export class EpisodeEvaluator {
     public constructor(
         private readonly attemptEvaluator: AttemptEvaluator,
         private readonly errorTransitionEvaluator: ErrorTransitionEvaluator,
-        private readonly trajectoryFactsBuilder: TrajectoryFactsBuilder,
-        private readonly trajectoryClassifier: TrajectoryClassifier
+        private readonly trajectoryFactsBuilder: TrajectoryFactsBuilder
     ) {}
 
     public async evaluate(
@@ -119,7 +118,7 @@ export class EpisodeEvaluator {
             attemptEvaluations,
             errorTransitions,
             trajectoryFacts,
-            trajectoryClass: this.trajectoryClassifier.classify(trajectoryFacts)
+            trajectoryClass: classifyTrajectory(trajectoryFacts)
         };
     }
 

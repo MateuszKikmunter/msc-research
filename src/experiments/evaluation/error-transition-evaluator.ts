@@ -3,7 +3,7 @@ import type {
     StoredRunInteraction,
     StoredTraceEvent
 } from '../types';
-import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { TraceEventInspector } from '../shared/trace-event-inspector';
 import { isRecord } from '../shared/type-guards';
 import { AthenaErrorNormalizer } from './athena-error-normalizer';
 

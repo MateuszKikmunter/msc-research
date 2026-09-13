@@ -8,7 +8,6 @@ import { ErrorTransitionEvaluator } from '../../evaluation/error-transition-eval
 import { ResultArtifactLoader } from '../../evaluation/result-artifact-loader';
 import { ResultComparator } from '../../evaluation/result-comparator';
 import { ResultNormalizer } from '../../evaluation/result-normalizer';
-import { TrajectoryClassifier } from '../../evaluation/trajectory-classifier';
 import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
 import type {
     BenchmarkRecord,
@@ -76,8 +75,7 @@ describe('EpisodeEvaluator', () => {
         episodeEvaluator = new EpisodeEvaluator(
             attemptEvaluator,
             new ErrorTransitionEvaluator(new AthenaErrorNormalizer()),
-            new TrajectoryFactsBuilder(),
-            new TrajectoryClassifier()
+            new TrajectoryFactsBuilder()
         );
     });
 

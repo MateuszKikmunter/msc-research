@@ -5,7 +5,7 @@ import type {
     StoredRunInteraction
 } from '../types';
 import { validateMatchingQuestion } from '../shared/benchmark-episode-validator';
-import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { TraceEventInspector } from '../shared/trace-event-inspector';
 
 export class ClarificationEvaluator {
     public constructor(

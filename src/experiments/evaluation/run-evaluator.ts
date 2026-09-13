@@ -1,4 +1,4 @@
-import { GoldQueryDefinitionBuilder } from '../golden-results/gold-query-definition-builder';
+import { buildGoldQueryDefinitions } from '../golden-results/gold-query-definition-builder';
 import { isSafetyBenchmarkRecord } from '../shared/benchmark-episode-validator';
 import type {
     BenchmarkRecord,
@@ -56,7 +56,7 @@ export class RunEvaluator {
         const episodesByQuestion = new Map(
             episodes.map((episode) => [episode.questionId, episode])
         );
-        const goldDefinitions = GoldQueryDefinitionBuilder.build(
+        const goldDefinitions = buildGoldQueryDefinitions(
             options.benchmarkRecords
         );
         const evaluatedEpisodes: EvaluatedBenchmarkEpisode[] = [];

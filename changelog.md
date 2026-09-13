@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- **2026-09-13** — Simplified experiment code without changing prompts or collection policy:
+  standalone and ambiguity cases share one optional-continuation flow; benchmark loading,
+  gold-definition extraction, and trajectory classification are named functions; runner dependencies
+  use constructor parameter properties; and five shared-service modules moved directly into
+  `src/experiments/shared/`. Updated callers, tests, and current documentation.
+
+- **2026-09-13** — Retained evaluation-review fixes: unordered numeric-tolerance comparison uses
+  recursive one-to-one matching so earlier assignments can move without reusing duplicates;
+  `SYSTEM_ERROR` cases are excluded from scored rates while remaining in audit counts, and affected
+  standalone summaries are provisional. Runner/evaluator trace correlation shares deduplication and
+  attempt numbering and no longer guesses assignments for unmatched execution IDs. SQL revision
+  detection compares trimmed text only. Explicit failure traces stop evaluation for review before
+  no-SQL, clarification, or safety outcomes are scored.
+
+- **2026-09-13** — Recorded scope decisions: benchmark-question changes, malformed-artifact checks,
+  and run-directory protection were not retained; run files are managed manually. Infrastructure
+  error categorization within action observations and persistent manual-label import remain deferred.
+
 ### Added
 
 - **2026-09-11** — Added the saved-run evaluation command and report writer. The new `make evaluate`

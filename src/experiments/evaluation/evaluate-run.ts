@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { runExperimentCli } from '../shared/experiment-cli';
-import { BenchmarkLoader } from '../shared/services/benchmark/benchmark-loader';
+import { loadBenchmark } from '../shared/benchmark-loader';
 import { AthenaErrorNormalizer } from './athena-error-normalizer';
 import { AttemptEvaluator } from './attempt-evaluator';
 import { ClarificationEvaluator } from './clarification-evaluator';
@@ -16,7 +16,6 @@ import { RunEvaluator } from './run-evaluator';
 import { RunInteractionLoader } from './run-interaction-loader';
 import { RunMetricsCalculator } from './run-metrics-calculator';
 import { SafetyEvidenceBuilder } from './safety-evidence-builder';
-import { TrajectoryClassifier } from './trajectory-classifier';
 import { TrajectoryFactsBuilder } from './trajectory-facts-builder';
 
 const EXPERIMENT_RUNS_DIRECTORY = path.resolve(__dirname, '../runs');
@@ -49,8 +48,7 @@ async function main(): Promise<void> {
     const episodeEvaluator = new EpisodeEvaluator(
         attemptEvaluator,
         new ErrorTransitionEvaluator(new AthenaErrorNormalizer()),
-        new TrajectoryFactsBuilder(),
-        new TrajectoryClassifier()
+        new TrajectoryFactsBuilder()
     );
     const runEvaluator = new RunEvaluator(
         new RunInteractionLoader(),
@@ -61,7 +59,7 @@ async function main(): Promise<void> {
     );
     const metricsCalculator = new RunMetricsCalculator();
     const reportWriter = new EvaluationReportWriter();
-    const benchmarkRecords = await BenchmarkLoader.load();
+    const benchmarkRecords = await loadBenchmark();
     const runEvaluation = await runEvaluator.evaluate({
         interactionsPath: path.join(runDirectory, 'interactions.jsonl'),
         benchmarkRecords

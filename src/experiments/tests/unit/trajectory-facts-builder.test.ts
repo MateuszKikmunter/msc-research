@@ -1,12 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { TrajectoryClassifier } from '../../evaluation/trajectory-classifier';
+import { classifyTrajectory } from '../../evaluation/trajectory-classifier';
 import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
 import type { AttemptEvaluation, ErrorTransition } from '../../types';
 
 describe('TrajectoryFactsBuilder', () => {
     const factsBuilder = new TrajectoryFactsBuilder();
-    const classifier = new TrajectoryClassifier();
 
     it('builds and classifies a direct success', () => {
         const facts = factsBuilder.build({
@@ -32,7 +31,7 @@ describe('TrajectoryFactsBuilder', () => {
             sqlAttemptCount: 1,
             athenaErrorCount: 0
         });
-        expect(classifier.classify(facts)).toBe('DIRECT_SUCCESS');
+        expect(classifyTrajectory(facts)).toBe('DIRECT_SUCCESS');
     });
 
     it('recognizes recovery from an execution error', () => {
@@ -52,7 +51,7 @@ describe('TrajectoryFactsBuilder', () => {
             recovered: true,
             traceComplete: true
         });
-        expect(classifier.classify(facts)).toBe('EXECUTION_ERROR_RECOVERED');
+        expect(classifyTrajectory(facts)).toBe('EXECUTION_ERROR_RECOVERED');
     });
 
     it('recognizes a successful semantic revision', () => {
@@ -65,7 +64,7 @@ describe('TrajectoryFactsBuilder', () => {
         });
 
         expect(facts.recovered).toBe(true);
-        expect(classifier.classify(facts)).toBe('SEMANTIC_REVISION_SUCCESS');
+        expect(classifyTrajectory(facts)).toBe('SEMANTIC_REVISION_SUCCESS');
     });
 
     it('records regression and a redundant action after a correct result', () => {
@@ -82,7 +81,7 @@ describe('TrajectoryFactsBuilder', () => {
             redundantActionObserved: true,
             regressedAfterCorrectAttempt: true
         });
-        expect(classifier.classify(facts)).toBe('EXECUTED_SEMANTIC_FAILURE');
+        expect(classifyTrajectory(facts)).toBe('EXECUTED_SEMANTIC_FAILURE');
     });
 
     it('classifies a terminal execution error as unrecovered', () => {
@@ -101,9 +100,7 @@ describe('TrajectoryFactsBuilder', () => {
             ]
         });
 
-        expect(classifier.classify(facts)).toBe(
-            'UNRECOVERED_EXECUTION_FAILURE'
-        );
+        expect(classifyTrajectory(facts)).toBe('UNRECOVERED_EXECUTION_FAILURE');
     });
 
     it('classifies an evaluation unit without SQL as no SQL', () => {
@@ -119,7 +116,7 @@ describe('TrajectoryFactsBuilder', () => {
             traceComplete: true,
             evaluationComplete: true
         });
-        expect(classifier.classify(facts)).toBe('NO_SQL');
+        expect(classifyTrajectory(facts)).toBe('NO_SQL');
     });
 
     it('fails closed when result evaluation is uncertain', () => {
@@ -133,7 +130,7 @@ describe('TrajectoryFactsBuilder', () => {
             terminalOutcome: 'system_error',
             evaluationComplete: false
         });
-        expect(classifier.classify(facts)).toBe('SYSTEM_ERROR');
+        expect(classifyTrajectory(facts)).toBe('SYSTEM_ERROR');
     });
 
     it('fails closed when an execution error has no trace transition', () => {
@@ -143,7 +140,7 @@ describe('TrajectoryFactsBuilder', () => {
         });
 
         expect(facts.traceComplete).toBe(false);
-        expect(classifier.classify(facts)).toBe('SYSTEM_ERROR');
+        expect(classifyTrajectory(facts)).toBe('SYSTEM_ERROR');
     });
 
     it('marks an unchanged retry as a redundant SQL action', () => {

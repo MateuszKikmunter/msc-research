@@ -1,5 +1,5 @@
 import type { AgentResponse } from '../../backend/types';
-import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { TraceEventInspector } from '../shared/trace-event-inspector';
 import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 

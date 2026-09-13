@@ -121,17 +121,15 @@ src/experiments/
     golden-result-writer.ts
 
   shared/
+    athena-service.ts
+    benchmark-loader.ts
+    trace-event-inspector.ts
+    json-file-reader.ts
+    json-file-writer.ts
     benchmark-episode-validator.ts
+    experiment-cli.ts
+    error-message.ts
     type-guards.ts
-    services/
-      athena/
-        athena-service.ts
-
-      benchmark/
-        benchmark-loader.ts
-
-      trace/
-        trace-event-inspector.ts
 
   tests/
     fixtures/
@@ -146,12 +144,21 @@ src/experiments/
       repetition-1/
 ```
 
-`run-benchmark.ts` constructs the runner services explicitly and passes their instances through
-constructors. `BenchmarkLoader` remains the only statically called service in the runner entry
-point. The existing golden-result utilities retain their current design. Episode-level components
-share one `{ benchmarkRecord, episode }` option type and question-ID validator. Trace consumers
-share SQL-invocation parsing and the common object type guard instead of maintaining separate
-copies.
+`run-benchmark.ts` constructs the clients and runner components explicitly. Benchmark loading,
+gold-definition extraction, and trajectory classification are named functions (`loadBenchmark`,
+`buildGoldQueryDefinitions`, and `classifyTrajectory`), rather than classes with no instance state.
+`EpisodeEvaluator` calls classification directly instead of requiring another constructor dependency.
+The runner classes use constructor parameter properties for stored dependencies.
+
+`EpisodeRunner` shares the initial-question and optional-continuation sequence between standalone
+and ambiguity cases. It explicitly selects the unchanged frozen fallback or authored scripted reply,
+with the original input labels, flags, session, and one-continuation limit. Interactive and safety
+flows remain separate. Shared I/O and trace helpers live directly in `shared/`.
+
+Episode-level components share one `{ benchmarkRecord, episode }` option type and question-ID
+validator. Trace consumers share invocation numbering and observation matching. Attempt evaluation,
+trajectory facts, classification, metrics, and reporting remain distinct stages. Backend streaming
+attempt reconstruction remains separate; this cleanup does not change the live response processor.
 
 ## 5. Commands
 
@@ -808,3 +815,20 @@ will not call AWS or the deployed agent.
 3. running the `gold` command again overwrites the existing golden JSON files; and
 4. the runner does not resume cancelled runs: partial run files and, when required, partial
    transcript rows are removed manually before a complete restart.
+
+## Maintenance scope after the evaluation review
+
+The retained fixes include one-to-one unordered result matching with numeric tolerance (using a
+recursive reassignment helper), system-error exclusions from model metrics with audit counts retained,
+shared trace correlation without guessed result assignments, trimmed-text SQL-change detection, and
+rejection of explicit failure traces before run scoring. `sqlChanged` measures text changes, not SQL
+semantic equivalence. The abstraction cleanup above preserves these rules.
+
+Benchmark prompt corrections, malformed-artifact validation, and automatic run-directory protection
+were not retained. Runs continue to use the authored gold tie choices and exact output shapes;
+alternative tied winners and month representations may therefore fail comparison. Existing run files
+are managed manually. Lambda validation and frontend work are outside this maintenance scope.
+
+Infrastructure errors carried inside ordinary action observations and durable manual-label import
+remain deferred. Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
+intervals are the final planned step; this cleanup does not implement them or recollect experiments.

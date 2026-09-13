@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { AgentResponse } from '../../backend/types';
 import { getErrorMessage } from '../shared/error-message';
 import type { CandidateResultFile, CandidateResultReference } from '../types';
-import { AthenaService } from '../shared/services/athena/athena-service';
+import { AthenaService } from '../shared/athena-service';
 import { AgentResponseInspector } from './agent-response-inspector';
 import { RunResultWriter } from './run-result-writer';
 
@@ -13,22 +13,14 @@ type CandidateResultContext = Pick<
 >;
 
 export class CandidateResultCollector {
-    private readonly athenaService: AthenaService;
-    private readonly responseInspector: AgentResponseInspector;
-    private readonly runResultWriter: RunResultWriter;
-    private readonly runDirectory: string;
     private readonly outputDirectory: string;
 
     public constructor(
-        runDirectory: string,
-        athenaService: AthenaService,
-        responseInspector: AgentResponseInspector,
-        runResultWriter: RunResultWriter
+        private readonly runDirectory: string,
+        private readonly athenaService: AthenaService,
+        private readonly responseInspector: AgentResponseInspector,
+        private readonly runResultWriter: RunResultWriter
     ) {
-        this.athenaService = athenaService;
-        this.responseInspector = responseInspector;
-        this.runResultWriter = runResultWriter;
-        this.runDirectory = runDirectory;
         this.outputDirectory = path.join(runDirectory, 'candidate-results');
     }
 

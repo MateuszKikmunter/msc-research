@@ -1,5 +1,5 @@
 import type { EvaluationEpisode, StoredRunInteraction } from '../types';
-import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
+import { TraceEventInspector } from '../shared/trace-event-inspector';
 
 export class EpisodeBuilder {
     public constructor(
