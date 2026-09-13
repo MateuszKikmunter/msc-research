@@ -45,7 +45,7 @@ describe('ErrorTransitionEvaluator', () => {
         ]);
     });
 
-    it('recognizes a formatting-only retry that repeats the same error', () => {
+    it('records formatting changes separately from repetition of the same error', () => {
         const interaction = interactionWithEvents([
             sqlInvocation(1, 'first-trace', 'SELECT missing\nFROM tracks;'),
             sqlObservation(
@@ -63,7 +63,7 @@ describe('ErrorTransitionEvaluator', () => {
 
         expect(evaluator.evaluate(interaction)[0]).toMatchObject({
             retryProduced: true,
-            sqlChanged: false,
+            sqlChanged: true,
             nextExecutionStatus: 'failed',
             nextNormalizedError: 'COLUMN_NOT_FOUND:missing',
             sameErrorRepeated: true,
@@ -71,6 +71,23 @@ describe('ErrorTransitionEvaluator', () => {
             newErrorIntroduced: false,
             transitionUncertain: false
         });
+    });
+
+    it.each([
+        ['SELECT 1', 'SELECT 1', false],
+        ['  SELECT 1\n', 'SELECT 1', false],
+        ['SELECT 1;', 'SELECT 1', true],
+        ['SELECT\n1', 'SELECT 1', true],
+        ["SELECT 'AC  DC'", "SELECT 'AC DC'", true],
+        ['SELECT 1 -- comment\n+ 1', 'SELECT 1 -- comment + 1', true]
+    ])('compares trimmed SQL text: %s → %s', (before, after, sqlChanged) => {
+        const interaction = interactionWithEvents([
+            sqlInvocation(1, 'first', before),
+            sqlObservation(2, 'first', 'SYNTAX_ERROR'),
+            sqlInvocation(3, 'retry', after),
+            sqlObservation(4, 'retry', { queryExecutionId: 'query-2' })
+        ]);
+        expect(evaluator.evaluate(interaction)[0].sqlChanged).toBe(sqlChanged);
     });
 
     it('distinguishes a new retry error from repetition of the previous error', () => {

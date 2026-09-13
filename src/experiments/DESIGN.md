@@ -511,8 +511,12 @@ For every failed Athena observation, it:
 4. pairs that retry with its observation to determine whether it succeeded, repeated the same
    normalized error, or produced a different error.
 
-`retryProduced` shows whether another SQL action followed. `sqlChanged` ignores whitespace-only
-changes and a trailing semicolon. `previousErrorResolved` means only that the original error did
+`retryProduced` shows whether another SQL action followed. `sqlChanged` compares SQL text after
+trimming outer whitespace only. Internal whitespace, comments, and trailing semicolon changes
+count as revisions; this does not establish a change in SQL meaning. Consequently, a formatting-only
+retry is not flagged as redundant by the unchanged-retry rule. Result correctness is evaluated
+separately.
+`previousErrorResolved` means only that the original error did
 not recur: when a different error replaces it, `newErrorIntroduced` is also true. These transition
 facts do not by themselves establish result correctness.
 
@@ -723,7 +727,7 @@ Implemented error-transition tests cover:
 
 - removal of volatile Athena line and column positions from error signatures;
 - observed, identifier-bearing, and unknown Trino-style error prefixes;
-- changed and formatting-equivalent retry SQL;
+- changed, identical, and outer-whitespace-only retry SQL;
 - successful retries, repeated errors, and different newly introduced errors;
 - errors with no retry; and
 - retries whose matching execution observation is missing.

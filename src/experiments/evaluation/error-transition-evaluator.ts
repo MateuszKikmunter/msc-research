@@ -90,9 +90,10 @@ export class ErrorTransitionEvaluator {
             };
         }
 
+        // This measures text changes, including internal formatting, not SQL equivalence.
         const sqlChanged =
-            this.normalizeSql(options.invocation.query) !==
-            this.normalizeSql(options.nextInvocation.query);
+            options.invocation.query.trim() !==
+            options.nextInvocation.query.trim();
         const nextObservation = this.traceEventInspector.findSqlObservation(
             options.events,
             options.nextInvocation.event
@@ -146,13 +147,5 @@ export class ErrorTransitionEvaluator {
             typeof event.observation.error === 'string'
             ? event.observation.error
             : null;
-    }
-
-    private normalizeSql(query: string): string {
-        // Formatting alone is not a query revision, so whitespace and a final semicolon are ignored.
-        const normalizedQuery = query.trim().split(/\s+/).join(' ');
-        return normalizedQuery.endsWith(';')
-            ? normalizedQuery.slice(0, -1).trimEnd()
-            : normalizedQuery;
     }
 }
