@@ -137,6 +137,25 @@ describe('ErrorTransitionEvaluator', () => {
         });
     });
 
+    it('counts repeated invocation parts as one attempt and one error transition', () => {
+        const interaction = interactionWithEvents([
+            sqlInvocation(1, 'first', 'SELECT missing'),
+            sqlInvocation(2, 'first', 'SELECT missing'),
+            sqlObservation(3, 'first', 'COLUMN_NOT_FOUND'),
+            sqlObservation(4, 'first', 'COLUMN_NOT_FOUND'),
+            sqlInvocation(5, 'retry', 'SELECT 1'),
+            sqlObservation(6, 'retry', { queryExecutionId: 'query-2' })
+        ]);
+        const transitions = evaluator.evaluate(interaction);
+        expect(transitions).toHaveLength(1);
+        expect(transitions[0]).toMatchObject({
+            precedingAttempt: 1,
+            nextAttempt: 2,
+            nextExecutionStatus: 'succeeded',
+            transitionUncertain: false
+        });
+    });
+
     it('does not create transitions for successful observations', () => {
         const interaction = interactionWithEvents([
             sqlInvocation(1, 'trace-1', 'SELECT name FROM tracks'),

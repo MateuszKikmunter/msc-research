@@ -494,6 +494,13 @@ separate from SQL trajectory classification.
 
 ### 12.1 Error transitions
 
+The runner and error evaluator share invocation numbering and observation matching through
+`TraceEventInspector`. Repeated invocation parts with the same trace ID count once, including
+failed attempts. Observations must follow their invocation and share its trace ID. The runner
+also requires agreement with the recorded successful SQL attempt; it never guesses an attempt
+number for an unmatched execution ID. A successful attempt without a captured result is reported
+as evaluator uncertainty by the attempt evaluator.
+
 The implemented error-transition evaluator uses the ordered trace events inside each interaction.
 For every failed Athena observation, it:
 

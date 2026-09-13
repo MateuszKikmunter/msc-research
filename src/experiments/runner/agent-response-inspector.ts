@@ -1,4 +1,4 @@
-import type { AgentResponse, AgentTraceEvent } from '../../backend/types';
+import type { AgentResponse } from '../../backend/types';
 import { TraceEventInspector } from '../shared/services/trace/trace-event-inspector';
 import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
@@ -33,73 +33,30 @@ export class AgentResponseInspector {
     public getCandidateQueryExecutions(
         response: AgentResponse
     ): CandidateQueryExecution[] {
-        const events = this.orderedEvents(response);
-        const attemptByTraceId = this.indexSqlAttemptsByTraceId(events);
-        const successfulAttempts = response.sqlAttempts
-            .filter((sqlAttempt) => sqlAttempt.status === 'succeeded')
-            .map((sqlAttempt) => sqlAttempt.attempt);
-
-        return this.collectCandidateExecutions(
-            events,
-            attemptByTraceId,
-            successfulAttempts
+        const events = this.traceEventInspector.orderEvents(
+            response.traceEvents
         );
-    }
-
-    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
-        return this.removeSensitiveKeys(response) as StoredAgentResponse;
-    }
-
-    private orderedEvents(response: AgentResponse): AgentTraceEvent[] {
-        return this.traceEventInspector.orderEvents(response.traceEvents);
-    }
-
-    private indexSqlAttemptsByTraceId(
-        events: AgentTraceEvent[]
-    ): Map<string, number> {
-        // Maps the ID shared by an invocation and observation to the SQL attempt number.
-        const attemptByTraceId = new Map<string, number>();
-        let attempt = 0;
-
-        // Count failed invocations too, so a later successful retry remains attempt 2, 3, etc.
-        for (const event of events) {
-            if (!this.traceEventInspector.isSqlInvocation(event)) {
-                continue;
-            }
-
-            // Repeated trace parts with the same ID still represent one SQL attempt.
-            if (event.traceId && attemptByTraceId.has(event.traceId)) {
-                continue;
-            }
-
-            attempt += 1;
-            if (event.traceId) {
-                attemptByTraceId.set(event.traceId, attempt);
-            }
-        }
-
-        return attemptByTraceId;
-    }
-
-    private collectCandidateExecutions(
-        events: AgentTraceEvent[],
-        attemptByTraceId: ReadonlyMap<string, number>,
-        successfulAttempts: number[]
-    ): CandidateQueryExecution[] {
-        // Prevent a trace-less observation from being assigned an attempt already in use.
-        const usedAttempts = new Set<number>();
-        // The same Athena observation may appear more than once in the trace stream.
-        const usedQueryExecutionIds = new Set<string>();
+        const invocations = this.traceEventInspector.getSqlInvocations(events);
         const executions: CandidateQueryExecution[] = [];
+        const usedQueryExecutionIds = new Set<string>();
 
-        for (const event of events) {
-            if (event.eventType !== 'OBSERVATION') {
+        for (const invocation of invocations) {
+            const attempt = response.sqlAttempts.find(
+                (attempt) => attempt.attempt === invocation.attempt
+            );
+            // Require agreement with the recorded attempt before saving its result.
+            if (
+                attempt?.status !== 'succeeded' ||
+                attempt.query.trim() !== invocation.query
+            ) {
                 continue;
             }
-
-            // Athena may nest its execution ID inside the action observation payload.
+            const observation = this.traceEventInspector.findSqlObservation(
+                events,
+                invocation.event
+            );
             const queryExecutionId = this.findStringByKey(
-                event.observation,
+                observation?.observation,
                 'queryExecutionId'
             );
             if (
@@ -108,46 +65,15 @@ export class AgentResponseInspector {
             ) {
                 continue;
             }
-
-            const resolvedAttempt = this.resolveAttemptNumber(
-                event,
-                attemptByTraceId,
-                successfulAttempts,
-                usedAttempts,
-                executions.length + 1
-            );
-
-            usedAttempts.add(resolvedAttempt);
             usedQueryExecutionIds.add(queryExecutionId);
-            executions.push({
-                attempt: resolvedAttempt,
-                queryExecutionId
-            });
+            executions.push({ attempt: invocation.attempt, queryExecutionId });
         }
 
         return executions;
     }
 
-    private resolveAttemptNumber(
-        event: AgentTraceEvent,
-        attemptByTraceId: ReadonlyMap<string, number>,
-        successfulAttempts: number[],
-        usedAttempts: ReadonlySet<number>,
-        fallbackAttempt: number
-    ): number {
-        const tracedAttempt = event.traceId
-            ? attemptByTraceId.get(event.traceId)
-            : undefined;
-
-        if (tracedAttempt !== undefined) {
-            return tracedAttempt;
-        }
-
-        // If correlation data is incomplete, use the next unassigned recorded success.
-        return (
-            successfulAttempts.find((attempt) => !usedAttempts.has(attempt)) ??
-            fallbackAttempt
-        );
+    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
+        return this.removeSensitiveKeys(response) as StoredAgentResponse;
     }
 
     private findStringByKey(value: unknown, targetKey: string): string | null {

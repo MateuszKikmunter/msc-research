@@ -32,12 +32,15 @@ export class ErrorTransitionEvaluator {
         const events = this.traceEventInspector.orderEvents(
             interaction.response.traceEvents
         );
-        const invocations = this.getSqlInvocations(events);
+        const invocations = this.traceEventInspector.getSqlInvocations(events);
         const transitions: ErrorTransition[] = [];
 
         for (const [index, invocation] of invocations.entries()) {
             // Bedrock gives the invocation and its Athena observation the same trace ID.
-            const observation = this.findObservation(events, invocation.event);
+            const observation = this.traceEventInspector.findSqlObservation(
+                events,
+                invocation.event
+            );
             const error = observation
                 ? this.getObservationError(observation)
                 : null;
@@ -57,23 +60,6 @@ export class ErrorTransitionEvaluator {
         }
 
         return transitions;
-    }
-
-    private getSqlInvocations(events: StoredTraceEvent[]): SqlInvocation[] {
-        const invocations: SqlInvocation[] = [];
-
-        for (const event of events) {
-            const query = this.traceEventInspector.getSqlQuery(event);
-            if (query) {
-                invocations.push({
-                    attempt: invocations.length + 1,
-                    event,
-                    query
-                });
-            }
-        }
-
-        return invocations;
     }
 
     private createTransition(
@@ -107,7 +93,7 @@ export class ErrorTransitionEvaluator {
         const sqlChanged =
             this.normalizeSql(options.invocation.query) !==
             this.normalizeSql(options.nextInvocation.query);
-        const nextObservation = this.findObservation(
+        const nextObservation = this.traceEventInspector.findSqlObservation(
             options.events,
             options.nextInvocation.event
         );
@@ -149,22 +135,6 @@ export class ErrorTransitionEvaluator {
             transitionUncertain: false,
             uncertaintyReason: null
         };
-    }
-
-    private findObservation(
-        events: StoredTraceEvent[],
-        invocation: StoredTraceEvent
-    ): StoredTraceEvent | undefined {
-        if (!invocation.traceId) {
-            return undefined;
-        }
-
-        return events.find(
-            (event) =>
-                event.eventType === 'OBSERVATION' &&
-                event.traceId === invocation.traceId &&
-                event.sequenceNumber > invocation.sequenceNumber
-        );
     }
 
     private getObservationError(event: StoredTraceEvent): string | null {

@@ -15,6 +15,42 @@ export class TraceEventInspector {
         );
     }
 
+    public getSqlInvocations<Event extends TraceEvent>(
+        events: readonly Event[]
+    ) {
+        const invocations: Array<{
+            attempt: number;
+            event: Event;
+            query: string;
+        }> = [];
+        const seenTraceIds = new Set<string>();
+
+        for (const event of this.orderEvents(events)) {
+            const query = this.getSqlQuery(event)?.trim();
+            if (!query || (event.traceId && seenTraceIds.has(event.traceId))) {
+                continue;
+            }
+            // Match the backend's numbering: repeated trace parts are one attempt.
+            invocations.push({ attempt: invocations.length + 1, event, query });
+            if (event.traceId) seenTraceIds.add(event.traceId);
+        }
+        return invocations;
+    }
+
+    public findSqlObservation<Event extends TraceEvent>(
+        orderedEvents: readonly Event[],
+        invocation: Event
+    ): Event | undefined {
+        // Arrival order alone cannot identify which SQL produced an observation.
+        if (!invocation.traceId) return undefined;
+        return orderedEvents.find(
+            (event) =>
+                event.eventType === 'OBSERVATION' &&
+                event.traceId === invocation.traceId &&
+                event.sequenceNumber > invocation.sequenceNumber
+        );
+    }
+
     public isSqlInvocation(event: TraceEvent): boolean {
         return this.getSqlQuery(event) !== null;
     }
