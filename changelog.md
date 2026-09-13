@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **2026-09-13** — Simplified episode coordination to one trajectory-evaluation loop and made
+  safety/unresolved-ambiguity/SQL routing explicit. Converted stateless result comparison, metrics,
+  report writing, and trace inspection to named functions. Inlined trivial wrappers, removed a
+  redundant invocation sort, and restricted gold-definition inputs to the current case. Preserved
+  existing `evaluateTrajectory` naming, scoring policies, prompts, and all saved artifacts. All 129
+  tests pass; complete results and metrics for four saved runs match the pre-refactor baseline.
+
 - **2026-09-13** — Consolidated the evaluation pipeline from 17 production modules to 12. Moved
   attempt evaluation into `episode-evaluator.ts`; replaced result-loader, JSONL-loader, and
   episode-builder classes with functions in `evaluation-input.ts`; combined clarification/safety

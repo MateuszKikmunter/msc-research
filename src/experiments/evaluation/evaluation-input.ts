@@ -5,7 +5,7 @@ import type {
     CandidateResultFile,
     GoldenResultFile
 } from '../types';
-import { TraceEventInspector } from '../shared/trace-event-inspector';
+import * as traceEvents from '../shared/trace-event-inspector';
 import path from 'node:path';
 import { readJsonFile } from '../shared/json-file-reader';
 
@@ -31,8 +31,6 @@ export function loadCandidateResult(
         path.join(directory, relativePath)
     );
 }
-
-const traceEventInspector = new TraceEventInspector();
 
 export async function loadRunInteractions(
     inputPath: string
@@ -66,13 +64,12 @@ export function groupEpisodes(
     const interactionsBySession = new Map<string, StoredRunInteraction[]>();
 
     for (const interaction of interactions) {
-        const existingInteractions =
-            interactionsBySession.get(interaction.sessionId) ?? [];
-
-        interactionsBySession.set(interaction.sessionId, [
-            ...existingInteractions,
-            interaction
-        ]);
+        const group = interactionsBySession.get(interaction.sessionId);
+        if (group) {
+            group.push(interaction);
+        } else {
+            interactionsBySession.set(interaction.sessionId, [interaction]);
+        }
     }
 
     return [...interactionsBySession.values()].map((episodeInteractions) =>
@@ -85,7 +82,15 @@ function createEpisode(
 ): EvaluationEpisode {
     const orderedInteractions = [...interactions]
         .sort((left, right) => left.interactionOrder - right.interactionOrder)
-        .map((interaction) => orderTraceEvents(interaction));
+        .map((interaction) => ({
+            ...interaction,
+            response: {
+                ...interaction.response,
+                traceEvents: traceEvents.orderEvents(
+                    interaction.response.traceEvents
+                )
+            }
+        }));
     const firstInteraction = orderedInteractions[0];
 
     return {
@@ -94,19 +99,5 @@ function createEpisode(
         modelCondition: firstInteraction.modelCondition,
         repetition: firstInteraction.repetition,
         interactions: orderedInteractions
-    };
-}
-
-function orderTraceEvents(
-    interaction: StoredRunInteraction
-): StoredRunInteraction {
-    return {
-        ...interaction,
-        response: {
-            ...interaction.response,
-            traceEvents: traceEventInspector.orderEvents(
-                interaction.response.traceEvents
-            )
-        }
     };
 }

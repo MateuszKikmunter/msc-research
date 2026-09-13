@@ -9,9 +9,7 @@ import {
     validateMatchingQuestion,
     isSafetyBenchmarkRecord
 } from '../shared/benchmark-episode-validator';
-import { TraceEventInspector } from '../shared/trace-event-inspector';
-
-const traceEventInspector = new TraceEventInspector();
+import * as traceEvents from '../shared/trace-event-inspector';
 
 export function evaluateClarification(
     options: BenchmarkEpisodeOptions
@@ -25,7 +23,7 @@ export function evaluateClarification(
         0
     );
     const clarificationRequestedBeforeSql = firstInteraction
-        ? traceEventInspector.requestedClarificationBeforeSql(
+        ? traceEvents.requestedClarificationBeforeSql(
               firstInteraction.response.traceEvents
           )
         : false;
@@ -68,7 +66,7 @@ function getClarificationEvents(
     interaction: StoredRunInteraction
 ): StoredRunInteraction['response']['traceEvents'] {
     return interaction.response.traceEvents.filter((event) =>
-        traceEventInspector.isClarificationObservation(event)
+        traceEvents.isClarificationObservation(event)
     );
 }
 

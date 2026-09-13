@@ -2,7 +2,6 @@ import { buildGoldQueryDefinitions } from '../golden-results/gold-query-definiti
 import { isSafetyBenchmarkRecord } from '../shared/benchmark-episode-validator';
 import type {
     BenchmarkRecord,
-    ClarificationEvaluation,
     EvaluatedBenchmarkEpisode,
     EvaluationEpisode,
     RunEvaluation
@@ -66,23 +65,30 @@ export class RunEvaluator {
                 benchmarkRecord,
                 episode
             });
-            const isSafetyCase = isSafetyBenchmarkRecord(benchmarkRecord);
-            const safetyReview = isSafetyCase
-                ? buildSafetyEvidence({
-                      benchmarkRecord,
-                      episode
-                  })
-                : null;
-            const shouldEvaluateTrajectory =
-                !isSafetyCase &&
-                !this.isUnresolvedAmbiguity(benchmarkRecord, clarification);
-            const trajectoryResults = shouldEvaluateTrajectory
-                ? await this.episodeEvaluator.evaluate({
-                      benchmarkRecord,
-                      episode,
-                      goldDefinitions
-                  })
-                : [];
+            let safetyReview = null;
+            let trajectoryResults: EvaluatedBenchmarkEpisode['trajectoryResults'] =
+                [];
+            if (isSafetyBenchmarkRecord(benchmarkRecord)) {
+                safetyReview = buildSafetyEvidence({
+                    benchmarkRecord,
+                    episode
+                });
+            } else if (
+                benchmarkRecord.expected_behavior === 'clarify_then_execute' &&
+                (clarification.status !== 'appropriate' ||
+                    !clarification.scriptedReplyUsed)
+            ) {
+                // Keep clarification evidence, but do not score an interpretation never supplied.
+            } else {
+                trajectoryResults = await this.episodeEvaluator.evaluate({
+                    benchmarkRecord,
+                    episode,
+                    goldDefinitions: goldDefinitions.filter(
+                        (definition) =>
+                            definition.questionId === benchmarkRecord.id
+                    )
+                });
+            }
 
             evaluatedEpisodes.push({
                 questionId: benchmarkRecord.id,
@@ -116,27 +122,13 @@ export class RunEvaluator {
             .map(({ turnNumber }) => turnNumber)
             .sort((left, right) => (left ?? 0) - (right ?? 0));
 
-        if (!this.arraysEqual(actualTurns, expectedTurns)) {
+        if (
+            actualTurns.length !== expectedTurns.length ||
+            actualTurns.some((turn, index) => turn !== expectedTurns[index])
+        ) {
             throw new Error(
                 `Interactive episode ${benchmarkRecord.id} does not contain the expected turns ${expectedTurns.join(', ')}.`
             );
         }
-    }
-
-    private isUnresolvedAmbiguity(
-        benchmarkRecord: BenchmarkRecord,
-        clarification: ClarificationEvaluation
-    ): boolean {
-        return (
-            benchmarkRecord.expected_behavior === 'clarify_then_execute' &&
-            (clarification.status !== 'appropriate' ||
-                !clarification.scriptedReplyUsed)
-        );
-    }
-    private arraysEqual(left: Array<number | null>, right: number[]): boolean {
-        return (
-            left.length === right.length &&
-            left.every((value, index) => value === right[index])
-        );
     }
 }

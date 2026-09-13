@@ -3,7 +3,7 @@ import type {
     StoredRunInteraction,
     StoredTraceEvent
 } from '../types';
-import { TraceEventInspector } from '../shared/trace-event-inspector';
+import * as traceEvents from '../shared/trace-event-inspector';
 import { isRecord } from '../shared/type-guards';
 import { AthenaErrorNormalizer } from './athena-error-normalizer';
 
@@ -24,20 +24,19 @@ interface CreateTransitionOptions {
 
 export class ErrorTransitionEvaluator {
     public constructor(
-        private readonly errorNormalizer: AthenaErrorNormalizer,
-        private readonly traceEventInspector = new TraceEventInspector()
+        private readonly errorNormalizer: AthenaErrorNormalizer
     ) {}
 
     public evaluate(interaction: StoredRunInteraction): ErrorTransition[] {
-        const events = this.traceEventInspector.orderEvents(
+        const events = traceEvents.orderEvents(
             interaction.response.traceEvents
         );
-        const invocations = this.traceEventInspector.getSqlInvocations(events);
+        const invocations = traceEvents.getSqlInvocations(events);
         const transitions: ErrorTransition[] = [];
 
         for (const [index, invocation] of invocations.entries()) {
             // Bedrock gives the invocation and its Athena observation the same trace ID.
-            const observation = this.traceEventInspector.findSqlObservation(
+            const observation = traceEvents.findSqlObservation(
                 events,
                 invocation.event
             );
@@ -94,7 +93,7 @@ export class ErrorTransitionEvaluator {
         const sqlChanged =
             options.invocation.query.trim() !==
             options.nextInvocation.query.trim();
-        const nextObservation = this.traceEventInspector.findSqlObservation(
+        const nextObservation = traceEvents.findSqlObservation(
             options.events,
             options.nextInvocation.event
         );

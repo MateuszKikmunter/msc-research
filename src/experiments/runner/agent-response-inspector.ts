@@ -1,5 +1,5 @@
 import type { AgentResponse } from '../../backend/types';
-import { TraceEventInspector } from '../shared/trace-event-inspector';
+import * as traceEvents from '../shared/trace-event-inspector';
 import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 
@@ -15,16 +15,12 @@ const SENSITIVE_KEYS = new Set([
 ]);
 
 export class AgentResponseInspector {
-    public constructor(
-        private readonly traceEventInspector = new TraceEventInspector()
-    ) {}
-
     public hasSqlAttempt(response: AgentResponse): boolean {
         return response.sqlAttempts.length > 0;
     }
 
     public requestedClarificationBeforeSql(response: AgentResponse): boolean {
-        return this.traceEventInspector.requestedClarificationBeforeSql(
+        return traceEvents.requestedClarificationBeforeSql(
             response.traceEvents
         );
     }
@@ -33,10 +29,8 @@ export class AgentResponseInspector {
     public getCandidateQueryExecutions(
         response: AgentResponse
     ): CandidateQueryExecution[] {
-        const events = this.traceEventInspector.orderEvents(
-            response.traceEvents
-        );
-        const invocations = this.traceEventInspector.getSqlInvocations(events);
+        const events = traceEvents.orderEvents(response.traceEvents);
+        const invocations = traceEvents.getSqlInvocations(events);
         const executions: CandidateQueryExecution[] = [];
         const usedQueryExecutionIds = new Set<string>();
 
@@ -51,7 +45,7 @@ export class AgentResponseInspector {
             ) {
                 continue;
             }
-            const observation = this.traceEventInspector.findSqlObservation(
+            const observation = traceEvents.findSqlObservation(
                 events,
                 invocation.event
             );

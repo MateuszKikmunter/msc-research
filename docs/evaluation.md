@@ -561,7 +561,8 @@ fixes and deferred work. Study-level paired analysis and uncertainty intervals r
 
 ### Evaluation module consolidation
 
-The evaluation entry point now wires four components. `evaluation-input.ts` contains file loading
+The evaluation entry point now constructs the run and episode coordinators and calls metrics and
+reporting functions directly. `evaluation-input.ts` contains file loading
 and episode grouping; `case-policies.ts` contains clarification and safety functions;
 `episode-evaluator.ts` contains both episode coordination and attempt evaluation; and `trajectory.ts`
 contains fact derivation and classification. Result normalization is a directly imported function.

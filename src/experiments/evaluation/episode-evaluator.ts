@@ -20,7 +20,7 @@ import {
     loadCandidateResult,
     type EvaluationPaths
 } from './evaluation-input';
-import { ResultComparator } from './result-comparator';
+import { compareResults } from './result-comparator';
 import { ErrorTransitionEvaluator } from './error-transition-evaluator';
 import { classifyTrajectory, buildTrajectoryFacts } from './trajectory';
 
@@ -28,7 +28,7 @@ interface EvaluateEpisodeOptions extends BenchmarkEpisodeOptions {
     goldDefinitions: GoldQueryDefinition[];
 }
 
-interface EvaluateUnitOptions {
+interface EvaluateTrajectoryOptions {
     questionId: string;
     turnNumber: number | null;
     interactions: StoredRunInteraction[];
@@ -52,55 +52,59 @@ export class EpisodeEvaluator {
             return [];
         }
 
+        // A normal episode is one trajectory; interactive episodes have one per authored turn.
+        const trajectories: Array<{
+            turnNumber: number | null;
+            interactions: StoredRunInteraction[];
+        }> = [];
         if (options.benchmarkRecord.expected_behavior === 'execute_sequence') {
-            return this.evaluateInteractiveTurns(options);
+            for (const interaction of options.episode.interactions) {
+                if (interaction.turnNumber === null) {
+                    throw new Error(
+                        `Interactive episode ${options.benchmarkRecord.id} contains an interaction without a turn number.`
+                    );
+                }
+                trajectories.push({
+                    turnNumber: interaction.turnNumber,
+                    interactions: [interaction]
+                });
+            }
+        } else {
+            trajectories.push({
+                turnNumber: null,
+                interactions: options.episode.interactions
+            });
         }
 
-        return [
-            await this.evaluateUnit({
-                questionId: options.benchmarkRecord.id,
-                turnNumber: null,
-                interactions: options.episode.interactions,
-                goldDefinition: this.getGoldDefinition(
-                    options.goldDefinitions,
-                    options.benchmarkRecord.id,
-                    null
-                )
-            })
-        ];
-    }
-
-    private async evaluateInteractiveTurns(
-        options: EvaluateEpisodeOptions
-    ): Promise<EpisodeEvaluationResult[]> {
         const results: EpisodeEvaluationResult[] = [];
-
-        for (const interaction of options.episode.interactions) {
-            if (interaction.turnNumber === null) {
+        for (const trajectory of trajectories) {
+            const goldDefinition = options.goldDefinitions.find(
+                (definition) =>
+                    definition.questionId === options.benchmarkRecord.id &&
+                    definition.turnNumber === trajectory.turnNumber
+            );
+            if (!goldDefinition) {
+                const turn =
+                    trajectory.turnNumber === null
+                        ? ''
+                        : ` turn ${trajectory.turnNumber}`;
                 throw new Error(
-                    `Interactive episode ${options.benchmarkRecord.id} contains an interaction without a turn number.`
+                    `Golden query definition not found for ${options.benchmarkRecord.id}${turn}.`
                 );
             }
-
             results.push(
-                await this.evaluateUnit({
+                await this.evaluateTrajectory({
                     questionId: options.benchmarkRecord.id,
-                    turnNumber: interaction.turnNumber,
-                    interactions: [interaction],
-                    goldDefinition: this.getGoldDefinition(
-                        options.goldDefinitions,
-                        options.benchmarkRecord.id,
-                        interaction.turnNumber
-                    )
+                    ...trajectory,
+                    goldDefinition
                 })
             );
         }
-
         return results;
     }
 
-    private async evaluateUnit(
-        options: EvaluateUnitOptions
+    private async evaluateTrajectory(
+        options: EvaluateTrajectoryOptions
     ): Promise<EpisodeEvaluationResult> {
         const attemptEvaluations: AttemptEvaluation[] = [];
         const errorTransitions: ErrorTransition[] = [];
@@ -133,27 +137,6 @@ export class EpisodeEvaluator {
             trajectoryFacts,
             trajectoryClass: classifyTrajectory(trajectoryFacts)
         };
-    }
-
-    private getGoldDefinition(
-        definitions: GoldQueryDefinition[],
-        questionId: string,
-        turnNumber: number | null
-    ): GoldQueryDefinition {
-        const definition = definitions.find(
-            (candidate) =>
-                candidate.questionId === questionId &&
-                candidate.turnNumber === turnNumber
-        );
-
-        if (!definition) {
-            const turn = turnNumber === null ? '' : ` turn ${turnNumber}`;
-            throw new Error(
-                `Golden query definition not found for ${questionId}${turn}.`
-            );
-        }
-
-        return definition;
     }
 }
 
@@ -200,10 +183,13 @@ async function evaluateAttempt(
     options: EvaluateAttemptOptions,
     paths: EvaluationPaths
 ): Promise<AttemptEvaluation> {
-    const baseEvaluation = createBaseEvaluation(
-        options.interaction,
-        options.attempt
-    );
+    const baseEvaluation: AttemptEvaluationBase = {
+        interactionOrder: options.interaction.interactionOrder,
+        turnNumber: options.interaction.turnNumber,
+        attempt: options.attempt.attempt,
+        query: options.attempt.query,
+        executionStatus: options.attempt.status
+    };
 
     if (options.attempt.status === 'failed') {
         return {
@@ -272,7 +258,7 @@ async function evaluateAttempt(
         );
     }
 
-    const comparison = new ResultComparator().compare(
+    const comparison = compareResults(
         goldenResult,
         candidateResult,
         options.goldDefinition.comparison
@@ -303,19 +289,6 @@ async function evaluateAttempt(
         reference,
         comparison.reason ?? 'Result comparison was uncertain.'
     );
-}
-
-function createBaseEvaluation(
-    interaction: StoredRunInteraction,
-    attempt: SqlAttempt
-): AttemptEvaluationBase {
-    return {
-        interactionOrder: interaction.interactionOrder,
-        turnNumber: interaction.turnNumber,
-        attempt: attempt.attempt,
-        query: attempt.query,
-        executionStatus: attempt.status
-    };
 }
 
 function uncertain(

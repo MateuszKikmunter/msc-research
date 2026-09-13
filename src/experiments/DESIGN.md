@@ -170,8 +170,8 @@ attempt reconstruction remains separate; this cleanup does not change the live r
 9. `run-metrics-calculator.ts` and `evaluation-report-writer.ts`: aggregate and export.
 
 Input loading, grouping, case policies, normalization, and trajectory facts are functions, not
-injected service objects. The CLI constructs four components: episode evaluation, run evaluation,
-metrics, and reporting. The substantial comparison and error-analysis algorithms remain separate.
+injected service objects. The CLI constructs only the run and episode coordinators; comparison, trace inspection,
+metrics, and report writing are functions. The substantial comparison and error-analysis algorithms remain separate.
 The refactor preserves all partition policies: standalone/resolved-ambiguity SQL trajectories,
 per-turn interactive trajectories, and separate safety evidence. It adds no natural-language judge,
 new metrics, or study-level analysis.
@@ -518,7 +518,7 @@ separate from SQL trajectory classification.
 ### 12.1 Error transitions
 
 The runner and error evaluator share invocation numbering and observation matching through
-`TraceEventInspector`. Repeated invocation parts with the same trace ID count once, including
+`trace-event-inspector.ts`. Repeated invocation parts with the same trace ID count once, including
 failed attempts. Observations must follow their invocation and share its trace ID. The runner
 also requires agreement with the recorded successful SQL attempt; it never guesses an attempt
 number for an unmatched execution ID. A successful attempt without a captured result is reported
@@ -626,7 +626,7 @@ in `evaluation-input.ts` from
 `runs/golden-sql` and candidate results from the selected model/repetition directory. Failed SQL
 attempts are evaluated from interactions and require no result artifact.
 
-After evaluation, `EvaluationReportWriter` writes the complete `RunEvaluation` to `results.json`,
+After evaluation, `writeEvaluationReport` writes the complete `RunEvaluation` to `results.json`,
 the calculated `RunMetrics` to `summary.json`, and a readable representation of the same metrics to
 `summary.md`. Each invocation replaces those three reports for the selected run. It does not alter
 the interaction or candidate files.
@@ -849,3 +849,16 @@ are managed manually. Lambda validation and frontend work are outside this maint
 Infrastructure errors carried inside ordinary action observations and durable manual-label import
 remain deferred. Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
 intervals are the final planned step; this cleanup does not implement them or recollect experiments.
+
+### Final readability pass
+
+`EpisodeEvaluator` prepares one trajectory for a standalone/resolved ambiguity episode or one per
+interactive turn, then evaluates them through a single loop. `RunEvaluator` explicitly branches
+between safety evidence, unresolved ambiguity, and SQL evaluation, passing only the current case's
+gold definitions. `compareResults`, `calculateRunMetrics`, `writeEvaluationReport`, and the trace
+helpers are functions in their existing modules. Query comparison and metric rules are unchanged.
+
+Trace callers order events before invocation extraction, avoiding a redundant sort. Episode grouping
+uses local array appends; it does not mutate the supplied interactions. Small one-use object and array
+comparison wrappers were inlined. Gold-file loading and the validation on separately callable policy
+functions remain in place; no cache or new preparation framework was introduced.

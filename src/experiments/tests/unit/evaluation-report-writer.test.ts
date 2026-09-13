@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { EvaluationReportWriter } from '../../evaluation/evaluation-report-writer';
+import { writeEvaluationReport } from '../../evaluation/evaluation-report-writer';
 import type { RunEvaluation, RunMetrics, TrajectoryClass } from '../../types';
 
 jest.mock('node:fs/promises', () => ({
@@ -21,9 +21,11 @@ describe('EvaluationReportWriter', () => {
     const runMetrics = createRunMetrics();
 
     it('writes the complete evaluation and metrics as formatted JSON', async () => {
-        const writer = new EvaluationReportWriter();
-
-        await writer.write({ runDirectory, runEvaluation, runMetrics });
+        await writeEvaluationReport({
+            runDirectory,
+            runEvaluation,
+            runMetrics
+        });
 
         expect(mkdir).toHaveBeenCalledWith(outputDirectory, {
             recursive: true
@@ -43,9 +45,11 @@ describe('EvaluationReportWriter', () => {
     });
 
     it('writes a readable Markdown summary with counts and explicit unavailable rates', async () => {
-        const writer = new EvaluationReportWriter();
-
-        await writer.write({ runDirectory, runEvaluation, runMetrics });
+        await writeEvaluationReport({
+            runDirectory,
+            runEvaluation,
+            runMetrics
+        });
 
         expect(writeFile).toHaveBeenNthCalledWith(
             3,

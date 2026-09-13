@@ -3,9 +3,9 @@ import path from 'node:path';
 import { runExperimentCli } from '../shared/experiment-cli';
 import { loadBenchmark } from '../shared/benchmark-loader';
 import { EpisodeEvaluator } from './episode-evaluator';
-import { EvaluationReportWriter } from './evaluation-report-writer';
+import { writeEvaluationReport } from './evaluation-report-writer';
 import { RunEvaluator } from './run-evaluator';
-import { RunMetricsCalculator } from './run-metrics-calculator';
+import { calculateRunMetrics } from './run-metrics-calculator';
 
 const EXPERIMENT_RUNS_DIRECTORY = path.resolve(__dirname, '../runs');
 const GOLDEN_RESULTS_DIRECTORY = path.join(
@@ -31,19 +31,17 @@ async function main(): Promise<void> {
         runDirectory
     });
     const runEvaluator = new RunEvaluator(episodeEvaluator);
-    const metricsCalculator = new RunMetricsCalculator();
-    const reportWriter = new EvaluationReportWriter();
     const benchmarkRecords = await loadBenchmark();
     const runEvaluation = await runEvaluator.evaluate({
         interactionsPath: path.join(runDirectory, 'interactions.jsonl'),
         benchmarkRecords
     });
-    const runMetrics = metricsCalculator.calculate({
+    const runMetrics = calculateRunMetrics({
         runEvaluation,
         benchmarkRecords
     });
 
-    await reportWriter.write({
+    await writeEvaluationReport({
         runDirectory,
         runEvaluation,
         runMetrics

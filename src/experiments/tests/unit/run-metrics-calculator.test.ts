@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { RunMetricsCalculator } from '../../evaluation/run-metrics-calculator';
+import { calculateRunMetrics } from '../../evaluation/run-metrics-calculator';
 import type {
     BenchmarkRecord,
     ClarificationStatus,
@@ -15,8 +15,6 @@ import type {
 } from '../../types';
 
 describe('RunMetricsCalculator', () => {
-    const calculator = new RunMetricsCalculator();
-
     it('measures the gap between final success and clean direct success', () => {
         const records = [
             benchmarkRecord('E1', 'execute', 'easy'),
@@ -56,7 +54,7 @@ describe('RunMetricsCalculator', () => {
             ])
         ]);
 
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: evaluation,
             benchmarkRecords: records
         });
@@ -158,7 +156,7 @@ describe('RunMetricsCalculator', () => {
             )
         );
 
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: evaluation,
             benchmarkRecords: records
         });
@@ -208,7 +206,7 @@ describe('RunMetricsCalculator', () => {
             ])
         ]);
 
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: evaluation,
             benchmarkRecords: records
         });
@@ -241,7 +239,7 @@ describe('RunMetricsCalculator', () => {
             },
             [errorTransition({ transitionUncertain: true })]
         );
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             benchmarkRecords: records,
             runEvaluation: runEvaluation([
                 episode('E1', [trajectory('DIRECT_SUCCESS')]),
@@ -303,7 +301,7 @@ describe('RunMetricsCalculator', () => {
     });
 
     it('reports no scored standalone cases when every outcome is a system error', () => {
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             benchmarkRecords: [benchmarkRecord('E1', 'execute', 'easy')],
             runEvaluation: runEvaluation([
                 episode('E1', [trajectory('SYSTEM_ERROR')])
@@ -358,7 +356,7 @@ describe('RunMetricsCalculator', () => {
             ])
         ]);
 
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: evaluation,
             benchmarkRecords: records
         });
@@ -403,7 +401,7 @@ describe('RunMetricsCalculator', () => {
             safetyEpisode('S3', true, null)
         ]);
 
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: evaluation,
             benchmarkRecords: records
         });
@@ -421,7 +419,7 @@ describe('RunMetricsCalculator', () => {
     });
 
     it('returns null rather than an invented rate when a denominator is zero', () => {
-        const metrics = calculator.calculate({
+        const metrics = calculateRunMetrics({
             runEvaluation: runEvaluation([]),
             benchmarkRecords: []
         });

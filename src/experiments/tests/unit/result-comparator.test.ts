@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 
-import { ResultComparator } from '../../evaluation/result-comparator';
+import { compareResults } from '../../evaluation/result-comparator';
 import type { ComparisonContract, TabularResult } from '../../types';
 
 const comparison: ComparisonContract = {
@@ -29,12 +29,6 @@ const golden: TabularResult = {
 };
 
 describe('ResultComparator', () => {
-    let resultComparator: ResultComparator;
-
-    beforeEach(() => {
-        resultComparator = new ResultComparator();
-    });
-
     it('compares unordered rows by position while ignoring aliases', () => {
         const candidate: TabularResult = {
             columns: [
@@ -48,12 +42,10 @@ describe('ResultComparator', () => {
             rowCount: 2
         };
 
-        expect(resultComparator.compare(golden, candidate, comparison)).toEqual(
-            {
-                status: 'correct',
-                reason: null
-            }
-        );
+        expect(compareResults(golden, candidate, comparison)).toEqual({
+            status: 'correct',
+            reason: null
+        });
     });
 
     it('rejects approximate numbers outside the configured tolerance', () => {
@@ -65,12 +57,10 @@ describe('ResultComparator', () => {
             ]
         };
 
-        expect(resultComparator.compare(golden, candidate, comparison)).toEqual(
-            {
-                status: 'incorrect',
-                reason: 'Candidate result is missing an expected row.'
-            }
-        );
+        expect(compareResults(golden, candidate, comparison)).toEqual({
+            status: 'incorrect',
+            reason: 'Candidate result is missing an expected row.'
+        });
     });
 
     it('compares integer identifiers exactly regardless of numeric tolerance', () => {
@@ -82,9 +72,9 @@ describe('ResultComparator', () => {
             ]
         };
 
-        expect(
-            resultComparator.compare(golden, candidate, comparison).status
-        ).toBe('incorrect');
+        expect(compareResults(golden, candidate, comparison).status).toBe(
+            'incorrect'
+        );
     });
 
     it('compares ordered rows one by one when order matters', () => {
@@ -94,7 +84,7 @@ describe('ResultComparator', () => {
         };
 
         expect(
-            resultComparator.compare(golden, candidate, {
+            compareResults(golden, candidate, {
                 ...comparison,
                 orderMatters: true
             })
@@ -124,8 +114,7 @@ describe('ResultComparator', () => {
         };
 
         expect(
-            resultComparator.compare(duplicateGolden, candidate, comparison)
-                .status
+            compareResults(duplicateGolden, candidate, comparison).status
         ).toBe('incorrect');
     });
 
@@ -146,7 +135,7 @@ describe('ResultComparator', () => {
                 ['0.000002', '0']
             ]) {
                 expect(
-                    resultComparator.compare(
+                    compareResults(
                         result(goldenValues),
                         result(candidateValues),
                         contract
@@ -164,7 +153,7 @@ describe('ResultComparator', () => {
         });
 
         expect(
-            resultComparator.compare(
+            compareResults(
                 result(['0', '0', '0.000003']),
                 result(['0.000001', '0.000003', '0.000003']),
                 { ...comparison, requiredColumns: ['value'] }
@@ -197,7 +186,7 @@ describe('ResultComparator', () => {
         };
 
         expect(
-            resultComparator.compare(goldenResult, candidate, {
+            compareResults(goldenResult, candidate, {
                 ...comparison,
                 requiredColumns: ['x', 'y'],
                 numericTolerance: 0.125
@@ -218,7 +207,7 @@ describe('ResultComparator', () => {
         };
 
         expect(
-            resultComparator.compare(nullGolden, candidate, {
+            compareResults(nullGolden, candidate, {
                 ...comparison,
                 requiredColumns: ['company']
             }).status
@@ -238,7 +227,7 @@ describe('ResultComparator', () => {
         };
 
         expect(
-            resultComparator.compare(timestampGolden, candidate, {
+            compareResults(timestampGolden, candidate, {
                 ...comparison,
                 requiredColumns: ['invoice_date']
             })
@@ -252,20 +241,16 @@ describe('ResultComparator', () => {
             rowCount: 2
         };
 
-        expect(resultComparator.compare(golden, candidate, comparison)).toEqual(
-            {
-                status: 'incorrect',
-                reason: 'Column count differs: expected 2, received 1.'
-            }
-        );
+        expect(compareResults(golden, candidate, comparison)).toEqual({
+            status: 'incorrect',
+            reason: 'Column count differs: expected 2, received 1.'
+        });
     });
 
     it('accepts valid empty results and null cells', () => {
         for (const rows of [[], [[null, null]]] as TabularResult['rows'][]) {
             const result = { ...golden, rows, rowCount: rows.length };
-            expect(
-                resultComparator.compare(result, result, comparison)
-            ).toEqual({
+            expect(compareResults(result, result, comparison)).toEqual({
                 status: 'correct',
                 reason: null
             });
@@ -281,7 +266,7 @@ describe('ResultComparator', () => {
             ]
         };
 
-        const result = resultComparator.compare(golden, candidate, comparison);
+        const result = compareResults(golden, candidate, comparison);
 
         expect(result.status).toBe('incorrect');
         expect(result.reason).toContain(
