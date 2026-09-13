@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { RunInteractionLoader } from '../../evaluation/run-interaction-loader';
+import { loadRunInteractions } from '../../evaluation/evaluation-input';
 import { createStoredRunInteraction } from '../fixtures/run-interaction';
 
 jest.mock('node:fs/promises', () => ({
@@ -12,7 +12,7 @@ beforeEach(() => {
     jest.clearAllMocks();
 });
 
-describe('RunInteractionLoader', () => {
+describe('loadRunInteractions', () => {
     it('loads one interaction from each non-empty JSONL line', async () => {
         const firstInteraction = createStoredRunInteraction();
         const secondInteraction = createStoredRunInteraction({
@@ -23,7 +23,7 @@ describe('RunInteractionLoader', () => {
             `${JSON.stringify(firstInteraction)}\n\n${JSON.stringify(secondInteraction)}\n`
         );
 
-        const interactions = await new RunInteractionLoader().load(
+        const interactions = await loadRunInteractions(
             'runs/nova-lite/repetition-1/interactions.jsonl'
         );
 
@@ -35,8 +35,8 @@ describe('RunInteractionLoader', () => {
             `${JSON.stringify(createStoredRunInteraction())}\n\nnot-json\n`
         );
 
-        await expect(
-            new RunInteractionLoader().load('interactions.jsonl')
-        ).rejects.toThrow('Invalid interaction JSON on line 3.');
+        await expect(loadRunInteractions('interactions.jsonl')).rejects.toThrow(
+            'Invalid interaction JSON on line 3.'
+        );
     });
 });

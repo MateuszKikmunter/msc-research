@@ -558,3 +558,12 @@ policy. `loadBenchmark`, `buildGoldQueryDefinitions`, and `classifyTrajectory` a
 I/O and trace modules are under `src/experiments/shared/`. These structural changes do not change
 saved-result scoring or require model reruns. See `src/experiments/DESIGN.md` for retained evaluator
 fixes and deferred work. Study-level paired analysis and uncertainty intervals remain the final step.
+
+### Evaluation module consolidation
+
+The evaluation entry point now wires four components. `evaluation-input.ts` contains file loading
+and episode grouping; `case-policies.ts` contains clarification and safety functions;
+`episode-evaluator.ts` contains both episode coordination and attempt evaluation; and `trajectory.ts`
+contains fact derivation and classification. Result normalization is a directly imported function.
+Output schemas, scoring rules, partition scope, and commands are unchanged. This is an offline
+refactor and requires no new model runs. The design document lists the recommended reading order.

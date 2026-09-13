@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **2026-09-13** — Consolidated the evaluation pipeline from 17 production modules to 12. Moved
+  attempt evaluation into `episode-evaluator.ts`; replaced result-loader, JSONL-loader, and
+  episode-builder classes with functions in `evaluation-input.ts`; combined clarification/safety
+  functions in `case-policies.ts`; and colocated fact derivation and classification in `trajectory.ts`.
+  The comparator imports normalization directly, and the CLI constructs four components rather than
+  wiring each small operation. Retained existing tests against the new functions. All four saved
+  model/repetition runs produce identical detailed evaluation results and aggregate metrics compared
+  with a pre-refactor baseline. No model calls, report overwrites, benchmark edits, or study-level
+  analysis were performed. Updated the design and evaluation documentation.
+
 - **2026-09-13** — Simplified experiment code without changing prompts or collection policy:
   standalone and ambiguity cases share one optional-continuation flow; benchmark loading,
   gold-definition extraction, and trajectory classification are named functions; runner dependencies

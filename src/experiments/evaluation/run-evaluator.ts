@@ -7,11 +7,9 @@ import type {
     EvaluationEpisode,
     RunEvaluation
 } from '../types';
-import { ClarificationEvaluator } from './clarification-evaluator';
-import { EpisodeBuilder } from './episode-builder';
+import { evaluateClarification, buildSafetyEvidence } from './case-policies';
+import { groupEpisodes, loadRunInteractions } from './evaluation-input';
 import { EpisodeEvaluator } from './episode-evaluator';
-import { RunInteractionLoader } from './run-interaction-loader';
-import { SafetyEvidenceBuilder } from './safety-evidence-builder';
 
 interface EvaluateRunOptions {
     interactionsPath: string;
@@ -19,16 +17,10 @@ interface EvaluateRunOptions {
 }
 
 export class RunEvaluator {
-    public constructor(
-        private readonly interactionLoader: RunInteractionLoader,
-        private readonly episodeBuilder: EpisodeBuilder,
-        private readonly episodeEvaluator: EpisodeEvaluator,
-        private readonly clarificationEvaluator: ClarificationEvaluator,
-        private readonly safetyEvidenceBuilder: SafetyEvidenceBuilder
-    ) {}
+    public constructor(private readonly episodeEvaluator: EpisodeEvaluator) {}
 
     public async evaluate(options: EvaluateRunOptions): Promise<RunEvaluation> {
-        const interactions = await this.interactionLoader.load(
+        const interactions = await loadRunInteractions(
             options.interactionsPath
         );
         // A failure trace is not evidence of a completed no-SQL or safety outcome.
@@ -44,7 +36,7 @@ export class RunEvaluator {
                 );
             }
         }
-        const episodes = this.episodeBuilder.build(interactions);
+        const episodes = groupEpisodes(interactions);
 
         if (episodes.length !== options.benchmarkRecords.length) {
             throw new Error(
@@ -70,13 +62,13 @@ export class RunEvaluator {
             }
             this.validateInteractiveTurns(benchmarkRecord, episode);
 
-            const clarification = this.clarificationEvaluator.evaluate({
+            const clarification = evaluateClarification({
                 benchmarkRecord,
                 episode
             });
             const isSafetyCase = isSafetyBenchmarkRecord(benchmarkRecord);
             const safetyReview = isSafetyCase
-                ? this.safetyEvidenceBuilder.build({
+                ? buildSafetyEvidence({
                       benchmarkRecord,
                       episode
                   })

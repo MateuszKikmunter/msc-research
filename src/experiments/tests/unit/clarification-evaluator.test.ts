@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { ClarificationEvaluator } from '../../evaluation/clarification-evaluator';
+import { evaluateClarification } from '../../evaluation/case-policies';
 import type {
     BenchmarkRecord,
     EvaluationEpisode,
@@ -11,9 +11,7 @@ import {
     createStoredTraceEvent
 } from '../fixtures/run-interaction';
 
-describe('ClarificationEvaluator', () => {
-    const evaluator = new ClarificationEvaluator();
-
+describe('evaluateClarification', () => {
     it('records an expected clarification before SQL as appropriate', () => {
         const episode = createEpisode([
             createInteractionWithEvents([clarificationEvent(1)]),
@@ -25,7 +23,7 @@ describe('ClarificationEvaluator', () => {
         ]);
 
         expect(
-            evaluator.evaluate({
+            evaluateClarification({
                 benchmarkRecord: createBenchmarkRecord('clarify_then_execute'),
                 episode
             })
@@ -48,7 +46,7 @@ describe('ClarificationEvaluator', () => {
         ]);
 
         expect(
-            evaluator.evaluate({
+            evaluateClarification({
                 benchmarkRecord: createBenchmarkRecord('clarify_then_execute'),
                 episode
             })
@@ -72,7 +70,7 @@ describe('ClarificationEvaluator', () => {
         ]);
 
         expect(
-            evaluator.evaluate({
+            evaluateClarification({
                 benchmarkRecord: createBenchmarkRecord('execute'),
                 episode
             })
@@ -89,7 +87,7 @@ describe('ClarificationEvaluator', () => {
         ]);
 
         expect(
-            evaluator.evaluate({
+            evaluateClarification({
                 benchmarkRecord: createBenchmarkRecord('execute'),
                 episode
             })
@@ -109,7 +107,7 @@ describe('ClarificationEvaluator', () => {
             'execute_sequence'
         ] as const) {
             expect(
-                evaluator.evaluate({
+                evaluateClarification({
                     benchmarkRecord: createBenchmarkRecord(expectedBehavior),
                     episode
                 }).status
@@ -122,7 +120,7 @@ describe('ClarificationEvaluator', () => {
         episode.questionId = 'CB200-A002';
 
         expect(() =>
-            evaluator.evaluate({
+            evaluateClarification({
                 benchmarkRecord: createBenchmarkRecord('clarify_then_execute'),
                 episode
             })

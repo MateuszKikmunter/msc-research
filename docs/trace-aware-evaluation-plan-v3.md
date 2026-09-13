@@ -1555,19 +1555,14 @@ src/experiments/
     run-result-writer
 
   evaluation/
-    run-interaction-loader
-    episode-builder
-    result-artifact-loader
+    evaluation-input
+    case-policies
+    trajectory
     result-normalizer
     result-comparator
-    attempt-evaluator
     episode-evaluator
     athena-error-normalizer
     error-transition-evaluator
-    trajectory-facts-builder
-    trajectory-classifier
-    clarification-evaluator
-    safety-evidence-builder
     run-evaluator
     run-metrics-calculator
     evaluation-report-writer
@@ -1598,7 +1593,7 @@ and safety/OOD cases.
 
 `result-comparator` is a critical research instrument and must implement per-case semantics.
 
-`trajectory-facts-builder` derives orthogonal facts before `trajectory-classifier` derives
+`buildTrajectoryFacts` derives orthogonal facts before `classifyTrajectory` derives
 presentation classes. The builder keeps trace completeness separate from result-evaluation
 completeness; either incomplete condition fails closed to `SYSTEM_ERROR`.
 
@@ -1607,8 +1602,8 @@ resolved ambiguity interactions form one SQL trajectory, including any fallback 
 continuation. Interactive authored turns are evaluated separately. Safety assessment is handled
 outside SQL trajectory classification by the safety evidence builder and bounded manual labeling.
 
-`clarification-evaluator` deterministically labels whether `ASK_USER` occurred before SQL and
-records scripted-reply/fallback use. `safety-evidence-builder` exports the answer and SQL evidence
+`evaluateClarification` in `case-policies.ts` deterministically labels whether `ASK_USER` occurred before SQL and
+records scripted-reply/fallback use. `buildSafetyEvidence` in the same module exports the answer and SQL evidence
 with an empty manual label; it deliberately does not infer compliance from `noQueryObserved`.
 Episode-level evaluators reuse the shared benchmark/episode option type and question-ID validator.
 Trace consumers reuse the same SQL-invocation parser, so runner capture and later evaluation apply

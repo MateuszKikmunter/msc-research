@@ -5,13 +5,11 @@ import type {
 } from '../types';
 import { getErrorMessage } from '../shared/error-message';
 import {
-    ResultNormalizer,
+    normalizeRow,
     type NormalizedRow,
     type NormalizedValue
 } from './result-normalizer';
 export class ResultComparator {
-    public constructor(private readonly resultNormalizer: ResultNormalizer) {}
-
     public compare(
         golden: TabularResult,
         candidate: TabularResult,
@@ -25,7 +23,7 @@ export class ResultComparator {
         let goldenRows: NormalizedRow[];
         try {
             goldenRows = golden.rows.map((row) =>
-                this.resultNormalizer.normalizeRow(row, golden.columns)
+                normalizeRow(row, golden.columns)
             );
         } catch (error) {
             return this.uncertain(
@@ -37,7 +35,7 @@ export class ResultComparator {
         try {
             // Golden types define the expected semantic type at every positional column.
             candidateRows = candidate.rows.map((row) =>
-                this.resultNormalizer.normalizeRow(row, golden.columns)
+                normalizeRow(row, golden.columns)
             );
         } catch (error) {
             return this.incorrect(

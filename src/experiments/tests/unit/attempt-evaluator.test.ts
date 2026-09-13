@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { AttemptEvaluator } from '../../evaluation/attempt-evaluator';
-import { ResultArtifactLoader } from '../../evaluation/result-artifact-loader';
-import { ResultComparator } from '../../evaluation/result-comparator';
-import { ResultNormalizer } from '../../evaluation/result-normalizer';
+import { evaluateAttempts } from '../../evaluation/episode-evaluator';
+import * as artifactLoader from '../../evaluation/evaluation-input';
 import type {
     CandidateResultFile,
     GoldenResultFile,
@@ -50,21 +48,21 @@ const candidateResult: CandidateResultFile = {
     rowCount: 1
 };
 
-describe('AttemptEvaluator', () => {
-    let artifactLoader: ResultArtifactLoader;
-    let attemptEvaluator: AttemptEvaluator;
+describe('evaluateAttempts', () => {
+    const attemptEvaluator = {
+        evaluate: (options: Parameters<typeof evaluateAttempts>[0]) =>
+            evaluateAttempts(options, {
+                goldenResultDirectory: 'golden-sql',
+                runDirectory: 'run'
+            })
+    };
 
     beforeEach(() => {
-        artifactLoader = new ResultArtifactLoader('golden-sql', 'run');
         jest.spyOn(artifactLoader, 'loadGoldenResult').mockResolvedValue(
             goldenResult
         );
         jest.spyOn(artifactLoader, 'loadCandidateResult').mockResolvedValue(
             candidateResult
-        );
-        attemptEvaluator = new AttemptEvaluator(
-            new ResultComparator(new ResultNormalizer()),
-            artifactLoader
         );
     });
 

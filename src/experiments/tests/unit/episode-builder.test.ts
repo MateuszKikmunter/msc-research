@@ -1,12 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { EpisodeBuilder } from '../../evaluation/episode-builder';
+import { groupEpisodes } from '../../evaluation/evaluation-input';
 import {
     createStoredRunInteraction,
     createStoredTraceEvent
 } from '../fixtures/run-interaction';
 
-describe('EpisodeBuilder', () => {
+describe('groupEpisodes', () => {
     it('groups interactions by session and orders interactions and traces', () => {
         const secondInteraction = createStoredRunInteraction({
             interactionOrder: 2,
@@ -34,7 +34,7 @@ describe('EpisodeBuilder', () => {
             sessionId: 'session-2'
         });
 
-        const episodes = new EpisodeBuilder().build([
+        const episodes = groupEpisodes([
             secondInteraction,
             firstInteraction,
             otherEpisode

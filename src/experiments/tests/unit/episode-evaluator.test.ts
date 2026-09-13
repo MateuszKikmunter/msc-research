@@ -2,13 +2,9 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 import type { SqlAttempt } from '../../../backend/types';
 import { AthenaErrorNormalizer } from '../../evaluation/athena-error-normalizer';
-import { AttemptEvaluator } from '../../evaluation/attempt-evaluator';
 import { EpisodeEvaluator } from '../../evaluation/episode-evaluator';
 import { ErrorTransitionEvaluator } from '../../evaluation/error-transition-evaluator';
-import { ResultArtifactLoader } from '../../evaluation/result-artifact-loader';
-import { ResultComparator } from '../../evaluation/result-comparator';
-import { ResultNormalizer } from '../../evaluation/result-normalizer';
-import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
+import * as artifactLoader from '../../evaluation/evaluation-input';
 import type {
     BenchmarkRecord,
     CandidateResultFile,
@@ -56,26 +52,18 @@ const candidateResult: CandidateResultFile = {
 };
 
 describe('EpisodeEvaluator', () => {
-    let artifactLoader: ResultArtifactLoader;
-    let attemptEvaluator: AttemptEvaluator;
     let episodeEvaluator: EpisodeEvaluator;
 
     beforeEach(() => {
-        artifactLoader = new ResultArtifactLoader('golden-sql', 'run');
         jest.spyOn(artifactLoader, 'loadGoldenResult').mockResolvedValue(
             goldenResult
         );
         jest.spyOn(artifactLoader, 'loadCandidateResult').mockResolvedValue(
             candidateResult
         );
-        attemptEvaluator = new AttemptEvaluator(
-            new ResultComparator(new ResultNormalizer()),
-            artifactLoader
-        );
         episodeEvaluator = new EpisodeEvaluator(
-            attemptEvaluator,
-            new ErrorTransitionEvaluator(new AthenaErrorNormalizer()),
-            new TrajectoryFactsBuilder()
+            { goldenResultDirectory: 'golden-sql', runDirectory: 'run' },
+            new ErrorTransitionEvaluator(new AthenaErrorNormalizer())
         );
     });
 
@@ -241,10 +229,12 @@ describe('EpisodeEvaluator', () => {
         ]);
         expect(artifactLoader.loadGoldenResult).toHaveBeenNthCalledWith(
             1,
+            'golden-sql',
             'CB200-E001-T01'
         );
         expect(artifactLoader.loadGoldenResult).toHaveBeenNthCalledWith(
             2,
+            'golden-sql',
             'CB200-E001-T02'
         );
     });

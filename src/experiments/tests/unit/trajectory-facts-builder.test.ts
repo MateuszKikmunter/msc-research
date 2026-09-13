@@ -1,14 +1,15 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { classifyTrajectory } from '../../evaluation/trajectory-classifier';
-import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
+import {
+    classifyTrajectory,
+    buildTrajectoryFacts
+} from '../../evaluation/trajectory';
+
 import type { AttemptEvaluation, ErrorTransition } from '../../types';
 
-describe('TrajectoryFactsBuilder', () => {
-    const factsBuilder = new TrajectoryFactsBuilder();
-
+describe('Trajectory facts and classification', () => {
     it('builds and classifies a direct success', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [createAttempt('correct')],
             errorTransitions: []
         });
@@ -35,7 +36,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('recognizes recovery from an execution error', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [
                 createAttempt('execution_error'),
                 createAttempt('correct', { attempt: 2 })
@@ -55,7 +56,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('recognizes a successful semantic revision', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [
                 createAttempt('semantic_error'),
                 createAttempt('correct', { attempt: 2 })
@@ -68,7 +69,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('records regression and a redundant action after a correct result', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [
                 createAttempt('correct'),
                 createAttempt('semantic_error', { attempt: 2 })
@@ -85,7 +86,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('classifies a terminal execution error as unrecovered', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [createAttempt('execution_error')],
             errorTransitions: [
                 createErrorTransition({
@@ -104,7 +105,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('classifies an evaluation unit without SQL as no SQL', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [],
             errorTransitions: []
         });
@@ -120,7 +121,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('fails closed when result evaluation is uncertain', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [createAttempt('evaluator_uncertain')],
             errorTransitions: []
         });
@@ -134,7 +135,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('fails closed when an execution error has no trace transition', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [createAttempt('execution_error')],
             errorTransitions: []
         });
@@ -144,7 +145,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('marks an unchanged retry as a redundant SQL action', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [
                 createAttempt('execution_error'),
                 createAttempt('execution_error', { attempt: 2 })
@@ -169,7 +170,7 @@ describe('TrajectoryFactsBuilder', () => {
     });
 
     it('records more than one retry without automatically calling it redundant', () => {
-        const facts = factsBuilder.build({
+        const facts = buildTrajectoryFacts({
             attempts: [
                 createAttempt('semantic_error'),
                 createAttempt('semantic_error', { attempt: 2 }),

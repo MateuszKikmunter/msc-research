@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { ResultComparator } from '../../evaluation/result-comparator';
-import { ResultNormalizer } from '../../evaluation/result-normalizer';
 import type { ComparisonContract, TabularResult } from '../../types';
 
 const comparison: ComparisonContract = {
@@ -33,7 +32,7 @@ describe('ResultComparator', () => {
     let resultComparator: ResultComparator;
 
     beforeEach(() => {
-        resultComparator = new ResultComparator(new ResultNormalizer());
+        resultComparator = new ResultComparator();
     });
 
     it('compares unordered rows by position while ignoring aliases', () => {

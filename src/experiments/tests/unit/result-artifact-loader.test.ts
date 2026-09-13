@@ -2,7 +2,10 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { ResultArtifactLoader } from '../../evaluation/result-artifact-loader';
+import {
+    loadGoldenResult,
+    loadCandidateResult
+} from '../../evaluation/evaluation-input';
 
 jest.mock('node:fs/promises', () => ({
     readFile: jest.fn()
@@ -12,7 +15,7 @@ beforeEach(() => {
     jest.clearAllMocks();
 });
 
-describe('ResultArtifactLoader', () => {
+describe('Result loading', () => {
     it('loads golden results from the shared golden-result directory', async () => {
         const result = {
             questionId: 'CB200-E001',
@@ -22,11 +25,10 @@ describe('ResultArtifactLoader', () => {
             rowCount: 1
         };
         jest.mocked(readFile).mockResolvedValue(JSON.stringify(result));
-        const loader = new ResultArtifactLoader('golden-sql', 'run');
 
-        await expect(loader.loadGoldenResult('CB200-E001')).resolves.toEqual(
-            result
-        );
+        await expect(
+            loadGoldenResult('golden-sql', 'CB200-E001')
+        ).resolves.toEqual(result);
         expect(readFile).toHaveBeenCalledWith(
             path.join('golden-sql', 'CB200-E001.json'),
             'utf8'
@@ -45,10 +47,10 @@ describe('ResultArtifactLoader', () => {
             rowCount: 1
         };
         jest.mocked(readFile).mockResolvedValue(JSON.stringify(result));
-        const loader = new ResultArtifactLoader('golden-sql', 'run');
 
         await expect(
-            loader.loadCandidateResult(
+            loadCandidateResult(
+                'run',
                 path.join('candidate-results', 'CB200-E001-T01-A01.json')
             )
         ).resolves.toEqual(result);

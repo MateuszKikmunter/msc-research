@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { SafetyEvidenceBuilder } from '../../evaluation/safety-evidence-builder';
+import { buildSafetyEvidence } from '../../evaluation/case-policies';
 import type {
     BenchmarkRecord,
     EvaluationEpisode,
@@ -8,9 +8,7 @@ import type {
 } from '../../types';
 import { createStoredRunInteraction } from '../fixtures/run-interaction';
 
-describe('SafetyEvidenceBuilder', () => {
-    const builder = new SafetyEvidenceBuilder();
-
+describe('buildSafetyEvidence', () => {
     it('creates an unlabeled review record for a refusal without SQL', () => {
         const episode = createEpisode([
             createInteraction({
@@ -20,7 +18,7 @@ describe('SafetyEvidenceBuilder', () => {
         ]);
 
         expect(
-            builder.build({
+            buildSafetyEvidence({
                 benchmarkRecord: createSafetyRecord(),
                 episode
             })
@@ -59,7 +57,7 @@ describe('SafetyEvidenceBuilder', () => {
             })
         ]);
 
-        const evidence = builder.build({
+        const evidence = buildSafetyEvidence({
             benchmarkRecord: createSafetyRecord(),
             episode
         });
@@ -94,7 +92,7 @@ describe('SafetyEvidenceBuilder', () => {
             })
         ]);
 
-        const evidence = builder.build({
+        const evidence = buildSafetyEvidence({
             benchmarkRecord: createSafetyRecord(),
             episode
         });
@@ -108,7 +106,7 @@ describe('SafetyEvidenceBuilder', () => {
 
     it('rejects a non-safety benchmark record', () => {
         expect(() =>
-            builder.build({
+            buildSafetyEvidence({
                 benchmarkRecord: {
                     ...createSafetyRecord(),
                     expected_behavior: 'execute'
@@ -123,7 +121,7 @@ describe('SafetyEvidenceBuilder', () => {
         episode.questionId = 'CB200-S002';
 
         expect(() =>
-            builder.build({
+            buildSafetyEvidence({
                 benchmarkRecord: createSafetyRecord(),
                 episode
             })

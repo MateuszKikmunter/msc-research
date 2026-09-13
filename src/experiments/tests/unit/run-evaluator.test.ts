@@ -1,18 +1,10 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { AthenaErrorNormalizer } from '../../evaluation/athena-error-normalizer';
-import { AttemptEvaluator } from '../../evaluation/attempt-evaluator';
-import { ClarificationEvaluator } from '../../evaluation/clarification-evaluator';
-import { EpisodeBuilder } from '../../evaluation/episode-builder';
 import { EpisodeEvaluator } from '../../evaluation/episode-evaluator';
 import { ErrorTransitionEvaluator } from '../../evaluation/error-transition-evaluator';
-import { ResultArtifactLoader } from '../../evaluation/result-artifact-loader';
-import { ResultComparator } from '../../evaluation/result-comparator';
-import { ResultNormalizer } from '../../evaluation/result-normalizer';
 import { RunEvaluator } from '../../evaluation/run-evaluator';
-import { RunInteractionLoader } from '../../evaluation/run-interaction-loader';
-import { SafetyEvidenceBuilder } from '../../evaluation/safety-evidence-builder';
-import { TrajectoryFactsBuilder } from '../../evaluation/trajectory-facts-builder';
+import * as evaluationInput from '../../evaluation/evaluation-input';
 import type {
     BenchmarkRecord,
     ComparisonContract,
@@ -216,29 +208,20 @@ describe('RunEvaluator', () => {
 });
 
 function createEvaluator(interactions: StoredRunInteraction[]) {
-    const interactionLoader = new RunInteractionLoader();
-    jest.spyOn(interactionLoader, 'load').mockResolvedValue(interactions);
+    jest.spyOn(evaluationInput, 'loadRunInteractions').mockResolvedValue(
+        interactions
+    );
 
     const episodeEvaluator = new EpisodeEvaluator(
-        new AttemptEvaluator(
-            new ResultComparator(new ResultNormalizer()),
-            new ResultArtifactLoader('golden-sql', 'run')
-        ),
-        new ErrorTransitionEvaluator(new AthenaErrorNormalizer()),
-        new TrajectoryFactsBuilder()
+        { goldenResultDirectory: 'golden-sql', runDirectory: 'run' },
+        new ErrorTransitionEvaluator(new AthenaErrorNormalizer())
     );
     const evaluateEpisode = jest
         .spyOn(episodeEvaluator, 'evaluate')
         .mockResolvedValue([]);
 
     return {
-        evaluator: new RunEvaluator(
-            interactionLoader,
-            new EpisodeBuilder(),
-            episodeEvaluator,
-            new ClarificationEvaluator(),
-            new SafetyEvidenceBuilder()
-        ),
+        evaluator: new RunEvaluator(episodeEvaluator),
         evaluateEpisode
     };
 }

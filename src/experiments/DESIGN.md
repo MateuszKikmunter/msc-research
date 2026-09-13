@@ -97,17 +97,14 @@ src/experiments/
     run-result-writer.ts
 
   evaluation/
-    run-interaction-loader.ts
-    episode-builder.ts
-    result-artifact-loader.ts
+    evaluation-input.ts
+    case-policies.ts
+    trajectory.ts
     result-normalizer.ts
     result-comparator.ts
-    attempt-evaluator.ts
     episode-evaluator.ts
     athena-error-normalizer.ts
     error-transition-evaluator.ts
-    trajectory-facts-builder.ts
-    trajectory-classifier.ts
     run-evaluator.ts
     run-metrics-calculator.ts
     evaluation-report-writer.ts
@@ -159,6 +156,25 @@ Episode-level components share one `{ benchmarkRecord, episode }` option type an
 validator. Trace consumers share invocation numbering and observation matching. Attempt evaluation,
 trajectory facts, classification, metrics, and reporting remain distinct stages. Backend streaming
 attempt reconstruction remains separate; this cleanup does not change the live response processor.
+
+### Evaluation reading order
+
+1. `evaluate-run.ts`: select directories, evaluate the run, calculate metrics, write reports.
+2. `evaluation-input.ts`: read JSONL and result JSON, group interactions into ordered episodes.
+3. `run-evaluator.ts`: check coverage and failure traces, route each benchmark case.
+4. `case-policies.ts`: clarification facts and manual safety evidence.
+5. `episode-evaluator.ts`: select a trajectory's interactions and evaluate its SQL attempts.
+6. `result-comparator.ts` and `result-normalizer.ts`: compare saved values and rows.
+7. `error-transition-evaluator.ts` and `athena-error-normalizer.ts`: classify observable retries.
+8. `trajectory.ts`: derive trajectory facts and assign a class.
+9. `run-metrics-calculator.ts` and `evaluation-report-writer.ts`: aggregate and export.
+
+Input loading, grouping, case policies, normalization, and trajectory facts are functions, not
+injected service objects. The CLI constructs four components: episode evaluation, run evaluation,
+metrics, and reporting. The substantial comparison and error-analysis algorithms remain separate.
+The refactor preserves all partition policies: standalone/resolved-ambiguity SQL trajectories,
+per-turn interactive trajectories, and separate safety evidence. It adds no natural-language judge,
+new metrics, or study-level analysis.
 
 ## 5. Commands
 
@@ -539,9 +555,9 @@ trace corpus. They are not presented as AWS Athena's official error enum: AWS pu
 
 ### 12.2 Episode coordination
 
-The episode evaluator is the in-memory coordinator for one benchmark episode. It receives an
-already grouped `EvaluationEpisode`, the matching benchmark record, and golden definitions. It
-does not read or write files.
+The episode evaluator coordinates one already grouped `EvaluationEpisode`, its benchmark record,
+and golden definitions. Its colocated `evaluateAttempts` function loads candidate and reference
+results through `evaluation-input.ts`. The module reads saved data but does not write reports.
 
 For a standalone or resolved ambiguity episode, it evaluates every interaction as one SQL
 trajectory. This preserves a fallback or scripted continuation while keeping SQL attempt ordering
@@ -605,7 +621,8 @@ category per transition, while eventual recovery is measured separately at episo
 ### 12.6 Report generation
 
 `evaluate-run.ts` loads the committed benchmark and selected run's `interactions.jsonl`. The
-existing `ResultArtifactLoader` supplies `AttemptEvaluator` with reference results from
+`evaluateAttempts` function in `episode-evaluator.ts` loads reference results through the functions
+in `evaluation-input.ts` from
 `runs/golden-sql` and candidate results from the selected model/repetition directory. Failed SQL
 attempts are evaluated from interactions and require no result artifact.
 
