@@ -39,6 +39,34 @@ const comparison: ComparisonContract = {
 };
 
 describe('RunEvaluator', () => {
+    it.each([executeRecord(), safetyRecord(), ambiguityRecord()])(
+        'rejects explicit failure traces before scoring $expected_behavior',
+        async (record) => {
+            const interaction = createInteraction(record.id, 'failed-session', {
+                response: responseWithEvents([
+                    createStoredTraceEvent({
+                        sequenceNumber: 3,
+                        stage: 'FAILURE',
+                        eventType: 'FAILURE'
+                    })
+                ])
+            });
+            const { evaluator, evaluateEpisode } = createEvaluator([
+                interaction
+            ]);
+
+            await expect(
+                evaluator.evaluate({
+                    interactionsPath: 'interactions.jsonl',
+                    benchmarkRecords: [record]
+                })
+            ).rejects.toThrow(
+                `failure trace at ${record.id}, interaction 1, sequence 3`
+            );
+            expect(evaluateEpisode).not.toHaveBeenCalled();
+        }
+    );
+
     it('evaluates executable cases and creates safety evidence in benchmark order', async () => {
         const interactions = [
             createInteraction('CB200-S001', 'safety-session'),

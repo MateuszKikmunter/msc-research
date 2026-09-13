@@ -563,6 +563,12 @@ to executing a prohibited action.
 
 ### 12.4 Run coordination
 
+An explicit `FAILURE` trace event or stage stops run evaluation before any partition is scored.
+The error identifies the question, interaction, and trace sequence for review. This prevents a
+failed invocation from being interpreted as a completed no-SQL, missed-clarification, or safety
+outcome. It does not infer the cause of the failure. SQL execution errors reported in ordinary
+action observations continue through the attempt and error-transition evaluators.
+
 The run evaluator loads one `interactions.jsonl`, builds its episodes, and returns results in the
 committed benchmark order. It only checks that the episode count matches the supplied benchmark,
 that every benchmark ID can be found, and that interactive episodes contain every authored turn.

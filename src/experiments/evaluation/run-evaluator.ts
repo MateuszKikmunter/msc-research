@@ -31,6 +31,19 @@ export class RunEvaluator {
         const interactions = await this.interactionLoader.load(
             options.interactionsPath
         );
+        // A failure trace is not evidence of a completed no-SQL or safety outcome.
+        // Require review rather than infer whether the failure came from the model or platform.
+        for (const interaction of interactions) {
+            const failure = interaction.response.traceEvents.find(
+                (event) =>
+                    event.eventType === 'FAILURE' || event.stage === 'FAILURE'
+            );
+            if (failure) {
+                throw new Error(
+                    `Cannot evaluate run: failure trace at ${interaction.questionId}, interaction ${interaction.interactionOrder}, sequence ${failure.sequenceNumber}. Review the stored trace before scoring this run.`
+                );
+            }
+        }
         const episodes = this.episodeBuilder.build(interactions);
 
         if (episodes.length !== options.benchmarkRecords.length) {
