@@ -5,7 +5,7 @@ import {
     StartQueryExecutionCommand
 } from '@aws-sdk/client-athena';
 
-import { AthenaService } from '../../shared/services/athena/athena-service';
+import { AthenaService } from '../../shared/athena-service';
 
 describe('AthenaService', () => {
     it('retrieves every result page and excludes the header row', async () => {

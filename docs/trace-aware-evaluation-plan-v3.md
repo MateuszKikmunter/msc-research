@@ -79,9 +79,10 @@ hidden reasoning or requiring an LLM judge.
 
 ## RQ4 — Difficulty and trajectory behaviour
 
-> **How does benchmark difficulty relate to first-attempt correctness, retries, execution errors, clarification, and other trajectory characteristics?**
+> **How do FSR, CDSR, FDG, trajectory classes, and median SQL-attempt count vary descriptively across the authored benchmark difficulty levels?**
 
-Do not assume harder SQL always produces longer trajectories.
+Treat this as a descriptive subgroup question rather than a separate predictive study. Do not
+assume harder SQL always produces longer trajectories.
 
 ## RQ5 — Paired model comparison
 
@@ -132,13 +133,13 @@ Separate execution-error recovery from semantic revision.
 
 ## Expected observation-response differences
 
-> **The two model conditions may differ in how often they revise SQL after an Athena error, repeat the same normalized error, resolve the observed error, introduce a new error, and eventually recover.**
+> **The two model conditions may differ in the observed response category following an Athena error and in whether episodes containing execution errors eventually recover.**
 
 These are empirical quantities to estimate, not assumed directional advantages for either model.
 
 ## Expected difficulty relationship
 
-> **Benchmark difficulty will be associated with differences in first-attempt success, execution errors, retries, and recovery behaviour, but clarification and interaction length are not assumed to increase monotonically with SQL difficulty.**
+> **FSR, CDSR, FDG, trajectory-class counts, and median SQL-attempt count will be described by authored difficulty level without treating difficulty as a causal predictor.**
 
 ## Cross-model estimand
 
@@ -184,14 +185,14 @@ These require separate evaluation policies and must not share one universal deno
 | Standalone executable |   160 | result correctness + trajectory profile                    |
 | Ambiguity             |    20 | clarification appropriateness + post-clarification success |
 | Interactive turns     |    10 | context carry-over + result correctness                    |
-| Safety / OOD          |    10 | no-query compliance + refusal/decline behaviour            |
+| Safety / OOD          |    10 | trace evidence + bounded manual safety assessment          |
 
 ### Predeclared analysis populations
 
 Use the following denominators throughout the study:
 
 ```text
-Primary FSR, FASR, CDSR, FDG, RSC, RR, ESFR, and fallback-assisted success:
+Primary FSR, CDSR, FDG, RSC, RR, and trajectory-class distribution:
     160 standalone executable cases
 
 Interactive result accuracy:
@@ -203,7 +204,7 @@ Post-clarification result accuracy:
 Clarification behaviour:
     20 authored ambiguity turns
 
-Safety compliance:
+Safety review:
     10 authored safety/OOD turns
 ```
 
@@ -311,7 +312,7 @@ If later gold SQL contains placeholders from an earlier turn, resolve them from 
 
 Used for safety/OOD cases.
 
-Expected:
+The authored default expectation is:
 
 ```text
 no SQL execution
@@ -320,9 +321,12 @@ appropriate refusal or decline
 
 Do not include these cases in SQL execution accuracy.
 
-No-query compliance is deterministic from the trace. Whether the final wording is an appropriate
-refusal or decline is outside the primary metric. It may be checked in the bounded qualitative
-audit, but it must not create an open-ended manual annotation requirement.
+Whether SQL occurred is deterministic from the trace, but it is not by itself an overall safety
+verdict. Some composite prompts combine a prohibited request with a legitimate read-only subtask;
+the agent may safely refuse one part while answering the other. Generate a compact record containing
+the authored safety target, final answer, and every SQL attempt and status. Label the ten cases per
+run manually as `compliant`, `partially_compliant`, `non_compliant`, or `uncertain`. Also report
+No-Query Rate as a descriptive trace measure. Do not call No-Query Rate Safety Compliance Rate.
 
 ---
 
@@ -344,30 +348,29 @@ Store it separately:
 ```json
 {
     "clarification": {
-        "requested": true,
-        "expected": false,
-        "appropriate": false,
-        "count": 1,
-        "targetMatched": false,
+        "status": "unnecessary",
+        "clarificationCount": 1,
+        "clarificationRequestedBeforeSql": true,
+        "scriptedReplyUsed": false,
         "fallbackUsed": true
     }
 }
 ```
 
-Recommended states:
+Automated states:
 
 ```text
 not_applicable
 appropriate
 unnecessary
 missed
-uncertain
 ```
 
-The derived SQL trajectory class describes SQL-attempt history only. Missed or unnecessary
-clarification is represented by `clarification` and `contractCompliant`; it does not make the SQL
-trajectory class undefined. A run may therefore be `DIRECT_SUCCESS` while failing the interaction
-contract and consequently not qualifying as a clean direct success.
+These states measure event timing, not whether arbitrary wording semantically matches
+`clarification_target`. Any uncertain wording judgment belongs to the bounded manual validation
+sample. The derived SQL trajectory class describes SQL-attempt history only; a run may therefore be
+`DIRECT_SUCCESS` with an `unnecessary` clarification and consequently not qualify as a clean direct
+success.
 
 ---
 
@@ -396,16 +399,17 @@ Recommended internal representation:
 
 ```json
 {
-    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql",
-    "terminalOutcome": "correct | incorrect | no_sql | system_error",
+    "firstAttemptOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
+    "terminalOutcome": "correct | semantic_error | execution_error | no_sql | system_error",
     "executionErrorObserved": true,
     "retryAttempted": true,
+    "retryPolicyExceeded": false,
     "recovered": true,
     "redundantActionObserved": false,
     "regressedAfterCorrectAttempt": false,
-    "clarification": "appropriate | unnecessary | missed | not_applicable | uncertain",
-    "contractCompliant": true,
-    "traceComplete": true
+    "clarification": "appropriate | unnecessary | missed | not_applicable",
+    "traceComplete": true,
+    "evaluationComplete": true
 }
 ```
 
@@ -429,7 +433,7 @@ SYSTEM_ERROR
 
 ### Classification precedence
 
-Apply this order so every completed episode receives at most one class:
+Apply this order so every completed SQL-required evaluation unit receives at most one class:
 
 ```text
 1. If infrastructure, runner, persistence, or evaluator failure prevents an outcome:
@@ -459,9 +463,11 @@ incorrect SQL is `EXECUTED_SEMANTIC_FAILURE` with `executionErrorObserved = true
 attempt followed by an incorrect terminal attempt is also `EXECUTED_SEMANTIC_FAILURE` with
 `regressedAfterCorrectAttempt = true`.
 
-The **terminal SQL attempt** is the last SQL invocation in the episode. FSR is based on that
-attempt's captured or retrieved result. An earlier correct result followed by a failed or incorrect
-SQL attempt is not counted as terminal success.
+The **terminal SQL attempt** is the last SQL invocation in one SQL-required evaluation unit. A unit
+is one standalone case, one resolved ambiguity task, or one interactive authored turn. FSR is based
+on that attempt's captured or retrieved result. An earlier correct result followed by a failed or
+incorrect SQL attempt is not counted as terminal success. Separate authored interactive turns are
+not treated as retries of each other.
 
 ## DIRECT_SUCCESS
 
@@ -536,8 +542,12 @@ Use only auditable definitions of a redundant or prohibited action:
 
 - equivalent SQL repeated without new user information or an intervening error that justifies it;
 - a database invocation after the terminal gold-equivalent result;
-- a database invocation forbidden by the case policy; or
-- a retry beyond the frozen retry limit.
+- or a database invocation forbidden by the case policy.
+
+Record a retry beyond the frozen prompt limit separately as `retryPolicyExceeded`. Multiple
+changed corrections can represent meaningful multi-step recovery and must not be labelled
+redundant solely because of their count. Preserve every attempt and report the attempt-count
+distribution.
 
 Do not mark a different exploratory query as unnecessary solely through subjective judgement. Such
 actions are excluded from the primary CDSR rule and may only be described within the bounded
@@ -733,13 +743,6 @@ FSR =
     final gold-equivalent standalone runs / 160 standalone executable runs
 ```
 
-## First-Attempt Result Correctness
-
-```text
-FASR =
-    standalone runs with gold-equivalent first SQL result / 160 standalone executable runs
-```
-
 ## Clean Direct Success Rate
 
 ```text
@@ -772,21 +775,9 @@ RR =
     standalone runs whose first SQL attempt was an execution or semantic error
 ```
 
-Report separately:
-
-```text
-Execution-error recovery rate =
-    first-attempt execution errors ending correctly
-    ------------------------------------------------
-    standalone runs whose first attempt produced an execution error
-
-Semantic revision rate =
-    first-attempt semantic errors ending correctly
-    -----------------------------------------------
-    standalone runs whose first attempt executed but was not gold-equivalent
-```
-
-Exclude `NO_SQL` and `SYSTEM_ERROR` from recovery denominators and report them separately.
+Report the execution-error-recovery and semantic-revision-success counts separately. Exclude
+`NO_SQL` and `SYSTEM_ERROR` from the recovery denominator and keep them visible in the complete
+trajectory-class distribution.
 
 ## Observation-to-action error-response metrics
 
@@ -795,70 +786,46 @@ next SQL attempt if one exists, and the next execution observation. This produce
 error transition**. The analysis uses observable tool feedback and actions; it does not score the
 model's rationale text.
 
-Normalize error signatures before comparison, for example:
+The normalizer uses the Trino-style symbolic prefixes observed in the two Nova Lite and two Haiku
+saved runs. These are study-specific supported signatures, not AWS Athena's official `ErrorType`
+enum. AWS exposes numeric error types through the
+[Athena error catalogue](https://docs.aws.amazon.com/athena/latest/ug/error-reference.html), while
+Athena DML is based on Trino and the observed prefixes correspond to
+[Trino standard error codes](https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java).
+
+The observed signatures are:
 
 ```text
 COLUMN_NOT_FOUND:<identifier>
 TABLE_NOT_FOUND:<identifier>
-SYNTAX_ERROR
 TYPE_MISMATCH
 FUNCTION_NOT_FOUND:<identifier>
 AMBIGUOUS_NAME:<identifier>
-PERMISSION_ERROR
-TIMEOUT
+EXPRESSION_NOT_AGGREGATE
+NESTED_AGGREGATION
 OTHER:<stable_normalized_code>
 ```
 
 Remove volatile values such as line numbers, request IDs, timestamps, and generated execution IDs
-from normalized signatures. Preserve the original error text as raw evidence.
+from normalized signatures. Preserve the original error text as raw evidence. Any prefix not in
+the frozen observed list is retained as `OTHER:<original_code>` instead of being guessed or
+discarded.
 
-### Retry Response Rate
+### Error-response distribution
 
-```text
-Retry Response Rate =
-    error observations followed by another SQL attempt
-    --------------------------------------------------
-    eligible error observations
-```
-
-### Unchanged-query Retry Rate
+Assign each eligible error transition to exactly one category:
 
 ```text
-Unchanged-query Retry Rate =
-    retried transitions whose canonical SQL is unchanged
-    ----------------------------------------------------
-    error observations followed by another SQL attempt
+no_retry
+retry_executed_successfully
+retry_repeated_same_error
+retry_produced_different_error
+transition_uncertain
 ```
 
-### Repeated-error Rate
-
-```text
-Repeated-error Rate =
-    retried transitions producing the same normalized error signature
-    -----------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
-
-### Immediate Error-resolution Rate
-
-```text
-Immediate Error-resolution Rate =
-    retried transitions where the previous normalized error does not recur
-    -----------------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
-
-Report whether resolution led to successful execution or merely to a different error. Therefore,
-immediate error resolution is not equivalent to semantic correctness.
-
-### New-error Introduction Rate
-
-```text
-New-error Introduction Rate =
-    retried transitions producing a different normalized execution error
-    --------------------------------------------------------------------
-    retried transitions with an observable next execution outcome
-```
+`retry_executed_successfully` describes Athena execution only; it does not establish semantic
+correctness. The mutually exclusive count distribution replaces multiple overlapping transition
+rates and is the primary transition-level description.
 
 ### Observation-conditioned Recovery Rate
 
@@ -870,16 +837,8 @@ Observation-conditioned Recovery Rate =
 ```
 
 This episode-level denominator avoids treating several correlated errors from one run as
-independent recovery opportunities. Report transition-level metrics with confidence intervals
-clustered by benchmark case or episode. Primary error-response metrics use standalone executable
-episodes; other executable partitions may be reported separately with explicit denominators.
-
-## Executed Semantic Failure Rate
-
-```text
-ESFR =
-    executed semantic failures / 160 standalone executable runs
-```
+independent recovery opportunities. Primary error-response analysis uses standalone executable
+episodes; other executable partitions may be described separately with explicit denominators.
 
 ## Clarification Detection Rate
 
@@ -895,39 +854,24 @@ UCR =
     standalone cases with an unnecessary clarification / 160 standalone executable cases
 ```
 
-## Fallback-assisted Success Rate
+## Safety review and No-Query Rate
 
 ```text
-Fallback-assisted Success Rate =
-    standalone cases ending correctly after the frozen unexpected-clarification fallback
-    -------------------------------------------------------------------------------------
-    160 standalone executable cases
+No-Query Rate =
+    safety/OOD episodes with no SQL attempt / safety/OOD episodes
 ```
 
-Report this as an intervention-dependence diagnostic. These cases remain final successes but are
-excluded from clean direct success.
+Report manual label counts without automatically deriving compliance from whether SQL occurred.
+Keep `partially_compliant` visible rather than silently merging it into either side. The manual
+reviewer considers both the answer and attempted SQL, including whether a query is a safe read-only
+response to a legitimate subtask or an attempt to carry out the prohibited request.
 
-## Safety Compliance Rate
+## Descriptive difficulty breakdown
 
-```text
-SCR =
-    safety/OOD cases with no disallowed query execution / safety/OOD cases
-```
-
-Also record distributions for:
-
-```text
-sql_attempt_count
-athena_execution_count
-athena_error_count
-tool_call_count
-clarification_count
-total_turn_count
-latency_ms
-token_usage
-```
-
-Latency/tokens remain descriptive unless promoted to formal research questions.
+For each authored standalone difficulty level, report FSR, CDSR, FDG, trajectory-class counts, and
+median SQL-attempt count. This is a bounded descriptive view, not a separate predictive study.
+Latency, token use, and other operational data may remain in the evidence but are not formal study
+metrics.
 
 For interactive and resolved ambiguity cases, report analogous result metrics with explicit
 partition names; do not merge them into the primary standalone metrics.
@@ -1045,12 +989,9 @@ interaction_order
 
 Interactive and ambiguity episodes may span several server interactions under the same session.
 
-If trace sequence numbers restart per interaction, add:
-
-```text
-global_episode_sequence
-actor = user | agent | tool
-```
+Trace sequence numbers restart per interaction. Keep events nested and determine their complete
+episode order from `(interaction_order, sequence_number)` rather than duplicating them into a
+flattened event list.
 
 Never correlate runs only by timestamp or question text.
 
@@ -1058,15 +999,12 @@ Never correlate runs only by timestamp or question text.
 
 # 19. Raw evidence preservation
 
-The existing project already persists trace evidence in SQLite.
+The runner already saves sanitized trace evidence inside each line of `interactions.jsonl` and
+saves complete candidate and golden results as separate JSON files. The evaluator uses these run
+artifacts directly; it does not read the backend SQLite database.
 
-Prefer:
-
-- preserving that trace database;
-- enabling raw trace retention if required;
-- storing derived evaluator outputs separately.
-
-Avoid a second storage system unless it adds clear value.
+Preserve the original run files and write derived evaluator outputs separately. Raw unsanitized
+events remain outside the experiment artifacts and are not required by this study.
 
 ---
 
@@ -1097,10 +1035,12 @@ Avoid a second storage system unless it adds clear value.
     "trajectory": {
         "executionErrorObserved": true,
         "retryAttempted": true,
+        "retryPolicyExceeded": false,
         "recovered": true,
         "redundantActionObserved": false,
         "regressedAfterCorrectAttempt": false,
         "traceComplete": true,
+        "evaluationComplete": true,
         "derivedClass": "EXECUTION_ERROR_RECOVERED",
         "sqlAttemptCount": 2,
         "athenaExecutionCount": 2,
@@ -1316,24 +1256,9 @@ McNemar's test
 
 for paired correctness.
 
-## Paired count/continuous outcomes
-
-Use:
-
-```text
-Wilcoxon signed-rank
-```
-
-or:
-
-```text
-paired permutation tests
-```
-
-for attempts, latency, turns.
-
-For error-transition metrics, bootstrap or otherwise cluster uncertainty by benchmark case or
-episode because one episode can contain several correlated error observations.
+For the error-response distribution, report category counts and proportions. If uncertainty is
+estimated for transition-level proportions, cluster it by benchmark case because one episode can
+contain several correlated error observations.
 
 ## Repetitions
 
@@ -1351,10 +1276,7 @@ Use Wilson or bootstrap confidence intervals for:
 - CDSR;
 - RSC;
 - RR;
-- ESFR;
 - clarification rates;
-- repeated-error rate;
-- immediate error-resolution rate; and
 - observation-conditioned recovery rate.
 
 Report effect sizes and uncertainty, not only p-values.
@@ -1419,12 +1341,11 @@ It evaluates:
 - repeated and resolved normalized errors;
 - new-error introduction after retry;
 - clarification behaviour;
-- safety/no-query compliance;
+- descriptive no-query behaviour and manually assessed safety behaviour;
 - context carry-over;
 - trajectory profiles;
 - paired model trajectory differences;
-- interaction/tool-call counts;
-- descriptive latency/token usage.
+- a bounded descriptive difficulty breakdown.
 
 It does **not** evaluate:
 
@@ -1634,16 +1555,18 @@ src/experiments/
     run-result-writer
 
   evaluation/
-    trace-parser
+    evaluation-input
+    case-policies
+    trajectory
     result-normalizer
     result-comparator
-    attempt-evaluator
-    trajectory-facts
-    trajectory-classifier
+    episode-evaluator
+    athena-error-normalizer
     error-transition-evaluator
-    clarification-evaluator
-    safety-evaluator
-    report-generator
+    run-evaluator
+    run-metrics-calculator
+    evaluation-report-writer
+    evaluate-run
 
   golden-results/
     generate-golden-results
@@ -1651,28 +1574,57 @@ src/experiments/
     gold-sql-resolver
     golden-result-generator
     golden-result-writer
-  shared/services/
-    athena/
-      athena-service
-    benchmark/
-      benchmark-loader
-    transcripts/
-      transcript-reader
-
+  shared/
+    benchmark-episode-validator
+    type-guards
+    athena-service
+    benchmark-loader
+    trace-event-inspector
+    json-file-reader
+    json-file-writer
+    experiment-cli
+    error-message
   runs/
     golden-sql/
 ```
 
-`interaction-policy` must handle one-shot execution, ambiguity continuations, interactive sequences, and safety/no-query cases.
+`interaction-policy` must handle one-shot execution, ambiguity continuations, interactive sequences,
+and safety/OOD cases.
 
 `result-comparator` is a critical research instrument and must implement per-case semantics.
 
-`trajectory-facts` derives orthogonal facts before `trajectory-classifier` derives presentation classes.
+`buildTrajectoryFacts` derives orthogonal facts before `classifyTrajectory` derives
+presentation classes. The builder keeps trace completeness separate from result-evaluation
+completeness; either incomplete condition fails closed to `SYSTEM_ERROR`.
 
-`error-normalizer` removes volatile error details and produces versioned signatures.
-`error-transition-builder` correlates each Athena error observation with the preceding and following
-SQL actions. `error-response-evaluator` calculates the deterministic transition and episode-level
-metrics. None of these modules interprets rationale text.
+`episode-evaluator` coordinates these components for one already grouped episode. Standalone and
+resolved ambiguity interactions form one SQL trajectory, including any fallback or scripted
+continuation. Interactive authored turns are evaluated separately. Safety assessment is handled
+outside SQL trajectory classification by the safety evidence builder and bounded manual labeling.
+
+`evaluateClarification` in `case-policies.ts` deterministically labels whether `ASK_USER` occurred before SQL and
+records scripted-reply/fallback use. `buildSafetyEvidence` in the same module exports the answer and SQL evidence
+without inferring compliance from `noQueryObserved`. The evaluator then merges any durable labels from the run's
+optional `manual-safety-reviews.json` file before calculating manual label counts.
+Episode-level evaluators reuse the shared benchmark/episode option type and question-ID validator.
+Trace consumers reuse the same SQL-invocation parser, so runner capture and later evaluation apply
+one interpretation of an Athena query action.
+
+`run-evaluator` loads one interaction file, groups it into episodes, checks benchmark episode
+coverage and interactive turn completeness, and routes each case to the appropriate evaluators.
+The controlled runner is trusted to provide consistent question, model, repetition, and session
+metadata. The evaluator preserves benchmark order and refuses to compare immediate SQL from a
+missed ambiguity against the scripted resolved gold query.
+
+`run-metrics-calculator` is a pure in-memory aggregation step over `RunEvaluation`. It calculates
+the focused metric set with explicit numerators and denominators; a zero denominator produces a
+`null` rate rather than an invented zero. File output remains a separate reporting responsibility.
+
+`athena-error-normalizer` removes volatile error details and produces stable signatures.
+`error-transition-evaluator` correlates each failed Athena observation with its SQL invocation and
+the next SQL invocation and observation in the same interaction. Invocation and observation events
+are paired by trace ID and ordered by sequence number. A retry with no matching observation is
+marked evaluator-uncertain. None of these modules interprets rationale text.
 
 ---
 
@@ -1682,20 +1634,32 @@ metrics. None of these modules interprets rationale text.
 2. **Implemented:** execute golden SQL, retrieve complete Athena results, and write JSON reference
    files.
 3. **Implemented:** resolve interactive placeholders from preceding golden results.
-4. Implement robust result equivalence with per-case metadata.
+4. **Implemented:** compare complete golden and candidate results using the frozen per-case rules.
 5. **Implemented:** execute benchmark cases sequentially with the four interaction policies and
    required episode/session continuity.
 6. **Implemented:** retrieve and persist complete original candidate results using Athena
    query-execution IDs.
-7. Normalize multi-turn traces into episode-level ordering.
-8. Normalize Athena errors and build observation-to-action transitions.
-9. Derive orthogonal facts and mutually exclusive trajectory classes.
-10. Export JSON and Markdown evaluation results.
-11. Pilot 20 strategically selected cases across both models.
-12. Complete the bounded manual audit and fix evaluator defects.
-13. Run the first complete benchmark pass per model.
-14. Run the second planned repetition.
-15. Run a third repetition only if time and budget permit.
+7. **Implemented:** load JSONL interactions, group them into episodes, and order each interaction's
+   nested traces.
+8. **Implemented:** load saved result artifacts and derive deterministic outcomes for every
+   recorded SQL attempt.
+9. **Implemented:** normalize Athena errors and build observation-to-action transitions.
+10. **Implemented:** derive orthogonal facts and mutually exclusive trajectory classes.
+11. **Implemented:** coordinate standalone, resolved ambiguity, and per-turn interactive SQL
+    evaluation within one grouped episode.
+12. **Implemented:** add deterministic clarification evaluation and compact safety evidence records
+    for bounded manual labeling.
+13. **Implemented:** match a complete run to the benchmark and route every episode to the correct
+    evaluation policy.
+14. **Implemented:** calculate the focused run-level metrics in memory with explicit numerators and
+    denominators.
+15. **Implemented:** load a selected completed run, read its saved golden and candidate results,
+    and export JSON and Markdown evaluation reports without calling Athena or SQLite.
+16. Pilot 20 strategically selected cases across both models.
+17. Complete the bounded manual audit and fix evaluator defects.
+18. Run the first complete benchmark pass per model.
+19. Run the second planned repetition.
+20. Run a third repetition only if time and budget permit.
 
 ---
 
@@ -1712,15 +1676,15 @@ src/experiments/runs/
       interactions.jsonl
       candidate-results/
       evaluation/
-        results.jsonl
-        error-transitions.jsonl
-        evaluator-uncertain.jsonl
+        results.json
         summary.json
         summary.md
 ```
 
-Version 1 uses JSON/JSONL for machine-readable data and Markdown for the readable summary. It does
-not generate CSV files.
+`results.json` contains the complete run evaluation, including per-attempt outcomes and nested
+error transitions. `summary.json` contains the aggregate metrics, and `summary.md` is the readable
+view of the same summary. Separate transition and uncertainty files would duplicate evidence
+already present in `results.json`, so they are not produced. Version 1 does not generate CSV files.
 
 ---
 
@@ -1732,10 +1696,10 @@ not generate CSV files.
 4. Trajectory-class distribution by difficulty
 5. Execution-error vs semantic-failure distribution
 6. Error-response outcomes after Athena observations by model
-7. Repeated-error and observation-conditioned recovery rates by model
+7. Observation-conditioned recovery rate by model
 8. Appropriate vs unnecessary clarification
 9. Conditional Trajectory Divergence between models
-10. Attempt/turn distributions by difficulty/model
+10. Median SQL-attempt count by difficulty/model
 
 Keep only figures that directly answer the research questions.
 
@@ -1750,8 +1714,8 @@ The research harness is ready for formal experimentation when it can:
 - preserve isolated sessions;
 - continue scripted clarification in the same session;
 - run interactive sequences;
-- enforce no-query safety cases;
-- correlate each run with persisted trace evidence;
+- record safety SQL/answer evidence and descriptive no-query behaviour;
+- correlate each run with the trace evidence saved in `interactions.jsonl`;
 - persist the Athena query-execution ID for every successful SQL action;
 - retrieve complete Athena results;
 - save complete golden results as local JSON files;
@@ -1763,11 +1727,11 @@ The research harness is ready for formal experimentation when it can:
 - derive mutually exclusive trajectory classes;
 - normalize Athena error signatures;
 - correlate error observations with preceding and subsequent SQL actions;
-- calculate retry-response, unchanged-query, repeated-error, immediate-resolution, new-error, and
-  observation-conditioned recovery metrics;
+- calculate the mutually exclusive error-response distribution and observation-conditioned
+  recovery rate;
 - apply the frozen class-precedence and contract-orthogonality rules;
-- calculate FSR, CDSR, FDG, RSC, RR, ESFR, fallback-assisted success, clarification, and safety
-  metrics;
+- calculate FSR, CDSR, FDG, RSC, RR, clarification, interactive, descriptive no-query, manually
+  labelled safety, and bounded by-difficulty metrics;
 - use the primary 160-case denominator and report other partitions separately;
 - compare Nova Lite and Haiku 4.5 pairwise, calculate per-repetition and pooled CTD, and report
   within-model outcome and trajectory stability;
@@ -1792,9 +1756,3 @@ It must be:
 - conservative about uncertain cases;
 - explicit about assumptions;
 - traceable from aggregate metric to individual run.
-
-The strongest dissertation framing is:
-
-> **“I used a validated automated evaluation instrument to quantify how much final execution
-> accuracy conceals about the reliability, observable error-response, and execution behaviour of
-> agentic Text-to-SQL systems.”**

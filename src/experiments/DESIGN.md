@@ -1,6 +1,8 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
-> **Status:** golden SQL generation and benchmark runner implemented; evaluator pending.
+> **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
+> grouping, per-attempt evaluation, error-transition extraction, SQL-trajectory classification,
+> focused aggregate metrics, and JSON/Markdown report generation implemented.
 >
 > **Evaluation specification:** [`../../docs/trace-aware-evaluation-plan-v3.md`](../../docs/trace-aware-evaluation-plan-v3.md)
 >
@@ -15,7 +17,7 @@ Create a small TypeScript command-line application that:
 3. handles the scripted ambiguity replies and interactive follow-up questions;
 4. saves each server response and retrieves the complete Athena result for every successful SQL
    attempt;
-5. reads the traces already persisted in SQLite;
+5. reads the trace events already saved in `interactions.jsonl`;
 6. compares candidate results with golden results; and
 7. produces JSON and Markdown evaluation results.
 
@@ -55,7 +57,7 @@ The experiment tools use existing project inputs directly:
   rules;
 - the existing root `.env` values for AWS region, Athena database, workgroup, and output location;
 - `http://localhost:8000/api/analytics-pipeline` as the default server endpoint; and
-- `src/backend/data/transcripts.db` for persisted interactions and traces.
+- each run's `interactions.jsonl` and candidate-result JSON files for agent outputs and traces.
 
 The model condition and repetition are Make variables used to organize outputs:
 
@@ -95,14 +97,18 @@ src/experiments/
     run-result-writer.ts
 
   evaluation/
-    # planned
-    trace-parser.ts
+    evaluation-input.ts
+    case-policies.ts
+    trajectory.ts
     result-normalizer.ts
     result-comparator.ts
-    attempt-evaluator.ts
-    trajectory-classifier.ts
+    episode-evaluator.ts
+    athena-error-normalizer.ts
     error-transition-evaluator.ts
-    report-generator.ts
+    run-evaluator.ts
+    run-metrics-calculator.ts
+    evaluation-report-writer.ts
+    evaluate-run.ts
 
   golden-results/
     generate-golden-results.ts
@@ -112,16 +118,15 @@ src/experiments/
     golden-result-writer.ts
 
   shared/
-    services/
-      athena/
-        athena-service.ts
-
-      benchmark/
-        benchmark-loader.ts
-
-      transcripts/
-        # planned
-        transcript-reader.ts
+    athena-service.ts
+    benchmark-loader.ts
+    trace-event-inspector.ts
+    json-file-reader.ts
+    json-file-writer.ts
+    benchmark-episode-validator.ts
+    experiment-cli.ts
+    error-message.ts
+    type-guards.ts
 
   tests/
     fixtures/
@@ -136,9 +141,40 @@ src/experiments/
       repetition-1/
 ```
 
-`run-benchmark.ts` constructs the runner services explicitly and passes their instances through
-constructors. `BenchmarkLoader` remains the only statically called service in the runner entry
-point. The existing golden-result utilities retain their current design.
+`run-benchmark.ts` constructs the clients and runner components explicitly. Benchmark loading,
+gold-definition extraction, and trajectory classification are named functions (`loadBenchmark`,
+`buildGoldQueryDefinitions`, and `classifyTrajectory`), rather than classes with no instance state.
+`EpisodeEvaluator` calls classification directly instead of requiring another constructor dependency.
+The runner classes use constructor parameter properties for stored dependencies.
+
+`EpisodeRunner` shares the initial-question and optional-continuation sequence between standalone
+and ambiguity cases. It explicitly selects the unchanged frozen fallback or authored scripted reply,
+with the original input labels, flags, session, and one-continuation limit. Interactive and safety
+flows remain separate. Shared I/O and trace helpers live directly in `shared/`.
+
+Episode-level components share one `{ benchmarkRecord, episode }` option type and question-ID
+validator. Trace consumers share invocation numbering and observation matching. Attempt evaluation,
+trajectory facts, classification, metrics, and reporting remain distinct stages. Backend streaming
+attempt reconstruction remains separate; this cleanup does not change the live response processor.
+
+### Evaluation reading order
+
+1. `evaluate-run.ts`: select directories, evaluate the run, calculate metrics, write reports.
+2. `evaluation-input.ts`: read JSONL and result JSON, group interactions into ordered episodes.
+3. `run-evaluator.ts`: check coverage and failure traces, route each benchmark case.
+4. `case-policies.ts`: clarification facts and manual safety evidence.
+5. `episode-evaluator.ts`: select a trajectory's interactions and evaluate its SQL attempts.
+6. `result-comparator.ts` and `result-normalizer.ts`: compare saved values and rows.
+7. `error-transition-evaluator.ts` and `athena-error-normalizer.ts`: classify observable retries.
+8. `trajectory.ts`: derive trajectory facts and assign a class.
+9. `run-metrics-calculator.ts` and `evaluation-report-writer.ts`: aggregate and export.
+
+Input loading, grouping, case policies, normalization, and trajectory facts are functions, not
+injected service objects. The CLI constructs only the run and episode coordinators; comparison, trace inspection,
+metrics, and report writing are functions. The substantial comparison and error-analysis algorithms remain separate.
+The refactor preserves all partition policies: standalone/resolved-ambiguity SQL trajectories,
+per-turn interactive trajectories, and separate safety evidence. It adds no natural-language judge,
+new metrics, or study-level analysis.
 
 ## 5. Commands
 
@@ -150,16 +186,18 @@ execute    Send benchmark questions to the local server
 evaluate   Compare one completed run and generate reports
 ```
 
-The root `Makefile` exposes the implemented generation and execution entry points:
+The root `Makefile` exposes all three entry points:
 
 ```sh
 make gold
 make execute MODEL=nova-lite REPETITION=1
 make execute MODEL=nova-lite REPETITION=1 QUESTION_ID=CB200-A001
+make evaluate MODEL=nova-lite REPETITION=1
 ```
 
-`make evaluate` will be added with the evaluator. The commands remain separate so evaluation logic
-can be corrected and rerun without sending the 200 questions to Bedrock again.
+The commands remain separate so evaluation logic can be corrected and rerun without sending the
+200 questions to Bedrock again. Evaluation reads the saved golden and candidate JSON files; it
+does not execute SQL, call Athena, or read SQLite.
 
 ## 6. Golden SQL execution
 
@@ -249,8 +287,8 @@ expected. It waits five seconds before each episode after the first. No artifici
 between ambiguity continuations or interactive turns inside the same episode.
 
 Each benchmark case receives a unique session ID. Interactive turns and ambiguity continuations
-reuse the same session ID. This session ID is also used to find the corresponding interactions and
-traces in SQLite, so the backend does not need to return an additional interaction ID.
+reuse the same session ID. The evaluator uses it to group the corresponding lines from
+`interactions.jsonl` into one episode.
 
 After each episode completes, the runner appends its interaction records to
 `interactions.jsonl`, one compact JSON object per line. Each record contains:
@@ -278,8 +316,9 @@ For `expected_behavior: execute`:
    fallback reply once in the same session; and
 4. if it asks again without executing SQL, finish the case as `NO_SQL`.
 
-The evaluator records unnecessary clarification and fallback-assisted success separately from SQL
-correctness.
+The evaluator records unnecessary clarification and fallback use separately from SQL correctness.
+Fallback use remains per-episode evidence; the focused aggregate metrics exclude those episodes
+from clean direct success without introducing a separate fallback-success rate.
 
 ### 8.2 Ambiguous questions
 
@@ -311,15 +350,17 @@ Turn 2 is always sent so context handling can be evaluated even when turn 1 was 
 
 ### 8.4 Safety and out-of-domain questions
 
-Send the question once. The deterministic test is whether the trace contains an Athena SQL action.
-Any SQL action fails the no-query contract. The exact wording of the refusal is not automatically
-scored.
+Send the question once. The evaluator records whether SQL was attempted, every attempted statement
+and status, and the final answer. `noQueryObserved` is an objective trace fact, not an automatic
+safety verdict: a composite request can contain a prohibited action and a legitimate read-only
+subtask. Overall safety is therefore assigned manually as `compliant`, `partially_compliant`,
+`non_compliant`, or `uncertain` using the generated evidence record.
 
 ## 9. Candidate SQL results
 
-The server response and SQLite traces identify every SQL attempt. For every successful attempt, the
-runner reads its Athena `queryExecutionId` from the observation and immediately retrieves the full
-result through paginated `GetQueryResults`.
+The server response and its trace events identify every SQL attempt. For every successful attempt,
+the runner reads its Athena `queryExecutionId` from the observation and immediately retrieves the
+full result through paginated `GetQueryResults`.
 
 The complete result is saved as JSON under the current run:
 
@@ -350,8 +391,11 @@ runner does not rerun the model or silently re-execute its SQL.
 
 ## 10. Transcript use
 
-After an episode finishes, the evaluator loads interactions and ordered trace events from SQLite by
-the unique session ID.
+The evaluator reads the sanitized trace events embedded in each line of `interactions.jsonl`. It
+groups interactions by session ID, sorts them by `interactionOrder`, and sorts each interaction's
+events by `sequenceNumber`. Trace events remain nested in their original interaction. Their complete
+episode order is represented by the pair `(interactionOrder, sequenceNumber)`, so no additional
+global sequence field or duplicated flattened trace list is needed.
 
 The traces are used to determine:
 
@@ -365,8 +409,8 @@ The traces are used to determine:
 - whether the episode eventually recovered; and
 - whether a safety case invoked Athena.
 
-The rationale text remains stored in SQLite but is not automatically scored or interpreted as
-hidden reasoning.
+The rationale text remains in the saved trace events but is not automatically scored or interpreted
+as hidden reasoning.
 
 ## 11. Result comparison
 
@@ -378,7 +422,7 @@ For the current benchmark:
 
 - candidate and golden results must contain the same number of columns;
 - columns are assigned to `requiredColumns` by position;
-- aliases are ignored because `compareColumnNames` is false; and
+- aliases are always ignored; and
 - extra columns are rejected because `allowExtraColumns` is false.
 
 For example, `revenue`, `total_revenue`, and `realized_revenue` can all be correct aliases for the
@@ -399,22 +443,38 @@ duplicate rows are preserved.
 
 When `orderMatters` is true, rows are compared one by one in their returned order.
 
-The comparison result is one of:
+The result comparator returns one of:
 
 ```text
 correct
 incorrect
-execution_error
-no_sql
 evaluator_uncertain
 ```
 
 An incorrect comparison also records a short reason such as different column count, different row
 count, missing row, extra row, or first ordered-row difference.
 
+The attempt evaluator combines this comparison with the saved SQL execution status and
+candidate-result reference. Each actual SQL attempt receives one of:
+
+```text
+correct
+semantic_error
+execution_error
+evaluator_uncertain
+```
+
+An interaction without SQL produces no attempt records. The episode evaluator determines whether
+that represents `NO_SQL` where SQL was required. Clarification timing and safety evidence are
+handled by their dedicated components.
+
 ## 12. Trajectory evaluation
 
-The evaluator first records independent facts:
+The implemented trajectory builder operates on one SQL-required evaluation unit: a standalone
+case, a resolved ambiguity task, or one interactive authored turn. This boundary is important:
+separate interactive turns are not retries of each other.
+
+It first records independent facts:
 
 ```text
 first attempt executed successfully
@@ -423,10 +483,12 @@ terminal attempt executed successfully
 terminal result correct
 execution error observed
 retry attempted
+retry policy exceeded
 recovered
-clarification requested
-fallback used
+redundant SQL action observed
+regression after a correct result
 trace complete
+evaluation complete
 ```
 
 It then assigns the class defined in the v3 evaluation plan:
@@ -441,9 +503,133 @@ NO_SQL
 SYSTEM_ERROR
 ```
 
+Attempts are ordered by `(interactionOrder, attempt)`, and the terminal attempt is the last SQL
+attempt in that evaluation unit. `traceComplete` requires every recorded execution error to have a
+corresponding error transition and no uncertain transition. `evaluationComplete` requires every
+attempt result to have a deterministic evaluation. Either incomplete condition takes precedence as
+`SYSTEM_ERROR`.
+
+The SQL-only redundancy flag is deterministic. It is true when another SQL action follows an
+already correct result or an error is followed by an unchanged SQL retry. Exceeding the prompt's
+limit of one retry is recorded separately as `retryPolicyExceeded`; it does not by itself make a
+changed SQL correction redundant. Clarification and manually reviewed safety outcomes remain
+separate from SQL trajectory classification.
+
+### 12.1 Error transitions
+
+The runner and error evaluator share invocation numbering and observation matching through
+`trace-event-inspector.ts`. Repeated invocation parts with the same trace ID count once, including
+failed attempts. Observations must follow their invocation and share its trace ID. The runner
+also requires agreement with the recorded successful SQL attempt; it never guesses an attempt
+number for an unmatched execution ID. A successful attempt without a captured result is reported
+as evaluator uncertainty by the attempt evaluator.
+
+The implemented error-transition evaluator uses the ordered trace events inside each interaction.
+For every failed Athena observation, it:
+
+1. pairs the SQL invocation and observation by their shared trace ID;
+2. normalizes the raw error into a stable, observed Trino-style signature, retaining a relevant
+   column, table, or function identifier where available;
+3. finds the next SQL invocation in sequence; and
+4. pairs that retry with its observation to determine whether it succeeded, repeated the same
+   normalized error, or produced a different error.
+
+`retryProduced` shows whether another SQL action followed. `sqlChanged` compares SQL text after
+trimming outer whitespace only. Internal whitespace, comments, and trailing semicolon changes
+count as revisions; this does not establish a change in SQL meaning. Consequently, a formatting-only
+retry is not flagged as redundant by the unchanged-retry rule. Result correctness is evaluated
+separately.
+`previousErrorResolved` means only that the original error did
+not recur: when a different error replaces it, `newErrorIntroduced` is also true. These transition
+facts do not by themselves establish result correctness.
+
+An error with no retry is a complete observable outcome and is not uncertain. A retry without a
+matching observation is `transitionUncertain` because its execution result cannot be inferred.
+The original error text is retained beside its normalized signature for auditability. Rationale
+text is not read or scored.
+
+The supported symbolic prefixes are the seven types observed in the saved Nova Lite and Haiku
+trace corpus. They are not presented as AWS Athena's official error enum: AWS publishes numeric
+`ErrorType` values, while Athena DML is based on Trino. Unobserved prefixes are retained as
+`OTHER:<original_code>`.
+
+### 12.2 Episode coordination
+
+The episode evaluator coordinates one already grouped `EvaluationEpisode`, its benchmark record,
+and golden definitions. Its colocated `evaluateAttempts` function loads candidate and reference
+results through `evaluation-input.ts`. The module reads saved data but does not write reports.
+
+For a standalone or resolved ambiguity episode, it evaluates every interaction as one SQL
+trajectory. This preserves a fallback or scripted continuation while keeping SQL attempt ordering
+by interaction. For an interactive episode, it evaluates each authored turn separately against
+that turn's golden definition. Failed attempts remain valid evaluator input without candidate
+files; successful attempts still require their saved candidate artifacts.
+
+The episode evaluator returns the attempt evaluations, error transitions, trajectory facts, and
+derived class. Safety cases return no SQL trajectory record because they are handled by the
+separate safety evidence builder.
+
+### 12.3 Clarification and safety evidence
+
+The clarification evaluator checks the first interaction's ordered trace for an orchestration
+`ASK_USER` observation before the first SQL invocation. It records `appropriate` for an ambiguity
+case, `unnecessary` for a standalone executable case, `missed` when an ambiguity case does not ask
+before SQL, and `not_applicable` for other cases. It also records the total clarification count and
+whether the runner used its scripted reply or frozen fallback. It does not judge whether arbitrary
+clarification wording matches `clarification_target` or `acceptedSlots`.
+
+The safety evidence builder does not calculate compliance. It creates a compact review record with
+the question ID, category, authored safety target, final answer(s), all SQL attempts and statuses,
+and the objective `noQueryObserved` fact. Its manual label and notes are initially `null`. This
+avoids incorrectly treating a safe read-only response to part of a composite request as equivalent
+to executing a prohibited action.
+
+### 12.4 Run coordination
+
+An explicit `FAILURE` trace event or stage stops run evaluation before any partition is scored.
+The error identifies the question, interaction, and trace sequence for review. This prevents a
+failed invocation from being interpreted as a completed no-SQL, missed-clarification, or safety
+outcome. It does not infer the cause of the failure. SQL execution errors reported in ordinary
+action observations continue through the attempt and error-transition evaluators.
+
+The run evaluator loads one `interactions.jsonl`, builds its episodes, and returns results in the
+committed benchmark order. It only checks that the episode count matches the supplied benchmark,
+that every benchmark ID can be found, and that interactive episodes contain every authored turn.
+The runner controls question IDs, sessions, model labels, and repetitions, so the evaluator does not
+revalidate those trusted fields.
+
+Each case includes its clarification evaluation. Executable cases receive SQL trajectory results,
+while safety cases receive an unlabeled safety review record. An ambiguity case is compared with its
+resolved golden result only when the agent requested clarification and the runner supplied the
+scripted reply. Immediate guessed SQL is recorded as a missed clarification and is not compared
+against an interpretation the user never selected.
+
 `SYSTEM_ERROR` is reserved for missing or unusable evidence that prevents evaluation. Local server
 timeouts are not measured or reported as an experimental metric. If the local API call fails, the
 runner stops and prints the current question and session. The incomplete run is discarded.
+
+### 12.5 Run metrics
+
+The run metrics calculator is a pure in-memory step after `RunEvaluator`. It joins evaluated
+episodes to their benchmark definitions, separates the four benchmark partitions, and calculates
+only the focused measures in section 15. It performs no file access and no report formatting.
+
+Every rate includes its raw numerator and denominator so a reported score can be audited. A zero
+denominator produces `null`. Error observations are reduced to one mutually exclusive response
+category per transition, while eventual recovery is measured separately at episode level.
+
+### 12.6 Report generation
+
+`evaluate-run.ts` loads the committed benchmark and selected run's `interactions.jsonl`. The
+`evaluateAttempts` function in `episode-evaluator.ts` loads reference results through the functions
+in `evaluation-input.ts` from
+`runs/golden-sql` and candidate results from the selected model/repetition directory. Failed SQL
+attempts are evaluated from interactions and require no result artifact.
+
+After evaluation, `writeEvaluationReport` writes the complete `RunEvaluation` to `results.json`,
+the calculated `RunMetrics` to `summary.json`, and a readable representation of the same metrics to
+`summary.md`. Each invocation replaces those three reports for the selected run. It does not alter
+the interaction or candidate files.
 
 ## 13. Cancellation and incomplete runs
 
@@ -453,10 +639,9 @@ selected case for diagnostics; it does not resume or contribute a replacement ca
 formal run. The append-only file merely makes completed episodes inspectable if execution is
 cancelled.
 
-If execution is cancelled or fails, generated candidate files under that run directory are removed
-manually before starting again. The server has already persisted completed calls in
-`transcripts.db`, so those partial transcript rows must also be removed separately when a clean
-database is required.
+If execution is cancelled or fails, the partial `interactions.jsonl` and generated candidate files
+under that run directory are removed manually before starting again. The evaluator does not read
+the backend transcript database.
 
 An incomplete run is not evaluated.
 
@@ -467,20 +652,23 @@ One run produces:
 ```text
 runs/nova-lite/repetition-1/
   interactions.jsonl
+  manual-safety-reviews.json
   candidate-results/
     <question-turn-attempt>.json
   evaluation/
-    results.jsonl
-    error-transitions.jsonl
-    evaluator-uncertain.jsonl
+    results.json
     summary.json
     summary.md
 ```
 
-`results.jsonl` contains one evaluated record per standalone or ambiguity episode and one record
-per interactive turn. It includes the question ID, model label, repetition, correctness, attempt
-facts, clarification facts, trajectory class, and token/latency metrics already returned by the
-server.
+`results.json` contains the complete `RunEvaluation`, with attempt outcomes and error transitions
+nested under their episodes. `summary.json` contains the focused aggregate scores, and
+`summary.md` presents the same summary for reading. Separate error-transition and
+evaluator-uncertain files would duplicate evidence already contained in `results.json`.
+
+`manual-safety-reviews.json` is an optional durable input. It stores one manual label and optional
+notes per reviewed safety question. The evaluator validates the question IDs and labels, merges
+them with the generated safety evidence, and leaves omitted questions unreviewed.
 
 No CSV output is generated in version 1.
 
@@ -491,14 +679,11 @@ The evaluator calculates the metrics already defined in the v3 plan with separat
 ### Standalone questions
 
 - Final Success Rate;
-- First-Attempt Result Correctness;
 - Clean Direct Success Rate;
 - Final-to-Direct Success Gap;
 - Recovered Success Contribution;
 - Recovery Rate;
-- Executed Semantic Failure Rate;
 - unnecessary clarification rate;
-- fallback-assisted success rate; and
 - trajectory-class distribution.
 
 ### Ambiguous questions
@@ -515,17 +700,29 @@ The evaluator calculates the metrics already defined in the v3 plan with separat
 
 ### Safety questions
 
-- no-query compliance.
+- No-Query Rate as a descriptive observable; and
+- manually labelled safety compliance, reported separately.
 
 ### Trace and error behaviour
 
-- SQL attempt count;
-- Athena error count;
-- retry-after-error rate;
-- unchanged-query retry rate;
-- repeated-error rate;
-- immediate error-resolution rate; and
-- recovery after an observed error.
+- mutually exclusive counts for no retry, successful retry execution, repeated error, different
+  error, and uncertain transition; and
+- observation-conditioned recovery rate.
+
+### Descriptive difficulty breakdown
+
+- Final Success Rate, Clean Direct Success Rate, and Final-to-Direct Success Gap;
+- trajectory-class counts; and
+- median SQL-attempt count.
+
+Every calculated rate stores its numerator and denominator. A zero denominator is represented by
+`rate: null` rather than zero.
+
+`SYSTEM_ERROR` outcomes remain in trajectory-class counts and detailed evaluation artifacts,
+but are excluded from model-metric numerators and denominators, error-response summaries,
+and SQL-attempt medians. Interactive turn accuracy includes evaluable turns; complete-episode
+accuracy excludes episodes containing any system-error turn. Standalone Markdown summaries
+with system-error exclusions are marked provisional and show the actual evaluable denominator.
 
 The later Haiku run can be compared with Nova Lite by matching the same question ID and repetition.
 No agent deployment identifiers are required for that comparison.
@@ -544,19 +741,57 @@ The experiment package uses TypeScript and Jest. Implemented tests cover:
 - trace inspection and sensitive deployment-identifier removal;
 - full candidate-result capture by existing Athena query-execution ID.
 
-The evaluator stage will add coverage for:
+Implemented result-comparison tests cover:
 
 - positional columns and ignored aliases;
 - ordered comparison;
 - unordered multiset comparison with duplicates;
-- NULL, integer, decimal, and timestamp normalization;
-- trace-to-attempt correlation;
-- clarification and safety policies;
-- trajectory classification; and
-- error transition evaluation.
+- NULL, integer, decimal, and timestamp normalization; and
+- invalid saved result artifacts failing closed as `evaluator_uncertain`.
 
-Integration tests will use mocked server and Athena responses plus a temporary SQLite transcript
-database. Normal tests will not call AWS or the deployed agent.
+Implemented attempt-evaluation tests cover:
+
+- successful gold-equivalent and executable-but-incorrect results;
+- Athena execution failures and later successful attempts;
+- interactions without SQL attempts;
+- missing candidate-result references and files;
+- candidate-result capture errors; and
+- attempts without a final execution status.
+
+Implemented error-transition tests cover:
+
+- removal of volatile Athena line and column positions from error signatures;
+- observed, identifier-bearing, and unknown Trino-style error prefixes;
+- changed, identical, and outer-whitespace-only retry SQL;
+- successful retries, repeated errors, and different newly introduced errors;
+- errors with no retry; and
+- retries whose matching execution observation is missing.
+
+Implemented trajectory tests cover:
+
+- direct success, execution-error recovery, and semantic revision;
+- terminal semantic and execution failures;
+- no-SQL and system-error precedence;
+- regression after an earlier correct result;
+- unchanged retries and separately recorded retry-policy violations; and
+- separate trace and result-evaluation completeness.
+
+Implemented aggregate-metric tests cover:
+
+- final success versus clean direct success and the resulting gap;
+- recovery contribution and recovery rate;
+- mutually exclusive error-response categories and observation-conditioned recovery;
+- ambiguity, interactive, safety, and by-difficulty partitions; and
+- zero denominators producing `null` rates.
+
+Implemented report tests mock filesystem operations and cover:
+
+- the three agreed output paths;
+- complete evaluation and metric JSON serialization; and
+- Markdown percentages, raw fractions, counts, and unavailable rates.
+
+Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
+will not call AWS or the deployed agent.
 
 ## 17. Implementation progress
 
@@ -564,15 +799,34 @@ database. Normal tests will not call AWS or the deployed agent.
 2. **Implemented:** load the benchmark and implement the two explicit interactive bindings.
 3. **Implemented:** provide `make gold` to execute golden SQL and write JSON reference files. The
    command is run manually when those files should be generated or overwritten.
-4. Implement result normalization and comparison with tests.
+4. **Implemented:** normalize and compare complete candidate and golden results according to each
+   benchmark comparison contract, with deterministic Jest coverage.
 5. **Implemented:** execute all benchmark cases sequentially and apply the four interaction
    policies.
 6. **Implemented:** capture complete candidate results for every successful attempt without
    re-executing model SQL.
-7. Read and correlate traces by session ID.
-8. Derive attempt outcomes, trajectory classes, and error transitions.
-9. Generate JSON and Markdown reports.
-10. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+7. **Implemented:** load `interactions.jsonl`, group interactions by session ID, and order the
+   interactions and their nested trace events.
+8. **Implemented:** load saved golden and candidate JSON artifacts and derive an outcome for every
+   recorded SQL attempt.
+9. **Implemented:** normalize Athena execution errors and correlate each failed execution
+   observation with the next SQL attempt and its observation. Correlation uses ordered trace events
+   and their shared trace IDs; rationale text is not evaluated. A retry without its matching
+   observation is marked uncertain rather than inferred.
+10. **Implemented:** derive orthogonal SQL-trajectory facts and apply the frozen mutually exclusive
+    class precedence for one SQL-required evaluation unit.
+11. **Implemented:** coordinate attempt, error-transition, fact, and class evaluation for
+    standalone, resolved ambiguity, and per-turn interactive units.
+12. **Implemented:** evaluate clarification timing deterministically and generate unlabeled safety
+    evidence records for bounded manual assessment. No-query observation is kept separate from the
+    manual safety verdict.
+13. **Implemented:** load and match a complete run to the benchmark, route every episode to the
+    correct evaluator, and prevent unresolved ambiguity SQL from being compared with resolved gold.
+14. **Implemented:** calculate the focused run metrics in memory with explicit numerators and
+    denominators.
+15. **Implemented:** evaluate a selected saved run and generate JSON and Markdown reports through
+    `make evaluate MODEL=<condition> REPETITION=<number>`.
+16. Run the small pilot defined in the v3 plan before executing the complete benchmark.
 
 ## 18. Confirmed decisions
 
@@ -583,3 +837,33 @@ database. Normal tests will not call AWS or the deployed agent.
 3. running the `gold` command again overwrites the existing golden JSON files; and
 4. the runner does not resume cancelled runs: partial run files and, when required, partial
    transcript rows are removed manually before a complete restart.
+
+## Maintenance scope after the evaluation review
+
+The retained fixes include one-to-one unordered result matching with numeric tolerance (using a
+recursive reassignment helper), system-error exclusions from model metrics with audit counts retained,
+shared trace correlation without guessed result assignments, trimmed-text SQL-change detection, and
+rejection of explicit failure traces before run scoring. `sqlChanged` measures text changes, not SQL
+semantic equivalence. The abstraction cleanup above preserves these rules.
+
+Benchmark prompt corrections, malformed-artifact validation, and automatic run-directory protection
+were not retained. Runs continue to use the authored gold tie choices and exact output shapes;
+alternative tied winners and month representations may therefore fail comparison. Existing run files
+are managed manually. Lambda validation and frontend work are outside this maintenance scope.
+
+Infrastructure errors carried inside ordinary action observations remain deferred.
+Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
+intervals are the final planned step; this cleanup does not implement them or recollect experiments.
+
+### Final readability pass
+
+`EpisodeEvaluator` prepares one trajectory for a standalone/resolved ambiguity episode or one per
+interactive turn, then evaluates them through a single loop. `RunEvaluator` explicitly branches
+between safety evidence, unresolved ambiguity, and SQL evaluation, passing only the current case's
+gold definitions. `compareResults`, `calculateRunMetrics`, `writeEvaluationReport`, and the trace
+helpers are functions in their existing modules. Query comparison and metric rules are unchanged.
+
+Trace callers order events before invocation extraction, avoiding a redundant sort. Episode grouping
+uses local array appends; it does not mutate the supplied interactions. Small one-use object and array
+comparison wrappers were inlined. Gold-file loading and the validation on separately callable policy
+functions remain in place; no cache or new preparation framework was introduced.

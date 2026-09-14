@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import type { GoldQueryDefinition } from '../../types';
-import type { AthenaService } from '../../shared/services/athena/athena-service';
+import type { AthenaService } from '../../shared/athena-service';
 import { GoldenResultGenerator } from '../../golden-results/golden-result-generator';
 import { GoldenResultWriter } from '../../golden-results/golden-result-writer';
 

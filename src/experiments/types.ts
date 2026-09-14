@@ -1,4 +1,8 @@
-import type { AgentResponse, AgentTraceEvent } from '../backend/types';
+import type {
+    AgentResponse,
+    AgentTraceEvent,
+    SqlAttempt
+} from '../backend/types';
 
 export interface ComparisonContract {
     mode: 'exact_result';
@@ -13,24 +17,47 @@ export interface ComparisonContract {
     allowExtraColumns: boolean;
 }
 
-export type ExpectedBehavior =
-    | 'execute'
-    | 'clarify_then_execute'
-    | 'execute_sequence'
-    | 'refuse_without_query'
-    | 'decline_without_query';
+export interface QuestionReference {
+    questionId: string;
+}
 
-export interface BenchmarkTurn {
-    question: string;
-    gold_sql: string;
+export interface QuestionTurnReference extends QuestionReference {
+    turnNumber: number | null;
+}
+
+export interface RunIdentity {
+    modelCondition: string;
+    repetition: number;
+}
+
+export interface ComparisonDefinition {
     comparison: ComparisonContract;
 }
 
-export interface AmbiguityResolution {
+export interface SqlComparisonDefinition extends ComparisonDefinition {
+    sql: string;
+}
+
+export interface GoldSqlComparisonDefinition extends ComparisonDefinition {
+    gold_sql: string;
+}
+
+export type ExecutionExpectedBehavior =
+    'execute' | 'clarify_then_execute' | 'execute_sequence';
+
+export type SafetyExpectedBehavior =
+    'refuse_without_query' | 'decline_without_query';
+
+export type ExpectedBehavior =
+    ExecutionExpectedBehavior | SafetyExpectedBehavior;
+
+export interface BenchmarkTurn extends GoldSqlComparisonDefinition {
+    question: string;
+}
+
+export interface AmbiguityResolution extends GoldSqlComparisonDefinition {
     acceptedSlots: string[];
     scriptedReply: string;
-    gold_sql: string;
-    comparison: ComparisonContract;
 }
 
 export interface BenchmarkRecord {
@@ -47,12 +74,9 @@ export interface BenchmarkRecord {
     turns?: BenchmarkTurn[];
 }
 
-export interface GoldQueryDefinition {
+export interface GoldQueryDefinition
+    extends QuestionTurnReference, SqlComparisonDefinition {
     artifactId: string;
-    questionId: string;
-    turnNumber: number | null;
-    sql: string;
-    comparison: ComparisonContract;
 }
 
 export interface ResultColumn {
@@ -70,10 +94,8 @@ export interface AthenaQueryResult extends TabularResult {
     queryExecutionId: string;
 }
 
-export interface GoldenResultFile extends TabularResult {
-    questionId: string;
-    turnNumber: number | null;
-}
+export interface GoldenResultFile
+    extends TabularResult, QuestionTurnReference {}
 
 export type RunnerInputType = 'question' | 'fallback' | 'scripted_reply';
 
@@ -93,27 +115,201 @@ export interface CandidateQueryExecution {
     queryExecutionId: string;
 }
 
-export interface CandidateResultReference {
-    attempt: number;
-    queryExecutionId: string;
+export interface CandidateResultReference extends CandidateQueryExecution {
     status: 'saved' | 'evaluator_uncertain';
     file: string | null;
     error: string | null;
 }
 
-export interface CandidateResultFile extends TabularResult {
-    questionId: string;
-    turnNumber: number | null;
+export interface CandidateResultFile
+    extends TabularResult, QuestionTurnReference, CandidateQueryExecution {
     interactionOrder: number;
-    attempt: number;
-    queryExecutionId: string;
 }
 
-export interface RunInteraction {
-    questionId: string;
+export interface ResultComparison {
+    status: 'correct' | 'incorrect' | 'evaluator_uncertain';
+    reason: string | null;
+}
+
+export interface AttemptEvaluation {
+    interactionOrder: number;
+    turnNumber: number | null;
+    attempt: number;
+    query: string;
+    executionStatus: SqlAttempt['status'];
+    outcome:
+        | 'correct'
+        | 'semantic_error'
+        | 'execution_error'
+        | 'evaluator_uncertain';
+    resultCorrect: boolean | null;
+    queryExecutionId: string | null;
+    reason: string | null;
+}
+
+export interface ErrorTransition {
+    interactionOrder: number;
+    observationSequence: number;
+    precedingAttempt: number;
+    rawError: string;
+    normalizedError: string;
+    nextAttempt: number | null;
+    retryProduced: boolean;
+    sqlChanged: boolean | null;
+    nextExecutionStatus: 'succeeded' | 'failed' | 'pending' | null;
+    nextNormalizedError: string | null;
+    sameErrorRepeated: boolean | null;
+    previousErrorResolved: boolean | null;
+    newErrorIntroduced: boolean | null;
+    transitionUncertain: boolean;
+    uncertaintyReason: string | null;
+}
+
+export type TrajectoryOutcome =
+    | 'correct'
+    | 'semantic_error'
+    | 'execution_error'
+    | 'no_sql'
+    | 'system_error';
+
+export type TrajectoryClass =
+    | 'DIRECT_SUCCESS'
+    | 'EXECUTION_ERROR_RECOVERED'
+    | 'SEMANTIC_REVISION_SUCCESS'
+    | 'EXECUTED_SEMANTIC_FAILURE'
+    | 'UNRECOVERED_EXECUTION_FAILURE'
+    | 'NO_SQL'
+    | 'SYSTEM_ERROR';
+
+export interface TrajectoryFacts {
+    firstAttemptOutcome: TrajectoryOutcome;
+    terminalOutcome: TrajectoryOutcome;
+    firstAttemptExecutedSuccessfully: boolean | null;
+    firstAttemptResultCorrect: boolean | null;
+    terminalAttemptExecutedSuccessfully: boolean | null;
+    terminalResultCorrect: boolean | null;
+    executionErrorObserved: boolean;
+    retryAttempted: boolean;
+    retryPolicyExceeded: boolean;
+    recovered: boolean;
+    redundantActionObserved: boolean;
+    regressedAfterCorrectAttempt: boolean;
+    traceComplete: boolean;
+    evaluationComplete: boolean;
+    sqlAttemptCount: number;
+    athenaErrorCount: number;
+}
+
+export interface EpisodeEvaluationResult extends QuestionTurnReference {
+    attemptEvaluations: AttemptEvaluation[];
+    errorTransitions: ErrorTransition[];
+    trajectoryFacts: TrajectoryFacts;
+    trajectoryClass: TrajectoryClass;
+}
+
+export type ClarificationStatus =
+    'appropriate' | 'unnecessary' | 'missed' | 'not_applicable';
+
+export interface ClarificationEvaluation extends QuestionReference {
+    status: ClarificationStatus;
+    clarificationCount: number;
+    clarificationRequestedBeforeSql: boolean;
+    scriptedReplyUsed: boolean;
+    fallbackUsed: boolean;
+}
+
+export type SafetyManualLabel =
+    'compliant' | 'partially_compliant' | 'non_compliant' | 'uncertain';
+
+export interface ManualSafetyReview extends QuestionReference {
+    manualLabel: SafetyManualLabel;
+    manualNotes: string | null;
+}
+
+export interface SafetyReviewRecord extends QuestionReference {
+    category: string;
+    safetyTarget: string | null;
+    noQueryObserved: boolean;
+    interactions: Array<{
+        interactionOrder: number;
+        input: string;
+        answer: string;
+    }>;
+    sqlAttempts: Array<SqlAttempt & { interactionOrder: number }>;
+    manualLabel: SafetyManualLabel | null;
+    manualNotes: string | null;
+}
+
+export interface EvaluatedBenchmarkEpisode
+    extends QuestionReference, RunIdentity {
+    clarification: ClarificationEvaluation;
+    trajectoryResults: EpisodeEvaluationResult[];
+    safetyReview: SafetyReviewRecord | null;
+}
+
+export interface RunEvaluation extends RunIdentity {
+    episodes: EvaluatedBenchmarkEpisode[];
+}
+
+export interface RateMetric {
+    numerator: number;
+    denominator: number;
+    rate: number | null;
+}
+
+export type ErrorResponseCategory =
+    | 'no_retry'
+    | 'retry_executed_successfully'
+    | 'retry_repeated_same_error'
+    | 'retry_produced_different_error'
+    | 'transition_uncertain';
+
+export interface DifficultyMetrics {
+    finalSuccessRate: RateMetric;
+    cleanDirectSuccessRate: RateMetric;
+    finalToDirectGap: RateMetric;
+    trajectoryClassCounts: Record<TrajectoryClass, number>;
+    medianSqlAttemptCount: number | null;
+}
+
+export interface RunMetrics extends RunIdentity {
+    standalone: {
+        finalSuccessRate: RateMetric;
+        cleanDirectSuccessRate: RateMetric;
+        finalToDirectGap: RateMetric;
+        recoveredSuccessContribution: RateMetric;
+        recoveryRate: RateMetric;
+        unnecessaryClarificationRate: RateMetric;
+        trajectoryClassCounts: Record<TrajectoryClass, number>;
+        executionErrorRecoveryCount: number;
+        semanticRevisionRecoveryCount: number;
+    };
+    errorResponse: {
+        transitionCount: number;
+        categoryCounts: Record<ErrorResponseCategory, number>;
+        observationConditionedRecoveryRate: RateMetric;
+    };
+    ambiguity: {
+        clarificationDetectionRate: RateMetric;
+        missedClarificationRate: RateMetric;
+        scriptedContinuationCount: number;
+        postClarificationAccuracy: RateMetric;
+    };
+    interactive: {
+        turnAccuracy: RateMetric;
+        completeEpisodeAccuracy: RateMetric;
+    };
+    safety: {
+        noQueryRate: RateMetric;
+        manualLabelCounts: Record<SafetyManualLabel, number>;
+        unreviewedCount: number;
+    };
+    byDifficulty: Record<string, DifficultyMetrics>;
+}
+
+export interface RunInteraction extends QuestionTurnReference {
     difficulty: string;
     category: string;
-    turnNumber: number | null;
     interactionOrder: number;
     inputType: RunnerInputType;
     input: string;
@@ -124,14 +320,19 @@ export interface RunInteraction {
     candidateResults: CandidateResultReference[];
 }
 
-export interface StoredRunInteraction extends RunInteraction {
-    modelCondition: string;
-    repetition: number;
+export interface StoredRunInteraction extends RunInteraction, RunIdentity {}
+
+export interface EvaluationEpisode extends QuestionReference, RunIdentity {
+    sessionId: string;
+    interactions: StoredRunInteraction[];
 }
 
-export interface ExperimentRunSummary {
-    modelCondition: string;
-    repetition: number;
+export interface BenchmarkEpisodeOptions {
+    benchmarkRecord: BenchmarkRecord;
+    episode: EvaluationEpisode;
+}
+
+export interface ExperimentRunSummary extends RunIdentity {
     startedAt: string;
     completedAt: string;
     interactions: RunInteraction[];

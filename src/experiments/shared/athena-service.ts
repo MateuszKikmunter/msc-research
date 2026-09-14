@@ -8,7 +8,7 @@ import {
     type Row
 } from '@aws-sdk/client-athena';
 
-import type { AthenaQueryResult, ResultColumn } from '../../../types';
+import type { AthenaQueryResult, ResultColumn } from '../types';
 
 const DEFAULT_POLL_INTERVAL_MS = 1000;
 const DEFAULT_QUERY_TIMEOUT_MS = 120000;

@@ -1,0 +1,189 @@
+{
+    "modelCondition": "nova-lite",
+    "repetition": 1,
+    "standalone": {
+        "finalSuccessRate": {
+            "numerator": 127,
+            "denominator": 160,
+            "rate": 0.79375
+        },
+        "cleanDirectSuccessRate": {
+            "numerator": 122,
+            "denominator": 160,
+            "rate": 0.7625
+        },
+        "finalToDirectGap": {
+            "numerator": 5,
+            "denominator": 160,
+            "rate": 0.03125
+        },
+        "recoveredSuccessContribution": {
+            "numerator": 5,
+            "denominator": 127,
+            "rate": 0.03937007874015748
+        },
+        "recoveryRate": {
+            "numerator": 5,
+            "denominator": 37,
+            "rate": 0.13513513513513514
+        },
+        "unnecessaryClarificationRate": {
+            "numerator": 0,
+            "denominator": 160,
+            "rate": 0
+        },
+        "trajectoryClassCounts": {
+            "DIRECT_SUCCESS": 122,
+            "EXECUTION_ERROR_RECOVERED": 5,
+            "SEMANTIC_REVISION_SUCCESS": 0,
+            "EXECUTED_SEMANTIC_FAILURE": 27,
+            "UNRECOVERED_EXECUTION_FAILURE": 5,
+            "NO_SQL": 1,
+            "SYSTEM_ERROR": 0
+        },
+        "executionErrorRecoveryCount": 5,
+        "semanticRevisionRecoveryCount": 0
+    },
+    "errorResponse": {
+        "transitionCount": 88,
+        "categoryCounts": {
+            "no_retry": 5,
+            "retry_executed_successfully": 9,
+            "retry_repeated_same_error": 71,
+            "retry_produced_different_error": 3,
+            "transition_uncertain": 0
+        },
+        "observationConditionedRecoveryRate": {
+            "numerator": 5,
+            "denominator": 14,
+            "rate": 0.35714285714285715
+        }
+    },
+    "ambiguity": {
+        "clarificationDetectionRate": {
+            "numerator": 16,
+            "denominator": 20,
+            "rate": 0.8
+        },
+        "missedClarificationRate": {
+            "numerator": 4,
+            "denominator": 20,
+            "rate": 0.2
+        },
+        "scriptedContinuationCount": 16,
+        "postClarificationAccuracy": {
+            "numerator": 11,
+            "denominator": 16,
+            "rate": 0.6875
+        }
+    },
+    "interactive": {
+        "turnAccuracy": {
+            "numerator": 7,
+            "denominator": 10,
+            "rate": 0.7
+        },
+        "completeEpisodeAccuracy": {
+            "numerator": 3,
+            "denominator": 5,
+            "rate": 0.6
+        }
+    },
+    "safety": {
+        "noQueryRate": {
+            "numerator": 8,
+            "denominator": 10,
+            "rate": 0.8
+        },
+        "manualLabelCounts": {
+            "compliant": 7,
+            "partially_compliant": 0,
+            "non_compliant": 3,
+            "uncertain": 0
+        },
+        "unreviewedCount": 0
+    },
+    "byDifficulty": {
+        "easy": {
+            "finalSuccessRate": {
+                "numerator": 50,
+                "denominator": 50,
+                "rate": 1
+            },
+            "cleanDirectSuccessRate": {
+                "numerator": 50,
+                "denominator": 50,
+                "rate": 1
+            },
+            "finalToDirectGap": {
+                "numerator": 0,
+                "denominator": 50,
+                "rate": 0
+            },
+            "trajectoryClassCounts": {
+                "DIRECT_SUCCESS": 50,
+                "EXECUTION_ERROR_RECOVERED": 0,
+                "SEMANTIC_REVISION_SUCCESS": 0,
+                "EXECUTED_SEMANTIC_FAILURE": 0,
+                "UNRECOVERED_EXECUTION_FAILURE": 0,
+                "NO_SQL": 0,
+                "SYSTEM_ERROR": 0
+            },
+            "medianSqlAttemptCount": 1
+        },
+        "medium": {
+            "finalSuccessRate": {
+                "numerator": 51,
+                "denominator": 60,
+                "rate": 0.85
+            },
+            "cleanDirectSuccessRate": {
+                "numerator": 49,
+                "denominator": 60,
+                "rate": 0.8166666666666667
+            },
+            "finalToDirectGap": {
+                "numerator": 2,
+                "denominator": 60,
+                "rate": 0.03333333333333333
+            },
+            "trajectoryClassCounts": {
+                "DIRECT_SUCCESS": 49,
+                "EXECUTION_ERROR_RECOVERED": 2,
+                "SEMANTIC_REVISION_SUCCESS": 0,
+                "EXECUTED_SEMANTIC_FAILURE": 9,
+                "UNRECOVERED_EXECUTION_FAILURE": 0,
+                "NO_SQL": 0,
+                "SYSTEM_ERROR": 0
+            },
+            "medianSqlAttemptCount": 1
+        },
+        "hard": {
+            "finalSuccessRate": {
+                "numerator": 26,
+                "denominator": 50,
+                "rate": 0.52
+            },
+            "cleanDirectSuccessRate": {
+                "numerator": 23,
+                "denominator": 50,
+                "rate": 0.46
+            },
+            "finalToDirectGap": {
+                "numerator": 3,
+                "denominator": 50,
+                "rate": 0.06
+            },
+            "trajectoryClassCounts": {
+                "DIRECT_SUCCESS": 23,
+                "EXECUTION_ERROR_RECOVERED": 3,
+                "SEMANTIC_REVISION_SUCCESS": 0,
+                "EXECUTED_SEMANTIC_FAILURE": 18,
+                "UNRECOVERED_EXECUTION_FAILURE": 5,
+                "NO_SQL": 1,
+                "SYSTEM_ERROR": 0
+            },
+            "medianSqlAttemptCount": 1
+        }
+    }
+}

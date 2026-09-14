@@ -7,7 +7,7 @@ import { EpisodeRunner } from '../../runner/episode-runner';
 import { QuestionRunner } from '../../runner/question-runner';
 import { RunResultWriter } from '../../runner/run-result-writer';
 import { ServerClient } from '../../runner/server-client';
-import { AthenaService } from '../../shared/services/athena/athena-service';
+import { AthenaService } from '../../shared/athena-service';
 import type { BenchmarkRecord } from '../../types';
 import { createAgentResponse } from '../fixtures/agent-response';
 

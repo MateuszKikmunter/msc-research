@@ -28,19 +28,11 @@ interface ExecuteInteractionOptions {
 }
 
 export class EpisodeRunner {
-    private readonly serverClient: ServerClient;
-    private readonly candidateResultCollector: CandidateResultCollector;
-    private readonly responseInspector: AgentResponseInspector;
-
     public constructor(
-        serverClient: ServerClient,
-        candidateResultCollector: CandidateResultCollector,
-        responseInspector: AgentResponseInspector
-    ) {
-        this.serverClient = serverClient;
-        this.candidateResultCollector = candidateResultCollector;
-        this.responseInspector = responseInspector;
-    }
+        private readonly serverClient: ServerClient,
+        private readonly candidateResultCollector: CandidateResultCollector,
+        private readonly responseInspector: AgentResponseInspector
+    ) {}
 
     public async run(
         benchmarkRecord: BenchmarkRecord,
@@ -48,9 +40,11 @@ export class EpisodeRunner {
     ): Promise<RunInteraction[]> {
         switch (benchmarkRecord.expected_behavior) {
             case 'execute':
-                return this.runStandalone(benchmarkRecord, sessionId);
             case 'clarify_then_execute':
-                return this.runAmbiguity(benchmarkRecord, sessionId);
+                return this.runWithOptionalClarification(
+                    benchmarkRecord,
+                    sessionId
+                );
             case 'execute_sequence':
                 return this.runInteractive(benchmarkRecord, sessionId);
             case 'refuse_without_query':
@@ -59,7 +53,7 @@ export class EpisodeRunner {
         }
     }
 
-    private async runStandalone(
+    private async runWithOptionalClarification(
         benchmarkRecord: BenchmarkRecord,
         sessionId: string
     ): Promise<RunInteraction[]> {
@@ -72,71 +66,34 @@ export class EpisodeRunner {
             interactionOrder: 1
         });
         const interactions = [firstInteraction.record];
-        // If the agent has already produced a SQL query,
-        // or if it hasn't requested clarification before producing SQL,
-        // we should stop the interaction.
-        if (
-            this.responseInspector.hasSqlAttempt(firstInteraction.response) ||
-            !this.responseInspector.requestedClarificationBeforeSql(
-                firstInteraction.response
-            )
-        ) {
+        if (!this.shouldContinueAfterClarification(firstInteraction.response)) {
             return interactions;
         }
 
-        const fallbackInteraction = await this.executeInteraction({
-            benchmarkRecord,
-            sessionId,
-            input: STANDALONE_FALLBACK,
-            inputType: 'fallback',
-            turnNumber: null,
-            interactionOrder: 2,
-            fallbackUsed: true
-        });
-        interactions.push(fallbackInteraction.record);
-        return interactions;
-    }
-
-    private async runAmbiguity(
-        benchmarkRecord: BenchmarkRecord,
-        sessionId: string
-    ): Promise<RunInteraction[]> {
-        const firstInteraction = await this.executeInteraction({
-            benchmarkRecord,
-            sessionId,
-            input: benchmarkRecord.question ?? '',
-            inputType: 'question',
-            turnNumber: null,
-            interactionOrder: 1
-        });
-
-        const interactions = [firstInteraction.record];
-        // If the agent has already produced a SQL query,
-        // or if it hasn't requested clarification before producing SQL, we should stop the interaction.
-        if (this.responseInspector.hasSqlAttempt(firstInteraction.response)) {
-            return interactions;
-        }
-
-        if (
-            !this.responseInspector.requestedClarificationBeforeSql(
-                firstInteraction.response
-            )
-        ) {
-            return interactions;
-        }
-
-        const scriptedReply = benchmarkRecord.resolution?.scriptedReply ?? '';
+        // Both cases allow one continuation, but keep their authored replies and labels distinct.
+        const isAmbiguity =
+            benchmarkRecord.expected_behavior === 'clarify_then_execute';
         const continuation = await this.executeInteraction({
             benchmarkRecord,
             sessionId,
-            input: scriptedReply,
-            inputType: 'scripted_reply',
+            input: isAmbiguity
+                ? (benchmarkRecord.resolution?.scriptedReply ?? '')
+                : STANDALONE_FALLBACK,
+            inputType: isAmbiguity ? 'scripted_reply' : 'fallback',
             turnNumber: null,
             interactionOrder: 2,
-            scriptedReplyUsed: true
+            fallbackUsed: !isAmbiguity,
+            scriptedReplyUsed: isAmbiguity
         });
         interactions.push(continuation.record);
         return interactions;
+    }
+
+    private shouldContinueAfterClarification(response: AgentResponse): boolean {
+        return (
+            !this.responseInspector.hasSqlAttempt(response) &&
+            this.responseInspector.requestedClarificationBeforeSql(response)
+        );
     }
 
     private async runInteractive(

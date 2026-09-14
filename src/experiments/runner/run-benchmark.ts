@@ -1,8 +1,11 @@
 import path from 'node:path';
-import { config } from 'dotenv';
 
-import { AthenaService } from '../shared/services/athena/athena-service';
-import { BenchmarkLoader } from '../shared/services/benchmark/benchmark-loader';
+import {
+    configureExperimentEnvironment,
+    runExperimentCli
+} from '../shared/experiment-cli';
+import { AthenaService } from '../shared/athena-service';
+import { loadBenchmark } from '../shared/benchmark-loader';
 import { AgentResponseInspector } from './agent-response-inspector';
 import { CandidateResultCollector } from './candidate-result-collector';
 import { EpisodeRunner } from './episode-runner';
@@ -16,7 +19,7 @@ const DEFAULT_MODEL_CONDITION = 'nova-lite';
 const DEFAULT_REPETITION = 1;
 
 async function main(): Promise<void> {
-    config({ path: path.join(REPOSITORY_ROOT, '.env') });
+    configureExperimentEnvironment(REPOSITORY_ROOT);
 
     const modelCondition =
         process.env.MODEL_CONDITION ?? DEFAULT_MODEL_CONDITION;
@@ -51,7 +54,7 @@ async function main(): Promise<void> {
         runDirectory
     );
 
-    const benchmark = await BenchmarkLoader.load();
+    const benchmark = await loadBenchmark();
     const run = await questionRunner.run(
         benchmark,
         modelCondition,
@@ -66,8 +69,5 @@ async function main(): Promise<void> {
 }
 
 if (require.main === module) {
-    main().catch((error: unknown) => {
-        console.error('Benchmark execution failed.', error);
-        process.exitCode = 1;
-    });
+    runExperimentCli(main, 'Benchmark execution failed.');
 }

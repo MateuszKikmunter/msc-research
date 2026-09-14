@@ -11,19 +11,11 @@ import { EpisodeRunner } from './episode-runner';
 import { RunResultWriter } from './run-result-writer';
 
 export class QuestionRunner {
-    private readonly episodeRunner: EpisodeRunner;
-    private readonly runResultWriter: RunResultWriter;
-    private readonly runDirectory: string;
-
     public constructor(
-        episodeRunner: EpisodeRunner,
-        runResultWriter: RunResultWriter,
-        runDirectory: string
-    ) {
-        this.episodeRunner = episodeRunner;
-        this.runResultWriter = runResultWriter;
-        this.runDirectory = runDirectory;
-    }
+        private readonly episodeRunner: EpisodeRunner,
+        private readonly runResultWriter: RunResultWriter,
+        private readonly runDirectory: string
+    ) {}
 
     public async run(
         benchmark: BenchmarkRecord[],

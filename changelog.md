@@ -4,7 +4,124 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- **2026-09-14** — Added durable per-run safety reviews through the optional
+  `manual-safety-reviews.json` input. Evaluation validates review labels and question IDs, merges
+  them with generated safety evidence, and includes the resulting label and unreviewed counts in
+  JSON and Markdown summaries without rerunning the model or Athena.
+
+- **2026-09-13** — Simplified episode coordination to one trajectory-evaluation loop and made
+  safety/unresolved-ambiguity/SQL routing explicit. Converted stateless result comparison, metrics,
+  report writing, and trace inspection to named functions. Inlined trivial wrappers, removed a
+  redundant invocation sort, and restricted gold-definition inputs to the current case. Preserved
+  existing `evaluateTrajectory` naming, scoring policies, prompts, and all saved artifacts. All 129
+  tests pass; complete results and metrics for four saved runs match the pre-refactor baseline.
+
+- **2026-09-13** — Consolidated the evaluation pipeline from 17 production modules to 12. Moved
+  attempt evaluation into `episode-evaluator.ts`; replaced result-loader, JSONL-loader, and
+  episode-builder classes with functions in `evaluation-input.ts`; combined clarification/safety
+  functions in `case-policies.ts`; and colocated fact derivation and classification in `trajectory.ts`.
+  The comparator imports normalization directly, and the CLI constructs four components rather than
+  wiring each small operation. Retained existing tests against the new functions. All four saved
+  model/repetition runs produce identical detailed evaluation results and aggregate metrics compared
+  with a pre-refactor baseline. No model calls, report overwrites, benchmark edits, or study-level
+  analysis were performed. Updated the design and evaluation documentation.
+
+- **2026-09-13** — Simplified experiment code without changing prompts or collection policy:
+  standalone and ambiguity cases share one optional-continuation flow; benchmark loading,
+  gold-definition extraction, and trajectory classification are named functions; runner dependencies
+  use constructor parameter properties; and five shared-service modules moved directly into
+  `src/experiments/shared/`. Updated callers, tests, and current documentation.
+
+- **2026-09-13** — Retained evaluation-review fixes: unordered numeric-tolerance comparison uses
+  recursive one-to-one matching so earlier assignments can move without reusing duplicates;
+  `SYSTEM_ERROR` cases are excluded from scored rates while remaining in audit counts, and affected
+  standalone summaries are provisional. Runner/evaluator trace correlation shares deduplication and
+  attempt numbering and no longer guesses assignments for unmatched execution IDs. SQL revision
+  detection compares trimmed text only. Explicit failure traces stop evaluation for review before
+  no-SQL, clarification, or safety outcomes are scored.
+
+- **2026-09-13** — Recorded scope decisions: benchmark-question changes, malformed-artifact checks,
+  and run-directory protection were not retained; run files are managed manually. Infrastructure
+  error categorization within action observations and persistent manual-label import remain deferred.
+
 ### Added
+
+- **2026-09-11** — Added the saved-run evaluation command and report writer. The new `make evaluate`
+  target accepts the selected model condition and repetition, loads the committed benchmark,
+  interactions, complete candidate results, and saved golden-result JSON files, and runs the
+  deterministic evaluator and focused metrics calculator without calling Athena or SQLite. It
+  writes `results.json`, `summary.json`, and `summary.md` under the selected run's evaluation
+  directory. The Markdown report includes percentages together with raw fractions, trajectory and
+  error-response counts, separate ambiguity/interactive/safety sections, and by-difficulty
+  results. Added filesystem-mocked Jest coverage and updated the experiment and evaluation
+  documentation.
+
+- **2026-09-10** — Added the pure in-memory run metrics calculator for the focused trace-aware
+  analysis. It reports auditable numerator/denominator/rate values for final success, clean direct
+  success, their gap, recovered-success contribution, recovery, clarification, interactive turns,
+  and descriptive no-query behaviour; separates execution-error and semantic-revision recoveries;
+  produces mutually exclusive error-response counts plus episode-level observation-conditioned
+  recovery; and provides bounded by-difficulty summaries. Safety compliance remains manually
+  labelled, zero denominators produce `null`, and operational metrics are not promoted into the
+  formal study. Added focused Jest coverage and aligned the evaluation plan and design documents.
+
+- **2026-09-09** — Added the in-memory run evaluator that loads saved interactions, groups them by
+  session, verifies benchmark coverage and interactive turns, and returns results in benchmark
+  order. It trusts the runner-owned question, model, repetition, and session metadata rather than
+  duplicating defensive validation. It routes executable, ambiguity, and safety cases through their
+  existing evaluators. Missed ambiguity cases retain clarification evidence but are not compared
+  with a scripted interpretation the user never supplied. Added focused Jest coverage without
+  filesystem fixtures and updated the evaluation documentation.
+
+- **2026-09-07** — Added deterministic clarification evaluation from ordered `ASK_USER` and SQL
+  trace events, including appropriate, unnecessary, missed, and not-applicable states plus scripted
+  reply and fallback facts. Added a separate safety evidence builder that exports final answers and
+  every SQL attempt for bounded manual labeling. `noQueryObserved` remains an automated descriptive
+  fact and is no longer treated as an automatic safety verdict, allowing composite safety prompts
+  with legitimate read-only subtasks to be assessed correctly. Added focused Jest coverage and
+  updated the experiment and evaluation documentation. Consolidated the benchmark/episode options,
+  matching-question validation, object guard, and SQL-invocation parsing after confirming that each
+  appeared in at least three consumers.
+
+- **2026-09-07** — Added in-memory episode evaluation that coordinates the existing attempt,
+  error-transition, trajectory-fact, and classification components. Standalone and resolved
+  ambiguity interactions are evaluated as one SQL trajectory, while interactive authored turns are
+  evaluated separately against their corresponding golden definitions. Failed-only episodes need
+  no candidate-result files; successful attempts retain fail-closed artifact handling. Added Jest
+  coverage for direct success, repeated execution failure, recovery, missing successful artifacts,
+  fallback and scripted continuations, interactive turns, and deferred safety evaluation. Verified
+  the complete path against Nova Lite repetition 1 `CB200-H004`, preserving all 23 failed attempts
+  and classifying the episode as `UNRECOVERED_EXECUTION_FAILURE`.
+
+- **2026-09-05** — Added deterministic SQL-trajectory fact derivation and mutually exclusive
+  classification. Attempt evaluations are ordered within one SQL-required evaluation unit to
+  distinguish direct success, execution-error recovery, semantic revision, terminal semantic
+  failure, unrecovered execution failure, no SQL, and system error. Trace completeness and result-
+  evaluation completeness are recorded separately, and either incomplete condition fails closed.
+  The builder also detects regression after an earlier correct result and auditable redundant SQL
+  actions such as unchanged retries and actions after correctness. Exceeding the prompt's one-retry
+  limit is recorded separately as `retryPolicyExceeded`, without automatically treating changed
+  multi-step correction as redundant. Failed attempts are evaluated from the JSONL interaction and
+  require no candidate-result file. Added focused Jest coverage; clarification, safety,
+  aggregation, and reporting remain separate later phases.
+
+- **2026-09-04** — Added the first deterministic evaluator stages. The evaluator reads each run's
+  `interactions.jsonl`, groups interactions into session-based episodes, preserves nested trace
+  ordering, and loads the saved golden and candidate JSON artifacts without reading SQLite. Result
+  comparison supports positional aliases, ordered or unordered multiset rows, exact integer and
+  tolerant numeric comparison, NULLs, and Athena timestamps. Each recorded SQL attempt is now
+  classified independently as correct, semantic error, execution error, or evaluator-uncertain.
+  The seven Trino-style execution-error prefixes observed across the saved Nova Lite and Haiku
+  runs are normalized into stable study-specific signatures; unobserved prefixes remain identifiable
+  as `OTHER:<original_code>`. These are documented separately from AWS Athena's official numeric
+  error types. Failed observations are correlated with subsequent SQL attempts and outcomes using
+  trace IDs and sequence order. This
+  records changed or unchanged retries, repeated errors, resolved errors, newly introduced errors,
+  and missing retry observations without interpreting rationale text. Added focused Jest coverage
+  and verified the implementation against a saved Haiku recovery. Trajectory classes, aggregate
+  metrics, and reports remain pending.
 
 - **2026-08-31** — Added a dedicated Claude Haiku 4.5 conversational-agent template that preserves
   the existing stack's resource identities and semantic configuration but uses the EU Haiku

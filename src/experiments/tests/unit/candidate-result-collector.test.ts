@@ -4,7 +4,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { CandidateResultCollector } from '../../runner/candidate-result-collector';
 import { AgentResponseInspector } from '../../runner/agent-response-inspector';
 import { RunResultWriter } from '../../runner/run-result-writer';
-import { AthenaService } from '../../shared/services/athena/athena-service';
+import { AthenaService } from '../../shared/athena-service';
 import {
     createAgentResponse,
     createTraceEvent

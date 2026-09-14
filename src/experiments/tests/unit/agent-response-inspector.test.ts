@@ -177,6 +177,101 @@ describe('AgentResponseInspector', () => {
         ]);
     });
 
+    it.each([
+        { invocationId: null, observationId: null, observationSequence: 2 },
+        { invocationId: 'sql', observationId: null, observationSequence: 2 },
+        {
+            invocationId: 'sql',
+            observationId: 'unrelated',
+            observationSequence: 2
+        },
+        { invocationId: 'sql', observationId: 'sql', observationSequence: 0 }
+    ])(
+        'does not guess a result assignment for %j',
+        ({ invocationId, observationId, observationSequence }) => {
+            const response = createAgentResponse({
+                sqlAttempts: [
+                    {
+                        attempt: 1,
+                        query: 'SELECT 1',
+                        status: 'succeeded',
+                        error: null
+                    }
+                ],
+                traceEvents: [
+                    createTraceEvent({
+                        sequenceNumber: 1,
+                        traceId: invocationId,
+                        eventType: 'INVOCATION',
+                        actionInput: {
+                            parameters: [{ name: 'query', value: 'SELECT 1' }]
+                        }
+                    }),
+                    createTraceEvent({
+                        sequenceNumber: observationSequence,
+                        traceId: observationId,
+                        eventType: 'OBSERVATION',
+                        observation: { queryExecutionId: 'query-1' }
+                    })
+                ]
+            });
+            expect(inspector.getCandidateQueryExecutions(response)).toEqual([]);
+        }
+    );
+
+    it('counts duplicate invocation parts once and keeps the retry number', () => {
+        const invocation = createTraceEvent({
+            sequenceNumber: 1,
+            traceId: 'failed',
+            eventType: 'INVOCATION',
+            actionInput: {
+                parameters: [{ name: 'query', value: 'SELECT missing' }]
+            }
+        });
+        const observation = createTraceEvent({
+            sequenceNumber: 5,
+            traceId: 'retry',
+            eventType: 'OBSERVATION',
+            observation: { queryExecutionId: 'query-2' }
+        });
+        const response = createAgentResponse({
+            sqlAttempts: [
+                {
+                    attempt: 1,
+                    query: 'SELECT missing',
+                    status: 'failed',
+                    error: 'COLUMN_NOT_FOUND'
+                },
+                {
+                    attempt: 2,
+                    query: 'SELECT 1',
+                    status: 'succeeded',
+                    error: null
+                }
+            ],
+            traceEvents: [
+                observation,
+                invocation,
+                { ...invocation, sequenceNumber: 2 },
+                createTraceEvent({
+                    sequenceNumber: 4,
+                    traceId: 'retry',
+                    eventType: 'INVOCATION',
+                    actionInput: {
+                        parameters: [{ name: 'query', value: ' SELECT 1 ' }]
+                    }
+                }),
+                { ...observation, sequenceNumber: 6 }
+            ]
+        });
+        expect(inspector.getCandidateQueryExecutions(response)).toEqual([
+            { attempt: 2, queryExecutionId: 'query-2' }
+        ]);
+        // Inconsistent recorded SQL must not receive this trace's result.
+        response.sqlAttempts[1].query = 'SELECT 2';
+        expect(inspector.getCandidateQueryExecutions(response)).toEqual([]);
+    });
+
     it('removes sensitive deployment identifiers from nested trace data', () => {
         const response = createAgentResponse({
             traceEvents: [

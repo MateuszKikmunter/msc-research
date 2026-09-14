@@ -1,7 +1,8 @@
-import type { AgentResponse, AgentTraceEvent } from '../../backend/types';
+import type { AgentResponse } from '../../backend/types';
+import * as traceEvents from '../shared/trace-event-inspector';
+import { isRecord } from '../shared/type-guards';
 import type { CandidateQueryExecution, StoredAgentResponse } from '../types';
 
-const ASK_USER_OBSERVATION_TYPE = 'ASK_USER';
 const SENSITIVE_KEYS = new Set([
     'agentId',
     'agentAlias',
@@ -19,95 +20,37 @@ export class AgentResponseInspector {
     }
 
     public requestedClarificationBeforeSql(response: AgentResponse): boolean {
-        const events = this.orderedEvents(response);
-        const clarificationSequence = events.find((event) =>
-            this.isClarificationObservation(event)
-        )?.sequenceNumber;
-
-        if (clarificationSequence === undefined) {
-            return false;
-        }
-
-        const sqlSequence = events.find((event) =>
-            this.isSqlInvocation(event)
-        )?.sequenceNumber;
-
-        return sqlSequence === undefined || clarificationSequence < sqlSequence;
+        return traceEvents.requestedClarificationBeforeSql(
+            response.traceEvents
+        );
     }
 
     // Pair each successful Athena execution ID with its original SQL attempt number.
     public getCandidateQueryExecutions(
         response: AgentResponse
     ): CandidateQueryExecution[] {
-        const events = this.orderedEvents(response);
-        const attemptByTraceId = this.indexSqlAttemptsByTraceId(events);
-        const successfulAttempts = response.sqlAttempts
-            .filter((sqlAttempt) => sqlAttempt.status === 'succeeded')
-            .map((sqlAttempt) => sqlAttempt.attempt);
-
-        return this.collectCandidateExecutions(
-            events,
-            attemptByTraceId,
-            successfulAttempts
-        );
-    }
-
-    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
-        return this.removeSensitiveKeys(response) as StoredAgentResponse;
-    }
-
-    private orderedEvents(response: AgentResponse): AgentTraceEvent[] {
-        return [...response.traceEvents].sort(
-            (left, right) => left.sequenceNumber - right.sequenceNumber
-        );
-    }
-
-    private indexSqlAttemptsByTraceId(
-        events: AgentTraceEvent[]
-    ): Map<string, number> {
-        // Maps the ID shared by an invocation and observation to the SQL attempt number.
-        const attemptByTraceId = new Map<string, number>();
-        let attempt = 0;
-
-        // Count failed invocations too, so a later successful retry remains attempt 2, 3, etc.
-        for (const event of events) {
-            if (!this.isSqlInvocation(event)) {
-                continue;
-            }
-
-            // Repeated trace parts with the same ID still represent one SQL attempt.
-            if (event.traceId && attemptByTraceId.has(event.traceId)) {
-                continue;
-            }
-
-            attempt += 1;
-            if (event.traceId) {
-                attemptByTraceId.set(event.traceId, attempt);
-            }
-        }
-
-        return attemptByTraceId;
-    }
-
-    private collectCandidateExecutions(
-        events: AgentTraceEvent[],
-        attemptByTraceId: ReadonlyMap<string, number>,
-        successfulAttempts: number[]
-    ): CandidateQueryExecution[] {
-        // Prevent a trace-less observation from being assigned an attempt already in use.
-        const usedAttempts = new Set<number>();
-        // The same Athena observation may appear more than once in the trace stream.
-        const usedQueryExecutionIds = new Set<string>();
+        const events = traceEvents.orderEvents(response.traceEvents);
+        const invocations = traceEvents.getSqlInvocations(events);
         const executions: CandidateQueryExecution[] = [];
+        const usedQueryExecutionIds = new Set<string>();
 
-        for (const event of events) {
-            if (event.eventType !== 'OBSERVATION') {
+        for (const invocation of invocations) {
+            const attempt = response.sqlAttempts.find(
+                (attempt) => attempt.attempt === invocation.attempt
+            );
+            // Require agreement with the recorded attempt before saving its result.
+            if (
+                attempt?.status !== 'succeeded' ||
+                attempt.query.trim() !== invocation.query
+            ) {
                 continue;
             }
-
-            // Athena may nest its execution ID inside the action observation payload.
+            const observation = traceEvents.findSqlObservation(
+                events,
+                invocation.event
+            );
             const queryExecutionId = this.findStringByKey(
-                event.observation,
+                observation?.observation,
                 'queryExecutionId'
             );
             if (
@@ -116,78 +59,15 @@ export class AgentResponseInspector {
             ) {
                 continue;
             }
-
-            const resolvedAttempt = this.resolveAttemptNumber(
-                event,
-                attemptByTraceId,
-                successfulAttempts,
-                usedAttempts,
-                executions.length + 1
-            );
-
-            usedAttempts.add(resolvedAttempt);
             usedQueryExecutionIds.add(queryExecutionId);
-            executions.push({
-                attempt: resolvedAttempt,
-                queryExecutionId
-            });
+            executions.push({ attempt: invocation.attempt, queryExecutionId });
         }
 
         return executions;
     }
 
-    private resolveAttemptNumber(
-        event: AgentTraceEvent,
-        attemptByTraceId: ReadonlyMap<string, number>,
-        successfulAttempts: number[],
-        usedAttempts: ReadonlySet<number>,
-        fallbackAttempt: number
-    ): number {
-        const tracedAttempt = event.traceId
-            ? attemptByTraceId.get(event.traceId)
-            : undefined;
-
-        if (tracedAttempt !== undefined) {
-            return tracedAttempt;
-        }
-
-        // If correlation data is incomplete, use the next unassigned recorded success.
-        return (
-            successfulAttempts.find((attempt) => !usedAttempts.has(attempt)) ??
-            fallbackAttempt
-        );
-    }
-
-    private isClarificationObservation(event: AgentTraceEvent): boolean {
-        return (
-            event.eventType === 'OBSERVATION' &&
-            this.isObject(event.observation) &&
-            event.observation.type === ASK_USER_OBSERVATION_TYPE
-        );
-    }
-
-    private isSqlInvocation(event: AgentTraceEvent): boolean {
-        return (
-            event.eventType === 'INVOCATION' &&
-            this.hasNamedParameter(event.actionInput, 'query')
-        );
-    }
-
-    private hasNamedParameter(value: unknown, name: string): boolean {
-        if (!this.isObject(value)) {
-            return false;
-        }
-
-        const parameters = value.parameters;
-        return (
-            Array.isArray(parameters) &&
-            parameters.some(
-                (parameter) =>
-                    this.isObject(parameter) &&
-                    parameter.name === name &&
-                    typeof parameter.value === 'string'
-            )
-        );
+    public sanitizeForStorage(response: AgentResponse): StoredAgentResponse {
+        return this.removeSensitiveKeys(response) as StoredAgentResponse;
     }
 
     private findStringByKey(value: unknown, targetKey: string): string | null {
@@ -199,7 +79,7 @@ export class AgentResponseInspector {
             return null;
         }
 
-        if (!this.isObject(value)) {
+        if (!isRecord(value)) {
             return null;
         }
 
@@ -224,7 +104,7 @@ export class AgentResponseInspector {
             return value.map((item) => this.removeSensitiveKeys(item));
         }
 
-        if (!this.isObject(value)) {
+        if (!isRecord(value)) {
             return value;
         }
 
@@ -233,9 +113,5 @@ export class AgentResponseInspector {
                 .filter(([key]) => !SENSITIVE_KEYS.has(key))
                 .map(([key, child]) => [key, this.removeSensitiveKeys(child)])
         );
-    }
-
-    private isObject(value: unknown): value is Record<string, unknown> {
-        return Boolean(value) && typeof value === 'object';
     }
 }
