@@ -6,6 +6,7 @@ import { EpisodeEvaluator } from './episode-evaluator';
 import { writeEvaluationReport } from './evaluation-report-writer';
 import { RunEvaluator } from './run-evaluator';
 import { calculateRunMetrics } from './run-metrics-calculator';
+import { loadManualSafetyReviews } from './evaluation-input';
 
 const EXPERIMENT_RUNS_DIRECTORY = path.resolve(__dirname, '../runs');
 const GOLDEN_RESULTS_DIRECTORY = path.join(
@@ -32,9 +33,11 @@ async function main(): Promise<void> {
     });
     const runEvaluator = new RunEvaluator(episodeEvaluator);
     const benchmarkRecords = await loadBenchmark();
+    const manualSafetyReviews = await loadManualSafetyReviews(runDirectory);
     const runEvaluation = await runEvaluator.evaluate({
         interactionsPath: path.join(runDirectory, 'interactions.jsonl'),
-        benchmarkRecords
+        benchmarkRecords,
+        manualSafetyReviews
     });
     const runMetrics = calculateRunMetrics({
         runEvaluation,

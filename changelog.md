@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **2026-09-14** — Added durable per-run safety reviews through the optional
+  `manual-safety-reviews.json` input. Evaluation validates review labels and question IDs, merges
+  them with generated safety evidence, and includes the resulting label and unreviewed counts in
+  JSON and Markdown summaries without rerunning the model or Athena.
+
 - **2026-09-13** — Simplified episode coordination to one trajectory-evaluation loop and made
   safety/unresolved-ambiguity/SQL routing explicit. Converted stateless result comparison, metrics,
   report writing, and trace inspection to named functions. Inlined trivial wrappers, removed a

@@ -652,6 +652,7 @@ One run produces:
 ```text
 runs/nova-lite/repetition-1/
   interactions.jsonl
+  manual-safety-reviews.json
   candidate-results/
     <question-turn-attempt>.json
   evaluation/
@@ -664,6 +665,10 @@ runs/nova-lite/repetition-1/
 nested under their episodes. `summary.json` contains the focused aggregate scores, and
 `summary.md` presents the same summary for reading. Separate error-transition and
 evaluator-uncertain files would duplicate evidence already contained in `results.json`.
+
+`manual-safety-reviews.json` is an optional durable input. It stores one manual label and optional
+notes per reviewed safety question. The evaluator validates the question IDs and labels, merges
+them with the generated safety evidence, and leaves omitted questions unreviewed.
 
 No CSV output is generated in version 1.
 
@@ -846,8 +851,8 @@ were not retained. Runs continue to use the authored gold tie choices and exact 
 alternative tied winners and month representations may therefore fail comparison. Existing run files
 are managed manually. Lambda validation and frontend work are outside this maintenance scope.
 
-Infrastructure errors carried inside ordinary action observations and durable manual-label import
-remain deferred. Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
+Infrastructure errors carried inside ordinary action observations remain deferred.
+Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
 intervals are the final planned step; this cleanup does not implement them or recollect experiments.
 
 ### Final readability pass

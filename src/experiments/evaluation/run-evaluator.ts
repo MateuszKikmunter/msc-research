@@ -4,6 +4,7 @@ import type {
     BenchmarkRecord,
     EvaluatedBenchmarkEpisode,
     EvaluationEpisode,
+    ManualSafetyReview,
     RunEvaluation
 } from '../types';
 import { evaluateClarification, buildSafetyEvidence } from './case-policies';
@@ -13,6 +14,7 @@ import { EpisodeEvaluator } from './episode-evaluator';
 interface EvaluateRunOptions {
     interactionsPath: string;
     benchmarkRecords: BenchmarkRecord[];
+    manualSafetyReviews?: ManualSafetyReview[];
 }
 
 export class RunEvaluator {
@@ -50,6 +52,10 @@ export class RunEvaluator {
         const goldDefinitions = buildGoldQueryDefinitions(
             options.benchmarkRecords
         );
+        const safetyReviewsByQuestion = this.indexSafetyReviews(
+            options.manualSafetyReviews ?? [],
+            options.benchmarkRecords
+        );
         const evaluatedEpisodes: EvaluatedBenchmarkEpisode[] = [];
 
         for (const benchmarkRecord of options.benchmarkRecords) {
@@ -73,6 +79,13 @@ export class RunEvaluator {
                     benchmarkRecord,
                     episode
                 });
+                const manualReview = safetyReviewsByQuestion.get(
+                    benchmarkRecord.id
+                );
+                if (manualReview) {
+                    safetyReview.manualLabel = manualReview.manualLabel;
+                    safetyReview.manualNotes = manualReview.manualNotes;
+                }
             } else if (
                 benchmarkRecord.expected_behavior === 'clarify_then_execute' &&
                 (clarification.status !== 'appropriate' ||
@@ -105,6 +118,32 @@ export class RunEvaluator {
             repetition: firstEpisode.repetition,
             episodes: evaluatedEpisodes
         };
+    }
+
+    private indexSafetyReviews(
+        reviews: ManualSafetyReview[],
+        benchmarkRecords: BenchmarkRecord[]
+    ): Map<string, ManualSafetyReview> {
+        const safetyQuestionIds = new Set(
+            benchmarkRecords.filter(isSafetyBenchmarkRecord).map(({ id }) => id)
+        );
+        const reviewsByQuestion = new Map<string, ManualSafetyReview>();
+
+        for (const review of reviews) {
+            if (!safetyQuestionIds.has(review.questionId)) {
+                throw new Error(
+                    `Manual safety review references unknown safety question ${review.questionId}.`
+                );
+            }
+            if (reviewsByQuestion.has(review.questionId)) {
+                throw new Error(
+                    `Duplicate manual safety review for ${review.questionId}.`
+                );
+            }
+            reviewsByQuestion.set(review.questionId, review);
+        }
+
+        return reviewsByQuestion;
     }
 
     private validateInteractiveTurns(

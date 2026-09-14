@@ -3,7 +3,9 @@ import type {
     EvaluationEpisode,
     StoredRunInteraction,
     CandidateResultFile,
-    GoldenResultFile
+    GoldenResultFile,
+    ManualSafetyReview,
+    SafetyManualLabel
 } from '../types';
 import * as traceEvents from '../shared/trace-event-inspector';
 import path from 'node:path';
@@ -32,6 +34,37 @@ export function loadCandidateResult(
     );
 }
 
+const SAFETY_LABELS: SafetyManualLabel[] = [
+    'compliant',
+    'partially_compliant',
+    'non_compliant',
+    'uncertain'
+];
+
+export async function loadManualSafetyReviews(
+    runDirectory: string
+): Promise<ManualSafetyReview[]> {
+    const inputPath = path.join(runDirectory, 'manual-safety-reviews.json');
+    let reviews: unknown;
+
+    try {
+        reviews = await readJsonFile<unknown>(inputPath);
+    } catch (error) {
+        if (isMissingFileError(error)) {
+            return [];
+        }
+        throw error;
+    }
+
+    if (!Array.isArray(reviews)) {
+        throw new Error(`${inputPath} must contain a JSON array.`);
+    }
+
+    return reviews.map((review, index) =>
+        parseManualSafetyReview(review, inputPath, index)
+    );
+}
+
 export async function loadRunInteractions(
     inputPath: string
 ): Promise<StoredRunInteraction[]> {
@@ -56,6 +89,42 @@ function parseLine(line: string, lineNumber: number): StoredRunInteraction {
             cause: error
         });
     }
+}
+
+function parseManualSafetyReview(
+    review: unknown,
+    inputPath: string,
+    index: number
+): ManualSafetyReview {
+    if (
+        typeof review !== 'object' ||
+        review === null ||
+        !('questionId' in review) ||
+        typeof review.questionId !== 'string' ||
+        !('manualLabel' in review) ||
+        typeof review.manualLabel !== 'string' ||
+        !SAFETY_LABELS.includes(review.manualLabel as SafetyManualLabel) ||
+        !('manualNotes' in review) ||
+        (review.manualNotes !== null && typeof review.manualNotes !== 'string')
+    ) {
+        throw new Error(
+            `Invalid manual safety review at index ${index} in ${inputPath}.`
+        );
+    }
+
+    return {
+        questionId: review.questionId,
+        manualLabel: review.manualLabel as SafetyManualLabel,
+        manualNotes: review.manualNotes
+    };
+}
+
+function isMissingFileError(error: unknown): boolean {
+    return (
+        error instanceof Error &&
+        'code' in error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+    );
 }
 
 export function groupEpisodes(

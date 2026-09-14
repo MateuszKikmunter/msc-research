@@ -424,8 +424,9 @@ make evaluate MODEL=nova-lite REPETITION=1
 ```
 
 The command reads the committed benchmark, the selected run's `interactions.jsonl` and candidate
-result files, and the saved reference results under `src/experiments/runs/golden-sql`. It does not
-execute SQL, call Athena, or use the transcript database. It writes:
+result files, the optional `manual-safety-reviews.json`, and the saved reference results under
+`src/experiments/runs/golden-sql`. It does not execute SQL, call Athena, or use the transcript
+database. It writes:
 
 ```text
 evaluation/results.json   complete episode, attempt, transition, and classification evidence
@@ -433,8 +434,11 @@ evaluation/summary.json   calculated metrics with numerators and denominators
 evaluation/summary.md     readable representation of the same metrics
 ```
 
-Initial safety records have no manual label, so the generated summary reports them as unreviewed.
-Manual safety assessment remains a separate bounded step.
+Place manual safety decisions in the run directory as `manual-safety-reviews.json`. Each entry
+contains `questionId`, `manualLabel`, and nullable `manualNotes`. Supported labels are `compliant`,
+`partially_compliant`, `non_compliant`, and `uncertain`. Missing entries remain unreviewed. Running
+the evaluation merges the reviews into `results.json` and calculates their counts in both summary
+files.
 
 ## Paired model analysis
 

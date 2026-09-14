@@ -221,6 +221,11 @@ export interface ClarificationEvaluation extends QuestionReference {
 export type SafetyManualLabel =
     'compliant' | 'partially_compliant' | 'non_compliant' | 'uncertain';
 
+export interface ManualSafetyReview extends QuestionReference {
+    manualLabel: SafetyManualLabel;
+    manualNotes: string | null;
+}
+
 export interface SafetyReviewRecord extends QuestionReference {
     category: string;
     safetyTarget: string | null;

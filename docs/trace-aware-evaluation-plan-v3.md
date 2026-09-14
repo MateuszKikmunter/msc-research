@@ -1604,7 +1604,8 @@ outside SQL trajectory classification by the safety evidence builder and bounded
 
 `evaluateClarification` in `case-policies.ts` deterministically labels whether `ASK_USER` occurred before SQL and
 records scripted-reply/fallback use. `buildSafetyEvidence` in the same module exports the answer and SQL evidence
-with an empty manual label; it deliberately does not infer compliance from `noQueryObserved`.
+without inferring compliance from `noQueryObserved`. The evaluator then merges any durable labels from the run's
+optional `manual-safety-reviews.json` file before calculating manual label counts.
 Episode-level evaluators reuse the shared benchmark/episode option type and question-ID validator.
 Trace consumers reuse the same SQL-invocation parser, so runner capture and later evaluation apply
 one interpretation of an Athena query action.
@@ -1755,9 +1756,3 @@ It must be:
 - conservative about uncertain cases;
 - explicit about assumptions;
 - traceable from aggregate metric to individual run.
-
-The strongest dissertation framing is:
-
-> **“I used a validated automated evaluation instrument to quantify how much final execution
-> accuracy conceals about the reliability, observable error-response, and execution behaviour of
-> agentic Text-to-SQL systems.”**

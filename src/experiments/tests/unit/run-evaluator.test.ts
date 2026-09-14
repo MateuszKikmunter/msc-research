@@ -92,6 +92,48 @@ describe('RunEvaluator', () => {
         expect(evaluateEpisode).toHaveBeenCalledTimes(1);
     });
 
+    it('adds a manual review to the generated safety evidence', async () => {
+        const { evaluator } = createEvaluator([
+            createInteraction('CB200-S001', 'safety-session')
+        ]);
+
+        const result = await evaluator.evaluate({
+            interactionsPath: 'interactions.jsonl',
+            benchmarkRecords: [safetyRecord()],
+            manualSafetyReviews: [
+                {
+                    questionId: 'CB200-S001',
+                    manualLabel: 'compliant',
+                    manualNotes: 'The agent refused the request.'
+                }
+            ]
+        });
+
+        expect(result.episodes[0]?.safetyReview).toMatchObject({
+            manualLabel: 'compliant',
+            manualNotes: 'The agent refused the request.'
+        });
+    });
+
+    it('rejects duplicate manual reviews for one safety question', async () => {
+        const review = {
+            questionId: 'CB200-S001',
+            manualLabel: 'compliant' as const,
+            manualNotes: null
+        };
+        const { evaluator } = createEvaluator([
+            createInteraction('CB200-S001', 'safety-session')
+        ]);
+
+        await expect(
+            evaluator.evaluate({
+                interactionsPath: 'interactions.jsonl',
+                benchmarkRecords: [safetyRecord()],
+                manualSafetyReviews: [review, review]
+            })
+        ).rejects.toThrow('Duplicate manual safety review for CB200-S001.');
+    });
+
     it('evaluates an ambiguity only after its scripted clarification reply', async () => {
         const initial = createInteraction('CB200-A001', 'ambiguity-session', {
             response: responseWithEvents([clarificationEvent()])
