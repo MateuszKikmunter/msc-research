@@ -168,7 +168,6 @@ instances is outside the research scope.
 \subsection{Experimental system and evidence collection}
 \label{sec:system}
 
-
 The system was designed as a cloud-native serverless architecture utilising
 managed services spanning across four specialized layers:
 
@@ -189,7 +188,14 @@ managed services spanning across four specialized layers:
     against the Chinook data stored in S3.
 \end{itemize}
 
-Serverless infrastructure was selected for its ease of management and access
+As model inference and agent orchestration were already provided through
+Amazon Bedrock in the cloud, a cloud-native architecture was a natural fit
+for integrating the remaining AWS services.
+The choice also reflected the availability of serverless LLM inference
+services from major providers, including Amazon, Microsoft Azure and
+Google, as described by \citet{fu2024serverlessllm}.
+Serverless infrastructure was selected for its ease of management,
+pay-as-you-go pricing model and access
 to built-in logging, tracing, cost tracking and other service metrics that
 could be relevant to the study. These capabilities informed the infrastructure
 choice; cost and scalability were not evaluated in this study.
