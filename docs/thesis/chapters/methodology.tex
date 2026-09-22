@@ -13,8 +13,9 @@ distinguished direct success, recovery after an error and unresolved failure.
 \subsection{Study design and evaluation scope}
 \label{sec:study-design}
 
-The study was designed around two large language model (LLM) conditions,
-each deployed in Amazon Bedrock. Bedrock is a fully managed AWS service that
+The study was designed around the two previously mentioned large language model (LLM) conditions, 
+each deployed in Amazon Bedrock. 
+Bedrock is a fully managed AWS service that
 provides access to foundation models. Bedrock Agents orchestrate
 interactions between a model, software applications and user conversations
 \citep{awsBedrockOverview,awsBedrockAgents}. Both conditions were evaluated
@@ -223,8 +224,12 @@ The serverless architecture covered the AWS services, while the experiment
 runner, Node.js backend and offline evaluator ran locally.
 
 A TypeScript runner loaded the benchmark, submitted requests to a Node.js
-backend and saved the evidence for offline evaluation. The backend captured
-responses and traces in a SQLite database for inspection.
+backend and saved the evidence for offline evaluation. After each benchmark
+case, it appended the interactions, including the model responses and trace
+events, to an \texttt{interactions.jsonl} file. Complete results from successful
+SQL attempts were saved as separate JSON files. The backend also stored responses
+and traces in a SQLite database \citep{sqliteDocs} for convenient inspection and
+initial data-shape checks, but the offline evaluator did not read this database.
 An Angular chat interface was developed for demonstration and manual interaction
 with the agent through the same backend; experimental runs bypassed the user
 interface (UI). The UI was not used to collect or evaluate experimental data.
@@ -278,8 +283,9 @@ favouring higher-probability tokens \citep{noble2026temperature}.
 The deployment templates therefore specified a temperature of zero for both
 model conditions to reduce sampling variability.
 
-Each model condition was deployed using its corresponding CloudFormation
-template, and the runner submitted requests through the configured backend.
+Each model condition was deployed using its corresponding AWS CloudFormation
+template \citep{awsCloudFormation}, and the runner submitted requests through
+the configured backend.
 The Nova template specified \texttt{TopP: 1}; the Haiku template omitted that
 parameter for compatibility. Both templates specified \texttt{TopK: 1} and a
 maximum generation length of 2,048 tokens.
