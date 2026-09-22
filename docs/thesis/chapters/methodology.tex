@@ -4,17 +4,27 @@
 
 The following chapter describes the methodology and experimental system used to evaluate
 an agentic Text-to-SQL system.
-The study compared Amazon Nova Lite v1.0 and Claude Haiku 4.5 using a shared benchmark, assessing returned results and SQL execution trajectories.
+The study compared Amazon Nova Lite v1.0 \citep{awsNovaLite} and Claude Haiku
+4.5 \citep{anthropicClaudeHaiku45} using a shared benchmark. The model condition
+was the independent variable, while final result
+correctness was the primary outcome variable. Trajectory measures further
+distinguished direct success, recovery after an error and unresolved failure.
 
 \subsection{Study design and evaluation scope}
 \label{sec:study-design}
 
 The study was designed around two large language model (LLM) conditions,
-each deployed in Amazon Bedrock, and evaluated using
-the same project-specific benchmark and application workflow.
+each deployed in Amazon Bedrock. Bedrock is a fully managed AWS service that
+provides access to foundation models. Bedrock Agents orchestrate
+interactions between a model, software applications and user conversations
+\citep{awsBedrockOverview,awsBedrockAgents}. Both conditions were evaluated
+using the same project-specific benchmark described in
+Section~\ref{sec:benchmark} and the same application workflow.
 
-Each model completed the same benchmark twice, producing four complete runs
-and supporting per-question comparisons between models and between repetitions.
+Each model completed the same benchmark twice, producing four complete runs.
+The repeated runs were used to compare results and trajectories, including
+whether failures occurred on the same questions or shifted between runs.
+They were not used to establish statistical significance.
 
 For every execution, both final answer and step-by-step SQL attempts were examined
 to track whether the model succeeded immediately, failed completely, or managed to recover from an execution error.
@@ -34,6 +44,8 @@ Each run was collected automatically and included 160 standalone questions and
 40 additional primary turns covering clarification, multi-turn interaction and
 safety scenarios. Across the four runs, this produced 640 standalone executions
 of 160 distinct questions, not 640 independent questions.
+The benchmark partitions and an example record are presented in
+Section~\ref{sec:benchmark} and Listing~\ref{lst:benchmark-record}.
 Safety responses were reviewed manually after collection.
 The evaluation did not assess general natural-language answer quality, usefulness
 to users, cost or scalability.
@@ -52,9 +64,11 @@ It is also complex enough to support joins, aggregations and subqueries.
 For this project, the Chinook Parquet version developed by \citet{chinook-parquet}
 was selected for its columnar storage format. AWS Athena can read the columns required
 by a query rather than all columns, reducing the data scanned for suitable queries
-\citep{awsColumnar}. Performance and cost savings were not measured in this study.
-The files were stored in Amazon S3 and
-registered through the AWS Glue Data Catalog for querying with Athena.
+\citep{apacheParquetDocs,awsColumnar}. Performance and cost savings were not
+measured in this study. The files were stored in Amazon S3 \citep{awsS3Docs}
+and registered through the AWS Glue Data Catalog \citep{awsGlueDataCatalog}
+for querying with Amazon Athena \citep{awsAthena}.
+The deployed Athena workgroup used engine version 3 \citep{awsAthenaEngineV3}.
 
 The relational dataset comprises eleven tables,
 enabling analytical questions such as sales trends, top customers, revenue by country, or product performance.
@@ -73,7 +87,8 @@ Chinook-Bench-200 was developed for this study and stored as a versioned JSON
 specification for automated experimental runs.
 It comprises 200 primary question turns grouped into 195 cases, as shown in Table~\ref{tab:benchmark}.
 The reference SQL queries were initially written manually by the Author and
-subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model.
+subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
+\citep{openaiGPT56Sol}.
 Afterwards, each query was executed manually in AWS Athena to check its returned results.
 
 Each interactive case contains two authored turns, giving ten turns in total for the five interactive cases.
@@ -105,21 +120,25 @@ Total & 195 & 200 & \\
 
 The Spider benchmark \citep{yu2018spider} and its categorisation of SQL queries by complexity
 were used as references when designing Chinook-Bench-200.
-However, it is not an extension of Spider because it does not test cross-domain generalisation
-or multi-database scenarios, and it has its own questions and difficulty strata.
+However, Chinook-Bench-200 is not an extension of Spider.
+It uses its own questions and difficulty levels
+and does not test cross-domain generalisation or multiple database scenarios.
 Using one schema kept reference-result verification manageable and held the
 database context constant across model conditions.
 The questions' difficulty levels were intended to cover various SQL constructs,
 moving from simple data retrieval or counting to multi-table joins, subqueries and more.
 
-Each benchmark record defines an executable question or turn, specifying a natural-language request, a golden
-SQL query and a result comparison contract. Ambiguous cases provide the query
+Each benchmark record defines an executable question or turn, specifying a
+natural-language request, a reference SQL query stored in the
+\texttt{gold\_sql} field and a result comparison contract.
+Ambiguous cases provide the query
 and contract for the resolved request, while safety cases specify the expected
-behaviour without golden SQL. The contract describes how to compare a candidate
+behaviour without a reference SQL query. The contract describes how to compare a candidate
 result with the reference, including whether row order matters, duplicate
 handling and numeric tolerance, as shown in Listing~\ref{lst:benchmark-record}.
 
-\begin{lstlisting}[caption={Example Chinook-Bench-200 record with a question, golden SQL query and result comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Example Chinook-Bench-200 record with a question, reference SQL query and result comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
 {
     "id": "CB200-E001",
     "difficulty": "easy",
@@ -141,6 +160,7 @@ handling and numeric tolerance, as shown in Listing~\ref{lst:benchmark-record}.
     }
 }
 \end{lstlisting}
+\end{minipage}
 
 Building on the work of \citet{dong2025practiq}, which examines ambiguous and
 unanswerable requests in conversational Text-to-SQL,
@@ -149,7 +169,7 @@ Each ambiguous case specifies a clarification target and one fixed reply.
 This scripted policy extends the benchmark beyond single-turn requests without
 requiring a human participant during collection.
 
-Reference results were generated by executing the golden SQL queries against the Chinook dataset
+Reference results were generated by executing the reference SQL queries against the Chinook dataset
 and saving the outputs in a structured JSON format for automated comparison with candidate results.
 There were 190 reference queries: 160 standalone, 20 resolved ambiguity and 10
 interactive-turn queries. Interactive reference placeholders were resolved from
@@ -180,7 +200,7 @@ managed services spanning across four specialized layers:
     using the selected model, Nova Lite or Claude Haiku 4.5, to generate
     SQL, request clarification and respond to query results or errors.
 
-    \item Query action layer: an AWS Lambda function that submitted
+    \item Query action layer: an AWS Lambda function \citep{awsLambdaDocs} that submitted
     generated SQL to Athena and returned results or execution errors
     to the agent.
 
@@ -205,14 +225,19 @@ runner, Node.js backend and offline evaluator ran locally.
 A TypeScript runner loaded the benchmark, submitted requests to a Node.js
 backend and saved the evidence for offline evaluation. The backend captured
 responses and traces in a SQLite database for inspection.
-An Angular chat interface supported manual interaction with the agent through
-the same backend; experimental runs bypassed the user interface (UI).
+An Angular chat interface was developed for demonstration and manual interaction
+with the agent through the same backend; experimental runs bypassed the user
+interface (UI). The UI was not used to collect or evaluate experimental data.
+It provided an illustrative and interactive way of presenting the
+pipeline's capabilities in a user-friendly form.
 The interface is illustrated in Figure~\ref{fig:chat-interface}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{../assets/chat-interface.png}
-    \caption{Angular interactive chat application (Source: Author, 2026).}
+    \caption{Angular interface showing a natural-language request, the agent's
+    response, the executed SQL and the recorded trace details
+    (Source: Author, 2026).}
     \label{fig:chat-interface}
 \end{figure}
 

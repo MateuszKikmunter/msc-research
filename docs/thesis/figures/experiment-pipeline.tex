@@ -77,14 +77,16 @@
   \fill[white] (-2.1,3.2) rectangle (18.1,-6.8);
 \end{scope}
 \node[font=\Large\bfseries] at (8,2.8) {System architecture and experimental flow};
+\path[draw=accent,line width=1pt,rounded corners=6pt]
+  (2.15,2.25) rectangle (17.85,-3.2);
 \foreach \x/\col/\title in {0/blue/Local application,4/green/Inference and orchestration,8/orange/Query action,12/purple/Query engine,16/olive/Data and metadata} {
   \path[draw=\col!65,fill=\col!3,rounded corners=5pt,line width=.7pt]
     (\x-1.65,1.9) rectangle (\x+1.65,-3.0);
   \node[text=\col,font=\small\bfseries,align=center,text width=3cm] at (\x,1.4) {\title};
 }
-\node[font=\scriptsize,text=blue] at (0,2.1) {LOCAL};
-\draw[draw=border,line width=.6pt] (2.35,2.05)--(17.65,2.05);
-\node[fill=white,font=\scriptsize,text=ink,inner sep=3pt] at (10,2.05) {AWS MANAGED SERVICES};
+\node[font=\footnotesize\bfseries,text=blue] at (0,2.1) {LOCAL};
+\node[fill=white,font=\footnotesize\bfseries,text=accent,inner xsep=5pt,inner ysep=2pt]
+  at (10,2.25) {AWS MANAGED SERVICES};
 \node (backend) at (0,.15) {\serviceicon{blue}{server}};
 \node (agent) at (4,.15) {\serviceicon{green}{agent}};
 \node (lambda) at (8,.15) {\serviceicon{orange}{function}};
