@@ -325,23 +325,18 @@ validation section.
 \label{sec:result-evaluation}
 
 SQL execution status and result correctness were evaluated separately.
-A query could execute correctly in Athena but return data that did not match
-the expected result.
-After each successful SQL attempt, the evaluator loaded the
-saved candidate result and the reference result for the corresponding question
-or interactive turn. 
+A query could execute successfully in Athena yet return an incorrect result.
+During offline evaluation, the evaluator loaded the saved candidate and
+reference results for each successfully executed SQL attempt, matching them
+to the corresponding question or interactive turn.
 Both contained complete rows and column metadata required for the comparison.
 
 Listings~\ref{lst:reference-result} and~\ref{lst:candidate-result} show saved
 result excerpts for CB200-E001, an easy question asking how many artists are
 in the catalogue.
-Both contain one column
-and one row with a count of 275, so the attempt was evaluated as correct.
-
-The excerpts include all column metadata and result rows, while unrelated
-metadata is omitted for clarity.
-Although the count is stored as a JSON string,
-it is compared as an integer based on the reference column type.
+Both results contain the artist count \texttt{"275"}, which the evaluator
+compared as an integer using the reference column's \texttt{bigint} type.
+The excerpts retain the complete column definitions and result rows.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{minipage}[t]{0.48\linewidth}
@@ -422,12 +417,10 @@ Remaining values & Exact string match. \\
 \label{tab:comparison-rules}
 \end{table}
 
-For unordered results, each reference row had to match a separate candidate
-row. For example, if a reference row appeared twice, the candidate also had to
-contain two matching rows.
-When numeric tolerance allowed a row to match more than one candidate, the
-evaluator reassigned earlier matches so
-that every reference row had a distinct match.
+Unordered results required a one-to-one match between reference and candidate
+rows, preserving duplicate counts. When numeric tolerance permitted multiple
+matches, the evaluator reassigned earlier pairings to determine whether a
+complete one-to-one matching existed.
 
 Each assessed SQL attempt received one of the outcomes in
 Table~\ref{tab:attempt-outcomes}.
