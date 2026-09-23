@@ -312,10 +312,165 @@ were retained in the evidence instead of being discarded. The resulting traces
 therefore describe observed adherence to the retry policy as well as whether
 execution ultimately succeeded.
 
-The safety cases received no reference-result score. All ten safety cases in each run were manually reviewed using the
+The safety cases received no reference-result score. 
+All ten safety cases in each run were manually reviewed using the
 case-specific target, response and attempted SQL.
 The 40 reviews supplied compliant, partially compliant or non-compliant judgments.
 They were kept separate from automatic no-query observations and
 from standalone result accuracy.
-The detailed manual assessment procedure will be described in the planned
+The detailed manual assessment procedure is described in the
 validation section.
+
+\subsection{Result correctness evaluation}
+\label{sec:result-evaluation}
+
+SQL execution status and result correctness were evaluated separately.
+A query could execute correctly in Athena but return data that did not match
+the expected result.
+After each successful SQL attempt, the evaluator loaded the
+saved candidate result and the reference result for the corresponding question
+or interactive turn. 
+Both contained complete rows and column metadata required for the comparison.
+
+Listings~\ref{lst:reference-result} and~\ref{lst:candidate-result} show saved
+result excerpts for CB200-E001, an easy question asking how many artists are
+in the catalogue.
+Both contain one column
+and one row with a count of 275, so the attempt was evaluated as correct.
+
+The excerpts include all column metadata and result rows, while unrelated
+metadata is omitted for clarity.
+Although the count is stored as a JSON string,
+it is compared as an integer based on the reference column type.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{minipage}[t]{0.48\linewidth}
+\begin{lstlisting}[caption={Reference result excerpt for CB200-E001 (Source: Author, 2026).},label={lst:reference-result},captionpos=b]
+{
+  "questionId": "CB200-E001",
+  "columns": [
+    {
+      "name": "artist_count",
+      "type": "bigint"
+    }
+  ],
+  "rows": [["275"]],
+  "rowCount": 1
+}
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\begin{lstlisting}[caption={Candidate result excerpt for CB200-E001, Haiku repetition 1 (Source: Author, 2026).},label={lst:candidate-result},captionpos=b]
+{
+  "questionId": "CB200-E001",
+  "interactionOrder": 1,
+  "attempt": 1,
+  "columns": [
+    {
+      "name": "artist_count",
+      "type": "bigint"
+    }
+  ],
+  "rows": [["275"]],
+  "rowCount": 1
+}
+\end{lstlisting}
+\end{minipage}
+\end{minipage}
+
+\citet{zhong2020semantic} evaluate SQL queries by comparing their results across
+generated database test suites.
+This differs from the evaluation process used in this study, where the
+comparison was based on the saved Chinook results and the rules defined in
+the benchmark contract, as illustrated in
+Listing~\ref{lst:benchmark-record}. Table~\ref{tab:comparison-rules}
+summarises how these rules were applied.
+Values were interpreted using the
+reference column types, so differences in numeric formatting did not by
+themselves cause a mismatch.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.23\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Aspect & \textbf{Comparison rule} \\
+\midrule
+Columns & Same number and positions as the reference. Aliases were ignored;
+extra columns were rejected. \\
+\addlinespace[0.6em]
+Rows & Same row count. Order mattered only when required by the contract. \\
+\addlinespace[0.6em]
+Duplicates & Repeated rows had to occur the same number of times. \\
+\addlinespace[0.6em]
+Integers & Exact numeric match. \\
+\addlinespace[0.6em]
+Decimals and floats & Absolute difference within the contract's numeric tolerance. \\
+\addlinespace[0.6em]
+Nulls & Null matched only null. \\
+\addlinespace[0.6em]
+Dates and timestamps & Compared as instants relative to Coordinated Universal
+Time (UTC) \citep{rfc3339}. The evaluator assumed UTC for values without a
+timezone. \\
+\addlinespace[0.6em]
+Remaining values & Exact string match. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Result comparison rules implemented for the benchmark
+(Source: Author, 2026).}
+\label{tab:comparison-rules}
+\end{table}
+
+For unordered results, each reference row had to match a separate candidate
+row. For example, if a reference row appeared twice, the candidate also had to
+contain two matching rows.
+When numeric tolerance allowed a row to match more than one candidate, the
+evaluator reassigned earlier matches so
+that every reference row had a distinct match.
+
+Each assessed SQL attempt received one of the outcomes in
+Table~\ref{tab:attempt-outcomes}.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.27\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Outcome & \textbf{Meaning} \\
+\midrule
+Correct & The SQL ran and its result matched the reference. \\
+\addlinespace[0.6em]
+Semantic error & The SQL ran, but its result failed the comparison rules,
+including wrong rows, columns or values. \\
+\addlinespace[0.6em]
+Execution error & The SQL attempt failed during execution. \\
+\addlinespace[0.6em]
+Evaluator uncertainty & The evaluator could not judge the attempt, for example
+because a result file or final execution status was missing. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Outcomes assigned to assessed SQL attempts (Source: Author, 2026).}
+\label{tab:attempt-outcomes}
+\end{table}
+
+Evaluator uncertainty was kept separate from observed model errors. 
+Here, semantic error means disagreement with the benchmark result on the Chinook data,
+within the scope defined in Section~\ref{sec:benchmark}.
+
+In their study of LLM self-debugging, \citet[Table~4(a)]{chen2024selfdebug}
+report SQL errors corrected by the model, including incorrect filters,
+joins, selected columns and aggregate functions.
+Similarly, these errors can cause a result mismatch in this study.
+The evaluator recorded the mismatch but did not automatically identify which
+part of the SQL caused it.
+
+The result comparison covered standalone questions, resolved ambiguity cases
+and individual interactive turns. If the agent skipped clarification on an
+ambiguous question, the evaluator did not compare its guessed result with the
+reference for the scripted reply because the agent had not received that reply.
+Safety cases were assessed through the separate manual review.
+For cases covered by result comparison, every recorded SQL attempt was assessed.
+These outcomes were then used to identify direct success, recovery and cases
+where a correct result was followed by an incorrect or failed attempt.
