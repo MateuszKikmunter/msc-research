@@ -460,10 +460,190 @@ The evaluator recorded the mismatch but did not automatically identify which
 part of the SQL caused it.
 
 The result comparison covered standalone questions, resolved ambiguity cases
-and individual interactive turns. If the agent skipped clarification on an
-ambiguous question, the evaluator did not compare its guessed result with the
-reference for the scripted reply because the agent had not received that reply.
+and individual interactive turns. 
+If the agent did not ask for clarification, 
+its result was not compared with the reference for 
+a scripted reply it had never received.
 Safety cases were assessed through the separate manual review.
 For cases covered by result comparison, every recorded SQL attempt was assessed.
 These outcomes were then used to identify direct success, recovery and cases
 where a correct result was followed by an incorrect or failed attempt.
+
+\subsection{Trajectory reconstruction and classification}
+\label{sec:trajectory-evaluation}
+
+In agent evaluation, it is possible to examine what happens between the initial request and the final outcome. 
+Several studies support examining the recorded action sequence as part of the evaluation. 
+For example, in AgentBoard, \citet{ma2024agentboard} measure intermediate progress alongside task success. 
+TRAJECT-Bench examines tool selection, arguments, and call order alongside final accuracy \citep{he2026trajectbench}. 
+This study, however, focused on SQL attempts and database feedback.
+
+The recorded SQL attempts and database feedback were described as trajectories within an evaluation unit. 
+This approach captured and measured how the agent reached its final result, 
+including any failed attempts or later changes in reaction to the encountered errors. 
+
+The offline evaluator grouped interactions by Bedrock Session ID and ordered them by interaction number. 
+A standalone question with any potential fallback interaction formed one evaluation unit. 
+A resolved ambiguity case included the clarification exchange and its continuation. 
+Each authored turn of an interactive episode was assessed separately, 
+while retaining the shared session context used during execution. 
+Safety cases followed a separate manual review process. 
+Figure~\ref{fig:evaluation-flow} shows how these inputs were processed.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/evaluation-flow.pdf}
+\caption{Offline evaluation sequence. One assessment path was selected per case
+after the clarification check (Source: Author, 2026).}
+\label{fig:evaluation-flow}
+\end{figure}
+
+All trace events within each interaction were ordered by their saved sequence
+numbers. SQL invocations were matched to later observations using their
+shared trace identifier. Duplicate invocation records carrying the same
+identifier were counted as a single attempt.
+When available, the Athena execution identifier linked 
+a successful attempt to its complete saved result. 
+These links allowed the evaluator to connect
+each attempt with its SQL query, 
+database feedback and result correctness.
+
+Listing~\ref{lst:trace-example} illustrates these links using CB200-E001
+from Nova Lite's first repetition. For readability, the listing regroups
+selected fields in YAML, a text format for structured data
+\citep{yamlSpec122}.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  basicstyle=\footnotesize\ttfamily,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{black!25},
+  framerule=0.4pt,
+  framesep=8pt,
+  xleftmargin=9pt,
+  xrightmargin=9pt,
+  aboveskip=0.7\baselineskip,
+  belowcaptionskip=0.5\baselineskip,
+  morekeywords={question,traceEvents,candidateResult,offlineEvaluation},
+  keywordstyle=\bfseries,
+  caption={Simplified trace and evaluation summary for CB200-E001. Identifiers are replaced with short labels and unrelated fields are omitted (Source: Author, 2026).},
+  label={lst:trace-example},
+  captionpos=b
+]
+question: "How many artists are in the catalogue?"
+
+traceEvents:
+  - sequenceNumber: 4
+    eventType: INVOCATION
+    traceId: T1
+    query: "SELECT COUNT(*) AS artist_count FROM artists"
+
+  - sequenceNumber: 5
+    eventType: OBSERVATION
+    traceId: T1
+    queryExecutionId: Q1
+    resultPreview: {artist_count: "275"}
+
+candidateResult:
+  attempt: 1
+  queryExecutionId: Q1
+  file: "candidate-results/CB200-E001-T01-A01.json"
+
+offlineEvaluation:
+  outcome: correct
+  trajectoryClass: DIRECT_SUCCESS
+\end{lstlisting}
+\end{minipage}
+
+The shared trace identifier linked the SQL invocation to its database
+observation. The Athena execution identifier linked that observation to
+the complete saved result. The evaluator compared the saved result with
+the reference and classified the single attempt as correct, producing
+a direct-success trajectory.
+
+The first and terminal outcomes were taken from the first and last recorded
+SQL attempts in each episode, or in each turn for interactive cases.
+The terminal outcome reflected the last attempt, even if an earlier attempt
+had been correct. For example, if a correct result was followed by an
+attempt that failed to execute, the terminal outcome was recorded as an
+execution error. The earlier correct result was retained as evidence
+of regression.
+
+Using the trajectory classes defined in Table~\ref{tab:trajectory-classes}, 
+the evaluator checked that every SQL attempt could be assessed and that
+the trace showed what happened after each execution error.
+Missing or unclear evidence resulted in a system error label,
+even if the final result was correct.
+
+A separate rule applied to explicit failure events in the Bedrock trace.
+These stopped evaluation of the whole run so that the saved evidence
+could be checked.
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.32\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Trajectory class & \textbf{Rule} \\
+\midrule
+Direct success & First and terminal attempts were correct. \\
+\addlinespace[0.6em]
+Execution-error recovery & First attempt failed to execute; terminal attempt was correct. \\
+\addlinespace[0.6em]
+Semantic-revision success & First attempt ran but returned an incorrect result;
+terminal attempt was correct. \\
+\addlinespace[0.6em]
+Executed semantic failure & Terminal attempt ran but returned an incorrect result. \\
+\addlinespace[0.6em]
+Unrecovered execution failure & Terminal attempt failed to execute. \\
+\addlinespace[0.6em]
+No SQL & No SQL attempt was recorded for a unit requiring SQL evaluation. \\
+\addlinespace[0.6em]
+System error & Missing or uncertain evidence prevented reliable classification. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Trajectory classification rules applied after attempt evaluation
+(Source: Author, 2026).}
+\label{tab:trajectory-classes}
+\end{table}
+
+The classes summarised the first and terminal outcomes. The evaluator also
+recorded:
+
+\begin{itemize}
+    \item whether an SQL attempt failed to execute (\texttt{executionErrorObserved});
+
+    \item whether there was more than one SQL attempt (\texttt{retryAttempted});
+
+    \item whether the agent retried unchanged SQL after an execution error;
+
+    \item whether another SQL attempt followed a correct result.
+\end{itemize}
+
+The final two behaviours were combined in the \texttt{redundantActionObserved}
+flag. The error-transition records retained the detail of retries after
+execution errors.
+
+Additionally, the evaluator recorded whether the prompt's one-retry instruction
+was exceeded.
+If more than two attempts occurred in one interaction, 
+then \texttt{retryPolicyExceeded} in trajectory facts was set to \texttt{true}.
+Also a regression was recorded when an earlier attempt was correct but the terminal attempt had a
+semantic or execution error.
+
+For example, a correct first attempt followed by another correct attempt
+received the direct-success class, but also a redundant-action flag.
+It was not considered a clean direct success 
+because clean direct success required exactly one SQL attempt and no unnecessary clarification. 
+Similarly, a failed first execution followed by a
+correct result received the execution-error-recovery class. 
+
+Clarifications were handled and recorded separately from the SQL trajectory class. 
+As a result, a case could have both an appropriate clarification and direct SQL success.
+The automated check identified whether a clarification request occurred before
+SQL; it did not judge the meaning of the clarification wording. 
+Ambiguity cases without the required clarification and scripted reply retained their
+clarification assessment but received no SQL trajectory class.
+
+Recovery described an observed change from an unsuccessful first attempt to a
+correct terminal result, without establishing why the agent changed its query.
