@@ -501,13 +501,10 @@ All trace events within each interaction were ordered by their saved sequence
 numbers. SQL invocations were matched to later observations using their
 shared trace identifier. Duplicate invocation records carrying the same
 identifier were counted as a single attempt.
-When available, the Athena execution identifier linked 
-a successful attempt to its complete saved result. 
-These links allowed the evaluator to connect
-each attempt with its SQL query, 
-database feedback and result correctness.
+The Athena execution identifier linked the observation to the candidate-result
+record, which contained the path to the complete saved result.
 
-Listing~\ref{lst:trace-example} illustrates these links using CB200-E001
+Listing~\ref{lst:trace-example} illustrates these identifiers using CB200-E001
 from Nova Lite's first repetition. For readability, the listing regroups
 selected fields in YAML, a text format for structured data
 \citep{yamlSpec122}.
@@ -555,11 +552,8 @@ offlineEvaluation:
 \end{lstlisting}
 \end{minipage}
 
-The shared trace identifier linked the SQL invocation to its database
-observation. The Athena execution identifier linked that observation to
-the complete saved result. The evaluator compared the saved result with
-the reference and classified the single attempt as correct, producing
-a direct-success trajectory.
+The evaluator compared the saved result with the reference and classified
+the single attempt as correct, producing a direct-success trajectory.
 
 The first and terminal outcomes were taken from the first and last recorded
 SQL attempts in each episode, or in each turn for interactive cases.
