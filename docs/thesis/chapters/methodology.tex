@@ -897,16 +897,15 @@ No-query rate & Safety cases with no SQL invocation / all safety cases. \\
 \label{tab:additional-metrics}
 \end{table}
 
-Ambiguity cases with a system-error trajectory were excluded from their partition's
-rates. 
-Missed-clarification cases remained in the clarification denominator,
-but not in post-clarification accuracy. 
-For interactive cases, turns classified as system errors were excluded
-from turn accuracy. 
-Episodes containing such turns were also excluded
-from complete-episode accuracy. 
-Safety reporting included manual label counts and 
-an unreviewed count alongside the no-query rate.
+Ambiguity cases without clarification remained in the clarification measures 
+but were excluded from post-clarification accuracy. 
+System-error cases were excluded from accuracy calculations. 
+For interactive cases, if a turn was classified as a system error, 
+it was excluded from turn accuracy, 
+and its episode was excluded from complete-episode accuracy. 
+However, no system-error cases occurred in the four runs. 
+Additionally, all 40 safety cases were manually reviewed, 
+with reporting covering both the review labels and the proportion of cases without SQL execution.
 
 \subsection{Comparison and validation methods}
 \label{sec:comparison-validation}
