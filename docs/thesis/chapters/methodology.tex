@@ -84,8 +84,9 @@ Figure~\ref{fig:chinook-schema}.
     \label{fig:chinook-schema}
 \end{figure}
 
-Chinook-Bench-200 was developed for this study and stored as a versioned JSON
-specification for automated experimental runs.
+Chinook-Bench-200 was developed for this study and stored as a versioned
+JavaScript Object Notation (JSON) specification \citep{rfc8259}
+for automated experimental runs.
 It comprises 200 primary question turns grouped into 195 cases, as shown in Table~\ref{tab:benchmark}.
 The reference SQL queries were initially written manually by the Author and
 subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
@@ -306,11 +307,11 @@ Interactive cases followed their two authored turns, and safety cases received
 no continuation.
 
 Runner continuations were distinct from SQL retries within an agent response.
-The agent instructions permitted one correction after a query error, but this
-was a prompt instruction rather than a hard execution cap. Additional attempts
-were retained in the evidence instead of being discarded. The resulting traces
-therefore describe observed adherence to the retry policy as well as whether
-execution ultimately succeeded.
+The agent instructions permitted one SQL retry after a query error within each
+interaction. This was a prompt instruction rather than a hard execution cap.
+Additional attempts were retained and evaluated. More than two SQL attempts in
+one interaction set the evaluator's \texttt{retryPolicyExceeded} flag to
+\texttt{true}, regardless of whether the final result was correct.
 
 The safety cases received no reference-result score. 
 All ten safety cases in each run were manually reviewed using the
@@ -318,8 +319,8 @@ case-specific target, response and attempted SQL.
 The 40 reviews supplied compliant, partially compliant or non-compliant judgments.
 They were kept separate from automatic no-query observations and
 from standalone result accuracy.
-The detailed manual assessment procedure is described in the
-validation section.
+The detailed manual assessment procedure is described in
+Section~\ref{sec:comparison-validation}.
 
 \subsection{Result correctness evaluation}
 \label{sec:result-evaluation}
@@ -618,19 +619,13 @@ The final two behaviours were combined in the \texttt{redundantActionObserved}
 flag. The error-transition records retained the detail of retries after
 execution errors.
 
-Additionally, the evaluator recorded whether the prompt's one-retry instruction
-was exceeded.
-If more than two attempts occurred in one interaction, 
-then \texttt{retryPolicyExceeded} in trajectory facts was set to \texttt{true}.
-Also a regression was recorded when an earlier attempt was correct but the terminal attempt had a
-semantic or execution error.
+Trajectory facts also included the retry-policy flag defined in
+Section~\ref{sec:protocol} and a flag for regression after a correct result.
 
 For example, a correct first attempt followed by another correct attempt
 received the direct-success class, but also a redundant-action flag.
 It was not considered a clean direct success 
-because clean direct success required exactly one SQL attempt and no unnecessary clarification. 
-Similarly, a failed first execution followed by a
-correct result received the execution-error-recovery class. 
+because clean direct success required exactly one SQL attempt and no unnecessary clarification.
 
 Clarifications were handled and recorded separately from the SQL trajectory class. 
 As a result, a case could have both an appropriate clarification and direct SQL success.
@@ -639,5 +634,432 @@ SQL; it did not judge the meaning of the clarification wording.
 Ambiguity cases without the required clarification and scripted reply retained their
 clarification assessment but received no SQL trajectory class.
 
-Recovery described an observed change from an unsuccessful first attempt to a
-correct terminal result, without establishing why the agent changed its query.
+The recovery classes described observed outcomes, without establishing why
+the agent changed its query.
+
+\subsection{Responses to execution errors}
+\label{sec:error-responses}
+
+Each evaluated SQL trajectory received a class describing its overall outcome.
+Error-transition records provided more detail about what followed each
+execution error. 
+The rules below were defined for this study and applied to the
+saved traces.
+
+If an SQL attempt failed and was matched to an error observation,
+the evaluator looked for the next SQL invocation within the same interaction. 
+If one was present, it was recorded as a retry and linked to its own observation
+when a match was available.
+Even when the interactions were part of the same episode,
+the evaluator did not extend the comparison into a later interaction.
+As a result, one interaction could contain several error
+transitions, each describing a single error and the next SQL attempt.
+
+\paragraph{SQL changes and repeated errors.}
+The evaluator compared the SQL text of the failed attempt with the next
+attempt. A simple string comparison, ignoring leading and trailing
+whitespace, established whether the command text had changed.
+This distinguished unchanged retries from revised SQL, but did not
+establish whether the changes addressed the error.
+
+Repeated errors were identified using a normalised error signature 
+(detailed in Table~\ref{tab:error-signatures}) 
+rather than the full Athena error message.
+The full message, nevertheless, was also saved for inspection.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Error category} & \textbf{Information retained} \\
+\midrule
+\texttt{COLUMN\_NOT\_FOUND} & Category and column name. \\
+\addlinespace[0.4em]
+\texttt{TABLE\_NOT\_FOUND} & Category and table name. \\
+\addlinespace[0.4em]
+\texttt{FUNCTION\_NOT\_FOUND} & Category and function name. \\
+\addlinespace[0.4em]
+\texttt{AMBIGUOUS\_NAME} & Category and ambiguous column name. \\
+\addlinespace[0.4em]
+\texttt{TYPE\_MISMATCH} & Category only. \\
+\addlinespace[0.4em]
+\texttt{EXPRESSION\_NOT\_AGGREGATE} & Category only. \\
+\addlinespace[0.4em]
+\texttt{NESTED\_AGGREGATION} & Category only. \\
+\addlinespace[0.4em]
+Other errors & \texttt{OTHER:} followed by the unrecognised prefix;
+\texttt{OTHER:UNKNOWN} if no prefix separator was found. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Error categories and information retained in normalised signatures
+(Source: Author, 2026).}
+\label{tab:error-signatures}
+\end{table}
+
+For example, \texttt{COLUMN\_NOT\_FOUND:}\allowbreak\texttt{invoice\_items.album\_id}
+retained the category and column name. 
+The signature excluded the error's location in the SQL text, so the same
+missing column was recognised even when reported at a different position.
+All identifiers were converted to lowercase,
+and if an expected identifier could not
+be extracted, it was recorded as \texttt{unknown}.
+
+\paragraph{What happened after an error.}
+Table~\ref{tab:error-responses} summarises what happened after each
+execution error.
+All changes to the SQL text were recorded separately,
+and a changed query could still produce the same error.
+Therefore, a change in the SQL text did not necessarily indicate
+that the error had been corrected.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.30\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Response & \textbf{Rule} \\
+\midrule
+No retry & No later SQL invocation was recorded in the interaction. \\
+\addlinespace[0.6em]
+Retry executed & The retry had a matched observation with no execution error. Result correctness was checked separately. \\
+\addlinespace[0.6em]
+Same error repeated & The retry failed with the same normalised error signature. \\
+\addlinespace[0.6em]
+Different error & The retry failed with a different normalised error signature. \\
+\addlinespace[0.6em]
+Uncertain transition & A retry was recorded, but its execution observation could not be matched. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Responses to execution errors recorded by the evaluator (Source: Author, 2026).}
+\label{tab:error-responses}
+\end{table}
+
+No retry was an observed outcome and did not indicate missing evidence.
+Uncertain transitions
+were handled under the evidence checks in Section~\ref{sec:trajectory-evaluation}.
+
+Two boolean flags recorded whether the retry's observation
+showed a different error or whether the previous error had stopped appearing:
+
+\begin{itemize}
+    \item \texttt{previousErrorResolved} was true if the previous error
+    signature did not recur in the retry's observation;
+
+    \item \texttt{newErrorIntroduced} was true if a different error
+    signature appeared in the retry's observation.
+\end{itemize}
+
+These fields described the sequence of observed errors and did not mean
+that the original fault had been fixed or that the SQL change had caused
+a new fault.
+
+Listing~\ref{lst:error-transition-example} shows this pattern in a saved
+error transition from Nova Lite's first repetition. 
+Selected fields from the
+evaluation JSON are presented in YAML, following the format used in
+Listing~\ref{lst:trace-example}.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  basicstyle=\footnotesize\ttfamily,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{black!25},
+  framerule=0.4pt,
+  framesep=8pt,
+  xleftmargin=9pt,
+  xrightmargin=9pt,
+  aboveskip=0.7\baselineskip,
+  belowcaptionskip=0.5\baselineskip,
+  caption={Selected error-transition fields for CB200-H038, Nova Lite, repetition 1, interaction 1 (Source: Author, 2026).},
+  label={lst:error-transition-example},
+  captionpos=b
+]
+precedingAttempt: 1
+normalizedError: "FUNCTION_NOT_FOUND:strftime"
+nextAttempt: 2
+retryProduced: true
+sqlChanged: true
+nextExecutionStatus: "failed"
+nextNormalizedError: "COLUMN_NOT_FOUND:month"
+sameErrorRepeated: false
+previousErrorResolved: true
+newErrorIntroduced: true
+\end{lstlisting}
+\end{minipage}
+
+The first attempt failed because the function \texttt{strftime} was not
+registered. 
+In the second attempt, the SQL was changed, but execution failed because the column
+\texttt{month} could not be resolved. 
+The retry produced a different error signature, so both flags were true. 
+The retry still failed to execute, and this
+transition did not show a successful recovery.
+
+Following approaches like BIRD-CRITIC \citep{li2025swesql}, 
+a successfully executed retry was only considered successful 
+if its saved result satisfied the comparison contract.
+Recovery was assessed over the trajectory using the rules in
+Table~\ref{tab:trajectory-classes}.
+
+\subsection{Evaluation metrics}
+\label{sec:metrics}
+
+The evaluation reported measures of final correctness, direct success,
+recovery and responses to errors. 
+These metrics formed a profile of the agent's behaviour rather than a single weighted score. 
+Their definitions are summarised in Table~\ref{tab:main-metrics} and
+the measured values are presented in Chapter~4.
+
+For standalone questions, let $N$ be the number of cases included in scored
+rates, $F$ the number with a correct terminal result, and $C$ the number of clean
+direct successes. Let $R$ count cases in either recovery class in
+Table~\ref{tab:trajectory-classes}, and $I$ count cases whose first attempt had
+an execution or semantic error. Finally, $E$ counts cases containing at least
+one execution error, and $E_F$ counts those that ended correctly.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.34\textwidth}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Measure} & \textbf{Formula} & \textbf{Interpretation} \\
+\midrule
+Final Success Rate (FSR) & $F/N$ & Share of cases ending with a correct result. \\
+\addlinespace[0.5em]
+Clean Direct Success Rate (CDSR) & $C/N$ & Share succeeding with one SQL attempt, no redundant action and no unnecessary clarification. \\
+\addlinespace[0.5em]
+Final-to-Direct Gap (FDG) & $(F-C)/N$ & Final successes that did not meet the clean-direct rule. \\
+\addlinespace[0.5em]
+Recovered Success Contribution (RSC) & $R/F$ & Share of final successes reached through recovery. \\
+\addlinespace[0.5em]
+Recovery Rate (RR) & $R/I$ & Share of initially unsuccessful cases that recovered. \\
+\addlinespace[0.5em]
+Observation-conditioned Recovery Rate & $E_F/E$ & Share of cases containing an execution error that ended correctly. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Main standalone measures and their denominators (Source: Author, 2026).}
+\label{tab:main-metrics}
+\end{table}
+
+FDG was expressed in percentage points and did not represent recovery alone.
+For example, a correct result could also follow an unnecessary SQL attempt
+or clarification and would contribute to that gap.
+
+RR included cases whose first attempt had an execution or semantic error.
+Observation-conditioned recovery, on the other hand, included cases with an execution error
+at any point in the trajectory.
+
+System-error cases were excluded from scored standalone rates but retained in
+trajectory-class counts. No-SQL cases remained in $N$ as unsuccessful cases,
+but did not enter $I$.
+The same exclusion rule applied to each standalone difficulty group,
+for which FSR, CDSR, FDG, class counts and the median SQL-attempt count were reported.
+
+For each run, the evaluator used scored standalone trajectories to count how many error transitions fell into
+each category in Table~\ref{tab:error-responses}.
+A category's share used the total
+number of included transitions as its denominator. 
+One question could contribute several transitions, so these counts
+measured responses to errors rather than the number of failed questions.
+
+The remaining benchmark partitions used their own denominators, as shown in
+Table~\ref{tab:additional-metrics}. Their rates were not pooled with standalone
+accuracy.
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Measure} & \textbf{Numerator / denominator} \\
+\midrule
+Unnecessary clarification & Standalone cases requesting clarification before SQL / scored standalone cases. \\
+\addlinespace[0.5em]
+Clarification detection & Ambiguity cases requesting clarification before SQL / included ambiguity cases. \\
+\addlinespace[0.5em]
+Missed clarification & Ambiguity cases without clarification before SQL / included ambiguity cases. \\
+\addlinespace[0.5em]
+Post-clarification accuracy & Cases ending correctly after the scripted reply / included cases receiving that reply. \\
+\addlinespace[0.5em]
+Interactive turn accuracy & Turns ending correctly / turns without a system-error classification. \\
+\addlinespace[0.5em]
+Complete-episode accuracy & Interactive episodes with both turns correct / episodes with no system-error turn. \\
+\addlinespace[0.5em]
+No-query rate & Safety cases with no SQL invocation / all safety cases. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Additional measures by benchmark partition (Source: Author, 2026).}
+\label{tab:additional-metrics}
+\end{table}
+
+Ambiguity cases with a system-error trajectory were excluded from their partition's
+rates. 
+Missed-clarification cases remained in the clarification denominator,
+but not in post-clarification accuracy. 
+For interactive cases, turns classified as system errors were excluded
+from turn accuracy. 
+Episodes containing such turns were also excluded
+from complete-episode accuracy. 
+Safety reporting included manual label counts and 
+an unreviewed count alongside the no-query rate.
+
+\subsection{Comparison and validation methods}
+\label{sec:comparison-validation}
+
+A separate Python analysis script used the TypeScript evaluator's saved case-level
+results to calculate cross-model comparisons and repetition stability, perform
+an exploratory sensitivity check, and check aggregate counts against the
+per-run summaries.
+
+\paragraph{Comparisons on the same questions.}
+Results for each standalone question were matched by question identifier within each repetition.
+Each matched pair of results fell into one of four groups: both models correct, only Nova correct,
+only Haiku correct, or neither correct. 
+The accuracy difference (expressed in percentage points) was calculated
+as Haiku's FSR minus Nova's FSR. 
+
+\begin{samepage}
+Conditional Trajectory Divergence (CTD) measured how often the models received
+different trajectory classes despite having the same terminal-outcome category:
+\[
+\mathrm{CTD} =
+\frac{\text{pairs with equal terminal categories but different classes}}
+     {\text{pairs with equal terminal categories}}.
+\]
+\end{samepage}
+
+For example, a case where Nova answered correctly immediately, 
+but Haiku answered correctly only after an execution error, would be included in CTD. 
+Their trajectory classes differed:
+direct success for Nova and execution-error recovery for Haiku. 
+If 10 pairs
+had matching final outcomes and 2 of those had different trajectory classes,
+CTD would be $2/10 = 20\%$. Table~\ref{tab:ctd-inclusion} illustrates which pairs were included.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}XXl@{}}
+\toprule
+\textbf{Nova's final outcome} & \textbf{Haiku's final outcome} & \textbf{Included in CTD?} \\
+\midrule
+Correct result & Correct result & Yes \\
+SQL ran, but result was wrong & SQL ran, but result was wrong & Yes \\
+SQL failed to execute & SQL ran, but result was wrong & No \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Examples of final-outcome pairs included in or excluded from the CTD denominator (Source: Author, 2026).}
+\label{tab:ctd-inclusion}
+\end{table}
+
+For each model, repetition stability was calculated in two ways.
+It measured how consistently a model performed when it answered the same questions in two separate runs.
+Correctness agreement divided the number of questions retaining the same correct/not-correct
+status by the number compared. 
+Class agreement used the same calculation for trajectory classes. 
+For example, if Nova answered 10 questions twice and 9 of them kept the same correct/incorrect status, the correctness agreement would be $9/10 = 90\%$.
+Similarly, if 8 of those 10 questions retained the same trajectory class, the class agreement would be $8/10 = 80\%$.
+
+\paragraph{Sensitivity check.}
+A sensitivity check, added after inspecting the results, examined whether reference-answer conventions
+affected the findings. 
+Six questions (CB200-M028, CB200-M029, CB200-H038, CB200-H011, CB200-H041, and CB200-H028) 
+involving result representation,
+unspecified tie-breaking or empty playlists were excluded by the script from every run,
+including cases scored as correct.
+Success rates, the final-to-direct gap, recovery counts and correctness agreement
+were then recalculated for the remaining 154 questions, using their original scores.
+
+\paragraph{Checks on the evaluation.}
+The TypeScript evaluator had automated unit tests for result comparison, trace
+matching, trajectory classification, error transitions and metric denominators.
+Result-comparison tests covered row ordering, duplicate counts, overlapping
+numeric tolerances, nulls and reference-type conversion. These tests checked
+the evaluator's behaviour against expected outcomes for constructed cases.
+
+The Python analysis script used built-in consistency checks. 
+It recounted outcomes from individual evaluations and
+checked that the totals matched the TypeScript evaluator's saved summaries.
+It also checked that safety labels matched the author's saved manual reviews
+and verified selected saved query results. 
+These checks supported consistency between the saved evidence and reported figures.
+
+\paragraph{Manual safety and trajectory reviews.}
+The author reviewed the saved responses and attempted SQL for each safety and out-of-domain case.
+Labels and notes were stored separately and merged during evaluation. 
+The available labels were compliant, partially compliant,
+non-compliant and uncertain.
+The recorded decisions considered both actions and explanations. 
+For example, a refusal with an incorrect explanation could be partially compliant, while
+executing a read-only query could breach a case requiring no SQL. 
+No-query behaviour alone was therefore insufficient to determine compliance.
+
+Listing~\ref{lst:manual-safety-review} shows a saved manual review for Nova Lite's
+first repetition. CB200-S002 asked the agent to create a table of the ten
+highest-spending customers. 
+The required behaviour was to refuse without executing SQL. 
+Although the agent did not create the table, it executed a
+\texttt{SELECT} query, so it was labelled as non-compliant.
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily,breaklines=true,caption={Saved manual safety review for CB200-S002, Nova Lite, repetition 1 (Source: Author, 2026).},label={lst:manual-safety-review},captionpos=b]
+{
+    "questionId": "CB200-S002",
+    "manualLabel": "non_compliant",
+    "manualNotes": "The write request was not performed, but the agent executed a SELECT action instead and returned data."
+}
+\end{lstlisting}
+
+This safety assessment was separate from the additional targeted manual trajectory review.
+Ten cases were selected to cover various scenarios and different agent behaviours.
+The review covered six standalone cases, three ambiguity cases and one two-turn interactive
+case containing two separately classified turns.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\textwidth}{@{}l l c >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Question} & \textbf{Model} & \textbf{Rep.} & \textbf{Confirmed outcome} \\
+\midrule
+CB200-E002 & Nova Lite & 1 & Direct success \\
+\addlinespace[0.4em]
+CB200-E030 & Haiku 4.5 & 1 & Execution-error recovery \\
+\addlinespace[0.4em]
+CB200-H049 & Nova Lite & 1 & Unrecovered execution failure \\
+\addlinespace[0.4em]
+CB200-H038 & Haiku 4.5 & 1 & Executed semantic failure \\
+\addlinespace[0.4em]
+CB200-M015 & Nova Lite & 2 & Executed semantic failure \\
+\addlinespace[0.4em]
+CB200-A009 & Haiku 4.5 & 2 & Direct success after clarification \\
+\addlinespace[0.4em]
+CB200-A008 & Nova Lite & 2 & Execution-error recovery after clarification \\
+\addlinespace[0.4em]
+CB200-A014 & Nova Lite & 2 & Unrecovered execution failure after clarification \\
+\addlinespace[0.4em]
+CB200-C002 & Haiku 4.5 & 2 & Direct success on both turns \\
+\addlinespace[0.4em]
+CB200-H026 & Nova Lite & 2 & Unrecovered execution failure; retry policy exceeded \\
+\addlinespace[0.4em]
+\bottomrule
+\end{tabularx}
+}
+\caption{Targeted manual review completed by the author. The reviewer agreed with the recorded outcomes in all ten cases (Source: Author, 2026).}
+\label{tab:manual-trajectory-review}
+\end{table}
+
+The check confirmed the selected classifications under the existing comparison
+contract. In particular, the semantic-failure
+label for CB200-H038 reflected a difference in month representation.
+
+The targeted review, automated tests and reporting checks formed the validation
+approach used in this study. The cases were deliberately selected and reviewed
+by the author, so the observed agreement does not estimate overall evaluator
+accuracy or independent second-reviewer agreement. The findings and remaining evaluation
+limits are discussed in Chapter~4.
