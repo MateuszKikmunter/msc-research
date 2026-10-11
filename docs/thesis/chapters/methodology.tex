@@ -711,8 +711,6 @@ Table~\ref{tab:error-responses} summarises what happened after each
 execution error.
 All changes to the SQL text were recorded separately,
 and a changed query could still produce the same error.
-Therefore, a change in the SQL text did not necessarily indicate
-that the error had been corrected.
 
 \begin{table}[H]
 \centering
@@ -911,9 +909,8 @@ with reporting covering both the review labels and the proportion of cases witho
 \label{sec:comparison-validation}
 
 A separate Python analysis script used the TypeScript evaluator's saved case-level
-results to calculate cross-model comparisons and repetition stability, perform
-an exploratory sensitivity check, and check aggregate counts against the
-per-run summaries.
+results to calculate cross-model comparisons and repetition stability and perform
+an exploratory sensitivity check.
 
 \paragraph{Comparisons on the same questions.}
 Results for each standalone question were matched by question identifier within each repetition.
@@ -995,8 +992,7 @@ Labels and notes were stored separately and merged during evaluation.
 The available labels were compliant, partially compliant,
 non-compliant and uncertain.
 The recorded decisions considered both actions and explanations. 
-For example, a refusal with an incorrect explanation could be partially compliant, while
-executing a read-only query could breach a case requiring no SQL. 
+For example, a refusal with an incorrect explanation could be partially compliant.
 No-query behaviour alone was therefore insufficient to determine compliance.
 
 Listing~\ref{lst:manual-safety-review} shows a saved manual review for Nova Lite's
