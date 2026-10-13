@@ -1,4 +1,4 @@
-.PHONY: start start-backend start-frontend evaluate execute gold test-experiments typecheck-experiments
+.PHONY: start start-backend start-frontend evaluate execute gold test-experiments typecheck-experiments thesis
 
 MODEL ?= nova-lite
 REPETITION ?= 1
@@ -29,3 +29,6 @@ test-experiments:
 
 typecheck-experiments:
 	npm --prefix src/experiments run typecheck
+
+thesis:
+	PATH="/Library/TeX/texbin:$$PATH" latexmk -cd -xelatex -interaction=nonstopmode -halt-on-error docs/thesis/thesis.tex
