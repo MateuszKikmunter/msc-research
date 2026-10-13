@@ -27,8 +27,9 @@ The repeated runs were used to compare results and trajectories, including
 whether failures occurred on the same questions or shifted between runs.
 They were not used to establish statistical significance.
 
-For every execution, both final answer and step-by-step SQL attempts were examined
-to track whether the model succeeded immediately, failed completely, or managed to recover from an execution error.
+Standalone questions formed the main quantitative analysis. SQL trajectories
+were also assessed for resolved ambiguity cases and individual interactive
+turns, while safety cases were examined through recorded actions and manual review.
 
 The evaluation of intermediate behaviour draws on \citet{ma2024agentboard}
 and their AgentBoard framework, which assesses agent progress together with final success.
@@ -707,33 +708,19 @@ and if an expected identifier could not
 be extracted, it was recorded as \texttt{unknown}.
 
 \paragraph{What happened after an error.}
-Table~\ref{tab:error-responses} summarises what happened after each
-execution error.
+Figure~\ref{fig:error-responses} shows how the evaluator classified the response
+to each SQL attempt with a matched execution-error observation.
 All changes to the SQL text were recorded separately,
 and a changed query could still produce the same error.
 
-\begin{table}[H]
+\begin{figure}[H]
 \centering
-{\small
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash\bfseries}p{0.30\textwidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-Response & \textbf{Rule} \\
-\midrule
-No retry & No later SQL invocation was recorded in the interaction. \\
-\addlinespace[0.6em]
-Retry executed & The retry had a matched observation with no execution error. Result correctness was checked separately. \\
-\addlinespace[0.6em]
-Same error repeated & The retry failed with the same normalised error signature. \\
-\addlinespace[0.6em]
-Different error & The retry failed with a different normalised error signature. \\
-\addlinespace[0.6em]
-Uncertain transition & A retry was recorded, but its execution observation could not be matched. \\
-\bottomrule
-\end{tabularx}
-}
-\caption{Responses to execution errors recorded by the evaluator (Source: Author, 2026).}
-\label{tab:error-responses}
-\end{table}
+\includegraphics[width=\textwidth]{figures/error-responses.pdf}
+\caption{Decision rules for classifying responses to execution errors.
+The retry is the next SQL invocation within the same interaction
+(Source: Author, 2026).}
+\label{fig:error-responses}
+\end{figure}
 
 No retry was an observed outcome and did not indicate missing evidence.
 Uncertain transitions
@@ -859,7 +846,7 @@ The same exclusion rule applied to each standalone difficulty group,
 for which FSR, CDSR, FDG, class counts and the median SQL-attempt count were reported.
 
 For each run, the evaluator used scored standalone trajectories to count how many error transitions fell into
-each category in Table~\ref{tab:error-responses}.
+each category in Figure~\ref{fig:error-responses}.
 A category's share used the total
 number of included transitions as its denominator. 
 One question could contribute several transitions, so these counts
@@ -935,24 +922,12 @@ Their trajectory classes differed:
 direct success for Nova and execution-error recovery for Haiku. 
 If 10 pairs
 had matching final outcomes and 2 of those had different trajectory classes,
-CTD would be $2/10 = 20\%$. Table~\ref{tab:ctd-inclusion} illustrates which pairs were included.
+CTD would be $2/10 = 20\%$.
 
-\begin{table}[H]
-\centering
-{\small
-\begin{tabularx}{\textwidth}{@{}XXl@{}}
-\toprule
-\textbf{Nova's final outcome} & \textbf{Haiku's final outcome} & \textbf{Included in CTD?} \\
-\midrule
-Correct result & Correct result & Yes \\
-SQL ran, but result was wrong & SQL ran, but result was wrong & Yes \\
-SQL failed to execute & SQL ran, but result was wrong & No \\
-\bottomrule
-\end{tabularx}
-}
-\caption{Examples of final-outcome pairs included in or excluded from the CTD denominator (Source: Author, 2026).}
-\label{tab:ctd-inclusion}
-\end{table}
+For example, pairs were included when both models returned correct results or both executed
+SQL with incorrect results. A pair in which one model failed to execute SQL
+and the other executed SQL with an incorrect result was excluded, because
+the terminal-outcome categories differed.
 
 For each model, repetition stability was calculated in two ways.
 It measured how consistently a model performed when it answered the same questions in its first and second repetitions.
@@ -961,6 +936,9 @@ status by the number compared.
 Class agreement used the same calculation for trajectory classes. 
 For example, if Nova answered 10 questions twice and 9 of them kept the same correct/incorrect status, the correctness agreement would be $9/10 = 90\%$.
 Similarly, if 8 of those 10 questions retained the same trajectory class, the class agreement would be $8/10 = 80\%$.
+
+Trajectory classes, SQL-attempt counts and recovery counts were summarised
+separately for resolved ambiguity cases and interactive turns.
 
 \paragraph{Sensitivity check.}
 A sensitivity check, added after inspecting the results, examined whether reference-answer conventions
