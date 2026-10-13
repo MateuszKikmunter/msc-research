@@ -211,6 +211,22 @@ managed services spanning across four specialized layers:
     against the Chinook data stored in S3.
 \end{itemize}
 
+Figure~\ref{fig:system} summarises the custom system implemented for the study.
+The backend invoked an Amazon Bedrock agent, which received schema information and instructions for
+read-only analysis. The agent could request clarification or call a Lambda
+action with generated SQL. That action submitted the query to Athena and
+returned its result or execution diagnostic to the agent.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/experiment-pipeline.pdf}
+\caption{Deployed analytical pipeline and offline evaluation.
+Arrows show the main request, response and evidence paths.
+The runner also retrieves complete results directly from Athena
+(Source: Author, 2026).}
+\label{fig:system}
+\end{figure}
+
 As model inference and agent orchestration were already provided through
 Amazon Bedrock in the cloud, a cloud-native architecture was a natural fit
 for integrating the remaining AWS services.
@@ -247,22 +263,6 @@ The interface is illustrated in Figure~\ref{fig:chat-interface}.
     response, the executed SQL and the recorded trace details
     (Source: Author, 2026).}
     \label{fig:chat-interface}
-\end{figure}
-
-Figure~\ref{fig:system} summarises the custom system implemented for the study.
-The backend invoked an Amazon Bedrock agent, which received schema information and instructions for
-read-only analysis. The agent could request clarification or call a Lambda
-action with generated SQL. That action submitted the query to Athena and
-returned its result or execution diagnostic to the agent.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figures/experiment-pipeline.pdf}
-\caption{Deployed analytical pipeline and offline evaluation.
-Arrows show the main request, response and evidence paths.
-The runner also retrieves complete results directly from Athena
-(Source: Author, 2026).}
-\label{fig:system}
 \end{figure}
 
 For each successfully executed attempt, the runner used the Athena execution identifier to retrieve all result
