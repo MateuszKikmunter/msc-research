@@ -8,3 +8,4 @@ dist/
 src/backend/data/*.db
 src/backend/data/*.db-shm
 src/backend/data/*.db-wal
+.github
