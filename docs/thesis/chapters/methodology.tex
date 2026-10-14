@@ -48,7 +48,6 @@ safety scenarios. Across the four runs, this produced 640 standalone executions
 of 160 distinct questions, not 640 independent questions.
 The benchmark partitions and an example record are presented in
 Section~\ref{sec:benchmark} and Listing~\ref{lst:benchmark-record}.
-Safety responses were reviewed manually after collection.
 The evaluation did not assess general natural-language answer quality, usefulness
 to users, cost or scalability.
 
@@ -89,7 +88,7 @@ Chinook-Bench-200 was developed for this study and stored as a versioned
 JavaScript Object Notation (JSON) specification \citep{rfc8259}
 for automated experimental runs.
 It comprises 200 primary question turns grouped into 195 cases, as shown in Table~\ref{tab:benchmark}.
-The reference SQL queries were initially written manually by the Author and
+The reference SQL queries were initially written manually by the author and
 subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
 \citep{openaiGPT56Sol}.
 Afterwards, each query was executed manually in AWS Athena to check its returned results.
@@ -114,7 +113,7 @@ Medium & 60 & 60 & Joins, grouped metrics and date operations \\
 Hard & 50 & 50 & Multi-hop joins, subqueries and window functions \\
 Ambiguous & 20 & 20 & Clarification before execution \\
 Interactive & 5 & 10 & Context across successive requests \\
-Safety/OOD & 10 & 10 & Refusal and domain boundaries \\
+Safety/out-of-domain & 10 & 10 & Refusal and domain boundaries \\
 \midrule
 Total & 195 & 200 & \\
 \bottomrule
@@ -196,7 +195,7 @@ instances is outside the research scope.
 \label{sec:system}
 
 The system was designed as a cloud-native serverless architecture utilising
-managed services spanning across four specialized layers:
+managed services spanning across four specialised layers:
 
 \begin{itemize}
     \item Data layer: the Chinook dataset stored as Apache Parquet in
@@ -252,9 +251,21 @@ events, to an \texttt{interactions.jsonl} file. Complete results from successful
 SQL attempts were saved as separate JSON files. The backend also stored responses
 and traces in a SQLite database \citep{sqliteDocs} for convenient inspection and
 initial data-shape checks, but the offline evaluator did not read this database.
+
+For each successfully executed attempt, the runner used the Athena execution identifier to retrieve all result
+pages and save the complete candidate result.
+The runner saved interactions, session identifiers, ordered trace events and
+links to candidate results. The offline evaluator read these artifacts and the
+saved reference results without invoking the model or executing new SQL.
+Evaluation could be repeated with updated manual safety labels using the saved
+model responses.
+Reference-result judgments were not
+returned to the agent during execution: an executable but incorrect query did
+not automatically produce correctness feedback or trigger another attempt.
+
 An Angular chat interface was developed for demonstration and manual interaction
 with the agent through the same backend; experimental runs bypassed the user
-interface (UI). The UI was not used to collect or evaluate experimental data.
+interface (UI).
 It provided an illustrative and interactive way of presenting the
 pipeline's capabilities in a user-friendly form.
 The interface is illustrated in Figure~\ref{fig:chat-interface}.
@@ -268,17 +279,6 @@ The interface is illustrated in Figure~\ref{fig:chat-interface}.
     (Source: Author, 2026).}
     \label{fig:chat-interface}
 \end{figure}
-
-For each successfully executed attempt, the runner used the Athena execution identifier to retrieve all result
-pages and save the complete candidate result.
-The runner saved interactions, session identifiers, ordered trace events and
-links to candidate results. The offline evaluator read these artifacts and the
-saved reference results without invoking the model or executing new SQL.
-Evaluation could be repeated with updated manual safety labels using the saved
-model responses.
-Reference-result judgments were not
-returned to the agent during execution: an executable but incorrect query did
-not automatically produce correctness feedback or trigger another attempt.
 
 \subsection{Execution protocol and comparison controls}
 \label{sec:protocol}
@@ -319,14 +319,9 @@ Additional attempts were retained and evaluated. More than two SQL attempts in
 one interaction set the evaluator's \texttt{retryPolicyExceeded} flag to
 \texttt{true}, regardless of whether the final result was correct.
 
-The safety cases received no reference-result score. 
-All ten safety cases in each run were manually reviewed using the
-case-specific target, response and attempted SQL.
-The 40 reviews supplied compliant, partially compliant or non-compliant judgments.
-They were kept separate from automatic no-query observations and
-from standalone result accuracy.
-The detailed manual assessment procedure is described in
-Section~\ref{sec:comparison-validation}.
+The safety cases received no reference-result score.
+Their responses and attempted SQL were retained for the manual assessment
+described in Section~\ref{sec:comparison-validation}.
 
 \subsection{Result correctness evaluation}
 \label{sec:result-evaluation}
@@ -380,12 +375,9 @@ The excerpts retain the complete column definitions and result rows.
 \end{minipage}
 \end{minipage}
 
-\citet{zhong2020semantic} evaluate SQL queries by comparing their results across
-generated database test suites.
-This differs from the evaluation process used in this study, where the
-comparison was based on the saved Chinook results and the rules defined in
-the benchmark contract, as illustrated in
-Listing~\ref{lst:benchmark-record}. Table~\ref{tab:comparison-rules}
+The evaluator applied the benchmark contract introduced in
+Section~\ref{sec:benchmark} to the saved Chinook results.
+Table~\ref{tab:comparison-rules}
 summarises how these rules were applied.
 Values were interpreted using the
 reference column types, so differences in numeric formatting did not by
@@ -479,15 +471,10 @@ where a correct result was followed by an incorrect or failed attempt.
 \subsection{Trajectory reconstruction and classification}
 \label{sec:trajectory-evaluation}
 
-In agent evaluation, it is possible to examine what happens between the initial request and the final outcome. 
-Several studies support examining the recorded action sequence as part of the evaluation. 
-For example, in AgentBoard, \citet{ma2024agentboard} measure intermediate progress alongside task success. 
-TRAJECT-Bench examines tool selection, arguments, and call order alongside final accuracy \citep{he2026trajectbench}. 
-This study, however, focused on SQL attempts and database feedback.
-
-The recorded SQL attempts and database feedback were described as trajectories within an evaluation unit. 
-This approach captured and measured how the agent reached its final result, 
-including any failed attempts or later changes in reaction to the encountered errors. 
+TRAJECT-Bench examines tool selection, arguments and call order alongside
+final accuracy \citep{he2026trajectbench}.
+In this study, trajectory evaluation focused on the recorded SQL attempts
+and database feedback, including failed attempts and subsequent revisions.
 
 The offline evaluator grouped interactions by Bedrock Session ID and ordered them by interaction number. 
 A standalone question with any potential fallback interaction formed one evaluation unit. 
@@ -862,9 +849,9 @@ number of included transitions as its denominator.
 One question could contribute several transitions, so these counts
 measured responses to errors rather than the number of failed questions.
 
-The remaining benchmark partitions used their own denominators, as shown in
-Table~\ref{tab:additional-metrics}. Their rates were not pooled with standalone
-accuracy.
+Table~\ref{tab:additional-metrics} summarises the additional clarification,
+interactive and safety measures and their denominators.
+Partition-specific rates were reported separately.
 
 \begin{table}[H]
 \centering
@@ -906,7 +893,7 @@ For interactive cases, if a turn was classified as a system error,
 it was excluded from turn accuracy, 
 and its episode was excluded from complete-episode accuracy. 
 However, no system-error cases occurred in the four runs. 
-Additionally, all 40 safety cases were manually reviewed, 
+Additionally, all 40 safety-case executions were manually reviewed,
 with reporting covering both the review labels and the proportion of cases without SQL execution.
 
 \subsection{Comparison and validation methods}
@@ -941,7 +928,7 @@ If 10 pairs
 had matching final outcomes and 2 of those had different trajectory classes,
 CTD would be $2/10 = 20\%$.
 
-For example, pairs were included when both models returned correct results or both executed
+Pairs were included when both models returned correct results or both executed
 SQL with incorrect results. A pair in which one model failed to execute SQL
 and the other executed SQL with an incorrect result was excluded, because
 the terminal-outcome categories differed.
