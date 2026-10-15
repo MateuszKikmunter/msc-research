@@ -20,7 +20,7 @@ provides access to foundation models. Bedrock Agents orchestrate
 interactions between a model, software applications and user conversations
 \citep{awsBedrockOverview,awsBedrockAgents}. Both conditions were evaluated
 using the same project-specific benchmark described in
-Section~\ref{sec:benchmark} and the same application workflow.
+\hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}} and the same application workflow.
 
 Each model completed the same benchmark twice, producing four complete runs.
 The repeated runs were used to compare results and trajectories, including
@@ -47,7 +47,7 @@ Each run was collected automatically and included 160 standalone questions and
 safety scenarios. Across the four runs, this produced 640 standalone executions
 of 160 distinct questions, not 640 independent questions.
 The benchmark partitions and an example record are presented in
-Section~\ref{sec:benchmark} and Listing~\ref{lst:benchmark-record}.
+\hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}} and \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
 The evaluation did not assess general natural-language answer quality, usefulness
 to users, cost or scalability.
 
@@ -74,7 +74,7 @@ The deployed Athena workgroup used engine version 3 \citep{awsAthenaEngineV3}.
 The relational dataset comprises eleven tables,
 enabling analytical questions such as sales trends, top customers, revenue by country, or product performance.
 The data structure and relationships between entities are shown in
-Figure~\ref{fig:chinook-schema}.
+\hyperref[fig:chinook-schema]{Figure~\ref*{fig:chinook-schema}}.
 
 \begin{figure}[htbp]
     \centering
@@ -87,7 +87,7 @@ Figure~\ref{fig:chinook-schema}.
 Chinook-Bench-200 was developed for this study and stored as a versioned
 JavaScript Object Notation (JSON) specification \citep{rfc8259}
 for automated experimental runs.
-It comprises 200 primary question turns grouped into 195 cases, as shown in Table~\ref{tab:benchmark}.
+It comprises 200 primary question turns grouped into 195 cases, as shown in \hyperref[tab:benchmark]{Table~\ref*{tab:benchmark}}.
 The reference SQL queries were initially written manually by the author and
 subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
 \citep{openaiGPT56Sol}.
@@ -141,7 +141,7 @@ Ambiguous cases provide the query
 and contract for the resolved request, while safety cases specify the expected
 behaviour without a reference SQL query. The contract describes how to compare a candidate
 result with the reference, including whether row order matters, duplicate
-handling and numeric tolerance, as shown in Listing~\ref{lst:benchmark-record}.
+handling and numeric tolerance, as shown in \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Example Chinook-Bench-200 record with a question, reference SQL query and result comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
@@ -214,7 +214,7 @@ managed services spanning across four specialised layers:
     against the Chinook data stored in S3.
 \end{itemize}
 
-Figure~\ref{fig:system} summarises the custom system implemented for the study.
+\hyperref[fig:system]{Figure~\ref*{fig:system}} summarises the custom system implemented for the study.
 The backend invoked an Amazon Bedrock agent, which received schema information and instructions for
 read-only analysis. The agent could request clarification or call a Lambda
 action with generated SQL. That action submitted the query to Athena and
@@ -268,7 +268,7 @@ with the agent through the same backend; experimental runs bypassed the user
 interface (UI).
 It provided an illustrative and interactive way of presenting the
 pipeline's capabilities in a user-friendly form.
-The interface is illustrated in Figure~\ref{fig:chat-interface}.
+The interface is illustrated in \hyperref[fig:chat-interface]{Figure~\ref*{fig:chat-interface}}.
 
 \begin{figure}[H]
     \centering
@@ -321,7 +321,7 @@ one interaction set the evaluator's \texttt{retryPolicyExceeded} flag to
 
 The safety cases received no reference-result score.
 Their responses and attempted SQL were retained for the manual assessment
-described in Section~\ref{sec:comparison-validation}.
+described in \hyperref[sec:comparison-validation]{Section~\ref*{sec:comparison-validation}}.
 
 \subsection{Result correctness evaluation}
 \label{sec:result-evaluation}
@@ -333,7 +333,7 @@ reference results for each successfully executed SQL attempt, matching them
 to the corresponding question or interactive turn.
 Both contained complete rows and column metadata required for the comparison.
 
-Listings~\ref{lst:reference-result} and~\ref{lst:candidate-result} show saved
+\hyperref[lst:reference-result]{Listings~\ref*{lst:reference-result}} and~\ref{lst:candidate-result} show saved
 result excerpts for CB200-E001, an easy question asking how many artists are
 in the catalogue.
 Both results contain the artist count \texttt{"275"}, which the evaluator
@@ -376,8 +376,8 @@ The excerpts retain the complete column definitions and result rows.
 \end{minipage}
 
 The evaluator applied the benchmark contract introduced in
-Section~\ref{sec:benchmark} to the saved Chinook results.
-Table~\ref{tab:comparison-rules}
+\hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}} to the saved Chinook results.
+\hyperref[tab:comparison-rules]{Table~\ref*{tab:comparison-rules}}
 summarises how these rules were applied.
 Values were interpreted using the
 reference column types, so differences in numeric formatting did not by
@@ -422,7 +422,7 @@ matches, the evaluator reassigned earlier pairings to determine whether a
 complete one-to-one matching existed.
 
 Each assessed SQL attempt received one of the outcomes in
-Table~\ref{tab:attempt-outcomes}.
+\hyperref[tab:attempt-outcomes]{Table~\ref*{tab:attempt-outcomes}}.
 
 \begin{table}[H]
 \centering
@@ -449,7 +449,7 @@ because a result file or final execution status was missing. \\
 
 Evaluator uncertainty was kept separate from observed model errors. 
 Here, semantic error means disagreement with the benchmark result on the Chinook data,
-within the scope defined in Section~\ref{sec:benchmark}.
+within the scope defined in \hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}}.
 
 In their study of LLM self-debugging, \citet[Table~4(a)]{chen2024selfdebug}
 report SQL errors corrected by the model, including incorrect filters,
@@ -482,7 +482,7 @@ A resolved ambiguity case included the clarification exchange and its continuati
 Each authored turn of an interactive episode was assessed separately, 
 while retaining the shared session context used during execution. 
 Safety cases followed a separate manual review process. 
-Figure~\ref{fig:evaluation-flow} shows how these inputs were processed.
+\hyperref[fig:evaluation-flow]{Figure~\ref*{fig:evaluation-flow}} shows how these inputs were processed.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/evaluation-flow.pdf}
@@ -498,7 +498,7 @@ identifier were counted as a single attempt.
 The Athena execution identifier linked the observation to the candidate-result
 record, which contained the path to the complete saved result.
 
-Listing~\ref{lst:trace-example} illustrates these identifiers using CB200-E001
+\hyperref[lst:trace-example]{Listing~\ref*{lst:trace-example}} illustrates these identifiers using CB200-E001
 from Nova Lite's first repetition. For readability, the listing regroups
 selected fields in YAML, a text format for structured data
 \citep{yamlSpec122}.
@@ -557,7 +557,7 @@ attempt that failed to execute, the terminal outcome was recorded as an
 execution error. The earlier correct result was retained as evidence
 of regression.
 
-Using the trajectory classes defined in Table~\ref{tab:trajectory-classes}, 
+Using the trajectory classes defined in \hyperref[tab:trajectory-classes]{Table~\ref*{tab:trajectory-classes}}, 
 the evaluator checked that every SQL attempt could be assessed and that
 the trace showed what happened after each execution error.
 Missing or unclear evidence resulted in a system error label,
@@ -613,7 +613,7 @@ flag. The error-transition records retained the detail of retries after
 execution errors.
 
 Trajectory facts also included the retry-policy flag defined in
-Section~\ref{sec:protocol} and a flag for regression after a correct result.
+\hyperref[sec:protocol]{Section~\ref*{sec:protocol}} and a flag for regression after a correct result.
 
 For example, a correct first attempt followed by another correct attempt
 received the direct-success class, but also a redundant-action flag.
@@ -656,7 +656,7 @@ This distinguished unchanged retries from revised SQL, but did not
 establish whether the changes addressed the error.
 
 Repeated errors were identified using a normalised error signature 
-(detailed in Table~\ref{tab:error-signatures}) 
+(detailed in \hyperref[tab:error-signatures]{Table~\ref*{tab:error-signatures}}) 
 rather than the full Athena error message.
 The full message, nevertheless, was also saved for inspection.
 
@@ -700,7 +700,7 @@ and if an expected identifier could not
 be extracted, it was recorded as \texttt{unknown}.
 
 \paragraph{What happened after an error.}
-Figure~\ref{fig:error-responses} shows how the evaluator classified the response
+\hyperref[fig:error-responses]{Figure~\ref*{fig:error-responses}} shows how the evaluator classified the response
 to each SQL attempt with a matched execution-error observation.
 All changes to the SQL text were recorded separately,
 and a changed query could still produce the same error.
@@ -716,7 +716,7 @@ The retry is the next SQL invocation within the same interaction
 
 No retry was an observed outcome and did not indicate missing evidence.
 Uncertain transitions
-were handled under the evidence checks in Section~\ref{sec:trajectory-evaluation}.
+were handled under the evidence checks in \hyperref[sec:trajectory-evaluation]{Section~\ref*{sec:trajectory-evaluation}}.
 
 Two boolean flags recorded whether the retry's observation
 showed a different error or whether the previous error had stopped appearing:
@@ -733,11 +733,11 @@ These fields described the sequence of observed errors and did not mean
 that the original fault had been fixed or that the SQL change had caused
 a new fault.
 
-Listing~\ref{lst:error-transition-example} shows this pattern in a saved
+\hyperref[lst:error-transition-example]{Listing~\ref*{lst:error-transition-example}} shows this pattern in a saved
 error transition from Nova Lite's first repetition. 
 Selected fields from the
 evaluation JSON are presented in YAML, following the format used in
-Listing~\ref{lst:trace-example}.
+\hyperref[lst:trace-example]{Listing~\ref*{lst:trace-example}}.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[
@@ -780,7 +780,7 @@ Following approaches like BIRD-CRITIC \citep{li2025swesql},
 a successfully executed retry was only considered successful 
 if its saved result satisfied the comparison contract.
 Recovery was assessed over the trajectory using the rules in
-Table~\ref{tab:trajectory-classes}.
+\hyperref[tab:trajectory-classes]{Table~\ref*{tab:trajectory-classes}}.
 
 \subsection{Evaluation metrics}
 \label{sec:metrics}
@@ -791,14 +791,14 @@ These metrics formed a profile of the agent's behaviour rather than a single wei
 Final Success Rate (FSR) measured execution accuracy \citep{yu2018spider}
 for the terminal SQL result under this study's comparison contract.
 The author defined the accompanying direct-success and recovery measures
-using the trajectory classes in Table~\ref{tab:trajectory-classes}.
-Their definitions are summarised in Table~\ref{tab:main-metrics} and
-the measured values are presented in Chapter~4.
+using the trajectory classes in \hyperref[tab:trajectory-classes]{Table~\ref*{tab:trajectory-classes}}.
+Their definitions are summarised in \hyperref[tab:main-metrics]{Table~\ref*{tab:main-metrics}} and
+the measured values are presented in \hyperref[sec:results]{Chapter~\ref*{sec:results}}.
 
 For standalone questions, let $N$ be the number of cases included in scored
 rates, $F$ the number with a correct terminal result, and $C$ the number of clean
 direct successes. Let $R$ count cases in either recovery class in
-Table~\ref{tab:trajectory-classes}, and $I$ count cases whose first attempt had
+\hyperref[tab:trajectory-classes]{Table~\ref*{tab:trajectory-classes}}, and $I$ count cases whose first attempt had
 an execution or semantic error. Finally, $E$ counts cases containing at least
 one execution error, and $E_F$ counts those that ended correctly.
 
@@ -843,13 +843,13 @@ The same exclusion rule applied to each standalone difficulty group,
 for which FSR, CDSR, FDG, class counts and the median SQL-attempt count were reported.
 
 For each run, the evaluator used scored standalone trajectories to count how many error transitions fell into
-each category in Figure~\ref{fig:error-responses}.
+each category in \hyperref[fig:error-responses]{Figure~\ref*{fig:error-responses}}.
 A category's share used the total
 number of included transitions as its denominator. 
 One question could contribute several transitions, so these counts
 measured responses to errors rather than the number of failed questions.
 
-Table~\ref{tab:additional-metrics} summarises the additional clarification,
+\hyperref[tab:additional-metrics]{Table~\ref*{tab:additional-metrics}} summarises the additional clarification,
 interactive and safety measures and their denominators.
 Partition-specific rates were reported separately.
 
@@ -977,7 +977,7 @@ The recorded decisions considered both actions and explanations.
 For example, a refusal with an incorrect explanation could be partially compliant.
 No-query behaviour alone was therefore insufficient to determine compliance.
 
-Listing~\ref{lst:manual-safety-review} shows a saved manual review for Nova Lite's
+\hyperref[lst:manual-safety-review]{Listing~\ref*{lst:manual-safety-review}} shows a saved manual review for Nova Lite's
 first repetition. CB200-S002 asked the agent to create a table of the ten
 highest-spending customers. 
 The required behaviour was to refuse without executing SQL. 
@@ -994,7 +994,7 @@ Although the agent did not create the table, it executed a
 
 This safety assessment was separate from the additional targeted manual trajectory review.
 Ten cases were selected to cover various scenarios and different agent behaviours
-(see Table~\ref{tab:manual-trajectory-review}).
+(see \hyperref[tab:manual-trajectory-review]{Table~\ref*{tab:manual-trajectory-review}}).
 The review covered six standalone cases, three ambiguity cases and one two-turn interactive
 case containing two separately classified turns.
 
@@ -1040,4 +1040,4 @@ The targeted review, automated tests and reporting checks formed the validation
 approach used in this study. The cases were deliberately selected and reviewed
 by the author, so the observed agreement does not estimate overall evaluator
 accuracy or independent second-reviewer agreement. The findings and remaining evaluation
-limits are discussed in Chapter~4.
+limits are discussed in \hyperref[sec:results]{Chapter~\ref*{sec:results}}.
