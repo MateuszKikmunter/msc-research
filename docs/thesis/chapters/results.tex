@@ -87,10 +87,8 @@ run, 122 questions succeeded directly and five after recovery, giving
 
 Haiku achieved more correct final results than Nova in both repetitions
 (\hyperref[fig:results-correctness]{Figure~\ref*{fig:results-correctness}}). The difference was 19 questions in the
-first repetition and 23 in the second. For the first repetition, the FSR
-difference was $100 \times (146-127)/160 = 11.875$ percentage points,
-rounded to 11.88. The second-run difference was
-$100 \times (147-124)/160 = 14.375$ points, rounded to 14.38.
+first repetition and 23 in the second. With 160 questions per run, these
+correspond to FSR differences of 11.88 and 14.38 percentage points.
 Haiku also had more clean direct successes. Its advantage therefore
 remained when considering only cases that succeeded without additional actions.
 
@@ -109,8 +107,7 @@ The clean-direct counts changed by the same amounts.
 
 Each run had five more final successes than clean direct successes.
 With 160 standalone questions per run, the Final-to-Direct Gap (FDG),
-the difference between FSR and CDSR, was therefore
-$100 \times 5/160 = 3.125$ percentage points, reported as 3.13,
+the difference between FSR and CDSR, was therefore 3.13 percentage points
 in all four runs.
 All five cases in each run were execution-error recoveries;
 no other type of successful trajectory contributed to the gap.
@@ -126,7 +123,7 @@ from the gap: \hyperref[tab:results-nondirect-share]{Table~\ref*{tab:results-non
 reports successes that were not clean direct successes as a share of all final successes.
 In these runs, this share equals Recovered Success Contribution (RSC), which
 measures how much final success involved recovery. Every non-direct success
-was a recovery, so Nova's first-run RSC was $100 \times 5/127 = 3.94\%$:
+was a recovery, so Nova's first-run RSC was 3.94\%:
 five recovered successes out of 127 final successes.
 Unlike FDG, RSC uses only final successes as its denominator.
 
@@ -295,7 +292,7 @@ Recovery Rate (RR) measures recovery among questions whose first SQL attempt
 had an execution error or returned an incorrect result.
 In Nova's first run, 37 questions were initially unsuccessful:
 14 execution errors and 23 semantic errors. Five eventually returned a
-correct result, giving $\mathrm{RR} = 100 \times 5/37 = 13.51\%$.
+correct result, giving an RR of 13.51\% (5 out of 37).
 \hyperref[fig:recovery-rates]{Figure~\ref*{fig:recovery-rates}} presents the
 RR values and their underlying counts for all four runs.
 Haiku's higher RR reflects fewer initially unsuccessful cases,
