@@ -1,0 +1,47 @@
+% Combined preview of Chapters 3 and 4, with a shared bibliography.
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{texgyretermes-math.otf}
+\usepackage[british]{babel}
+\usepackage[margin=1.25in]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs,tabularx,array}
+\usepackage{listings}
+\lstset{
+  basicstyle=\normalsize\ttfamily,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[round,authoryear]{natbib}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\urlstyle{same}
+\renewcommand{\harvardurl}[1]{\url{#1}}
+\hypersetup{pdftitle={Methodology and experimental results},
+  pdfauthor={Mateusz Kikmunter}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\emergencystretch}{1.5em}
+\setlength{\bibsep}{0.65\baselineskip}
+\renewcommand{\refname}{References}
+\begin{document}
+% Match the template's section-based chapter numbering; restart page numbers
+% for this review excerpt rather than implying final thesis pagination.
+\setcounter{section}{2}
+\input{chapters/methodology}
+\clearpage
+\input{chapters/results}
+\clearpage
+\begingroup
+\interlinepenalty=10000
+\bibliographystyle{agsm}
+\bibliography{references}
+\endgroup
+\end{document}

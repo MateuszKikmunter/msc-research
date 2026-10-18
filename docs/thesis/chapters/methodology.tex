@@ -144,7 +144,7 @@ result with the reference, including whether row order matters, duplicate
 handling and numeric tolerance, as shown in \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
 
 \noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}[caption={Example Chinook-Bench-200 record with a question, reference SQL query and result comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
+\begin{lstlisting}[caption={Example benchmark record with its reference SQL and comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
 {
     "id": "CB200-E001",
     "difficulty": "easy",
@@ -223,10 +223,7 @@ returned its result or execution diagnostic to the agent.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/experiment-pipeline.pdf}
-\caption{Deployed analytical pipeline and offline evaluation.
-Arrows show the main request, response and evidence paths.
-The runner also retrieves complete results directly from Athena
-(Source: Author, 2026).}
+\caption{Deployed pipeline and offline evaluation. The runner also retrieves complete results directly from Athena (Source: Author, 2026).}
 \label{fig:system}
 \end{figure}
 
@@ -274,9 +271,7 @@ The interface is illustrated in \hyperref[fig:chat-interface]{Figure~\ref*{fig:c
     \centering
     % Keep the figure at its native size so the key remains exactly 12 pt.
     \includegraphics{figures/chat-interface-annotated.pdf}
-    \caption{Angular interface showing a natural-language request, the agent's
-    response, the executed SQL and the recorded trace details
-    (Source: Author, 2026).}
+    \caption{Angular interface showing the request, response, SQL and trace details (Source: Author, 2026).}
     \label{fig:chat-interface}
 \end{figure}
 
@@ -486,8 +481,7 @@ Safety cases followed a separate manual review process.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/evaluation-flow.pdf}
-\caption{Offline evaluation sequence. One assessment path was selected per case
-after the clarification check (Source: Author, 2026).}
+\caption{Offline evaluation flow by case type (Source: Author, 2026).}
 \label{fig:evaluation-flow}
 \end{figure}
 
@@ -517,7 +511,7 @@ selected fields in YAML, a text format for structured data
   belowcaptionskip=0.5\baselineskip,
   morekeywords={question,traceEvents,candidateResult,offlineEvaluation},
   keywordstyle=\bfseries,
-  caption={Simplified trace and evaluation summary for CB200-E001. Identifiers are replaced with short labels and unrelated fields are omitted (Source: Author, 2026).},
+  caption={Simplified trace and evaluation summary for CB200-E001, with shortened identifiers (Source: Author, 2026).},
   label={lst:trace-example},
   captionpos=b
 ]
@@ -876,8 +870,7 @@ No-query rate & Safety cases with no SQL invocation / all safety cases. \\
 \bottomrule
 \end{tabularx}
 }
-\caption{Additional measures by benchmark partition, with study-specific
-definitions and denominators (Source: Author, 2026).}
+\caption{Additional measures and denominators by benchmark partition (Source: Author, 2026).}
 \label{tab:additional-metrics}
 \end{table}
 
@@ -1028,7 +1021,7 @@ CB200-H026 & Nova Lite & 2 & Unrecovered execution failure; retry policy exceede
 \bottomrule
 \end{tabularx}
 }
-\caption{Targeted manual review completed by the author. The reviewer agreed with the recorded outcomes in all ten cases (Source: Author, 2026).}
+\caption{Targeted manual review: agreement with recorded outcomes in all ten cases (Source: Author, 2026).}
 \label{tab:manual-trajectory-review}
 \end{table}
 
