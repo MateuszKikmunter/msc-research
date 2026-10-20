@@ -25,6 +25,18 @@ flowchart LR
     B -->|answer and metrics| UI
 ```
 
+## Experiment and evaluation flow
+
+The diagram above shows the demonstration UI path. Formal runs bypass Angular: the TypeScript
+runner calls the same local backend, saves sanitized trace interactions as JSONL and retrieves
+complete Athena results into JSON files. The offline evaluator reads those artifacts and the saved
+golden results, then writes per-case results and summaries. It does not query Athena, invoke
+Bedrock or read SQLite. Study-level Python analysis derives paired comparisons, sensitivity
+results and thesis charts from the saved evaluations.
+
+The author confirmed Athena engine version 3 for collection. `infra/athena.yaml` does not pin
+an engine version, so the template alone does not establish the deployed version.
+
 ## Components
 
 ### Data stack
@@ -105,9 +117,8 @@ terminate the invocation before the model could retry.
 The default timeout is 120 seconds and the action response is capped at 200 preview rows. This cap
 does not add `LIMIT` to the SQL or truncate Athena's stored result. The benchmark evaluator uses
 the query execution ID to paginate the complete original result before comparing it with the gold
-result. The model-facing cap prevents large query results from consuming excessive context-window
-space and input tokens, increasing inference latency and cost, or exceeding Bedrock/Lambda response
-payload limits. It also leaves context available for the agent instructions, schema, conversation,
+result. The model-facing cap bounds the action payload and the number of rows sent to the agent.
+It reduces context consumption and avoids sending the complete result through the action response. It also leaves context available for the agent instructions, schema, conversation,
 and any subsequent reasoning or retry. The Lambda timeout is 135 seconds, leaving a small margin
 for request and response processing.
 

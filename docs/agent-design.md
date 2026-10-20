@@ -98,15 +98,15 @@ Athena, and explain the result while distinguishing retrieved context from compu
 
 The formal evaluation has two model conditions:
 
-1. **Amazon Nova Lite** is the cost-effective AWS-native baseline and remains the development
-   model for now.
-2. **Claude Haiku 4.5** is the cost-effective Anthropic alternative. AWS describes it as a
-   lightweight model with strong coding and agent performance.
+1. **Amazon Nova Lite** is the AWS-native baseline. It was deployed first and used for two runs.
+2. **Claude Haiku 4.5** is the Anthropic comparison condition. It replaced Nova in the same
+   deployment and was used for two further runs. The models were never deployed simultaneously.
 
 Compare both using the same frozen prompt, action implementation, benchmark questions,
-fresh-session policy, row cap, and repetition count. Measure correctness, clarification behavior,
-latency, token usage, retries, and estimated cost rather than assuming performance from published
-capabilities alone.
+fresh-session policy, row cap, and repetition count. The formal evaluation measures result
+correctness, clarification, SQL trajectories, retries and responses to execution errors. Latency
+and token usage remain operational evidence; cost and latency comparisons are outside the current
+study. Published model capabilities are not evidence of performance on this benchmark.
 
 “Same prompt” means equivalent semantic instructions, constraints, examples, and action
 descriptions. It does not require forcing one model family's serialized prompt or textual function
@@ -140,7 +140,7 @@ answer:
 - `agentMetrics.modelInvocations`: unique model invocations across preprocessing, orchestration,
   postprocessing, and routing-classifier stages; and
 - `agentMetrics.actionInvocations`: unique action-group invocations requested during orchestration;
-- `agentMetrics.retryCount`: SQL attempts after the first action invocation;
+- `agentMetrics.retryCount`: SQL attempts after the first SQL attempt;
 - `agentMetrics.firstAttemptSucceeded`: whether the first SQL action succeeded, or `null` when no
   SQL action was traced; and
 - `sqlAttempts`: every generated SQL statement in order, together with its success/failure state

@@ -1,5 +1,9 @@
 # Conversation storage
 
+> **Current evaluation boundary:** SQLite supports application inspection and initial data-shape
+> checks. The experiment runner saves JSONL interactions and complete JSON result files; the
+> offline evaluator reads those files, not SQLite. See the [experiment design](../src/experiments/DESIGN.md).
+
 The local Express backend persists every Bedrock request-response interaction to SQLite. This is
 appropriate for the current single-user, single-process research application: it is simple to
 operate, supports transactions, and can be queried directly during analysis. The database is

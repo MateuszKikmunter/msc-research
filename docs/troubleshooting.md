@@ -14,8 +14,8 @@ agent in `eu-west-1` on 2 August 2026.
 accepted that combination, but Claude Haiku 4.5 permits only one of those sampling parameters.
 
 **Fix:** Deploy `infra/conversational-query-agent-haiku.yaml` to the existing
-`chinook-conversational-query-agent` stack. It retains `Temperature: 0` for deterministic
-experiments and omits `TopP`, while preserving the action Lambda, IAM boundaries, prompt, schema,
+`chinook-conversational-query-agent` stack. It retains `Temperature: 0` to reduce sampling
+variability and omits `TopP`, while preserving the action Lambda, IAM boundaries, prompt, schema,
 and alias structure.
 
 ### Bedrock access denied before action invocation
@@ -120,4 +120,5 @@ date_add('year', -3, current_date)
 
 This is currently a model SQL-correctness failure, not a deployment failure. The action returned
 an error as designed, but the agent did not perform the single corrective retry requested by its
-instructions. The first observed instance is recorded in the exploratory experiment below.
+instructions. This is a historical exploratory observation, not an additional formal benchmark run.
+The completed run evidence is under [`../src/experiments/runs/`](../src/experiments/runs/).

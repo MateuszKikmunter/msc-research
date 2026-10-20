@@ -1,5 +1,10 @@
 # Bedrock agent trace storage
 
+> **Current study scope:** this page describes backend capture and possible uses of trace data.
+> Formal evaluation reads the runner's sanitized traces in `interactions.jsonl` and complete JSON
+> result files, not the SQLite tables. It scores SQL execution trajectories and result agreement;
+> rationale quality, general answer faithfulness, cost and latency are not formal study outcomes.
+
 ## Purpose and terminology
 
 The backend enables tracing on every `InvokeAgent` request and stores the trace parts returned by
@@ -134,7 +139,8 @@ agent version.
 
 ## Evaluation uses
 
-Trace events support analysis that the final answer alone cannot provide:
+The captured fields can support the following analyses. Only clarification, SQL attempts,
+execution feedback and result correctness are used by the current evaluator:
 
 - identify the rationale preceding correct and incorrect SQL;
 - determine whether clarification occurred before a tool call;
@@ -144,7 +150,7 @@ Trace events support analysis that the final answer alone cannot provide:
 - locate guardrail or orchestration failures; and
 - detect accidental mixing of draft and deployed experimental conditions.
 
-Rationale quality should be reported separately from outcome correctness. A plausible rationale
+If rationale quality is studied in future, it must be reported separately from outcome correctness. A plausible rationale
 does not establish that the SQL, returned result, or final answer is correct. Deterministic result
 checks remain primary; rationale analysis is diagnostic and explanatory.
 

@@ -16,9 +16,16 @@ reliably from the source code alone.
   The machine-readable cases and canonical SQL are in
   [`../benchmarks/`](../benchmarks/README.md).
 - [Experiment runner and evaluator design](../src/experiments/DESIGN.md) documents the implemented
-  golden-result generator and question runner, plus the planned evaluator structure.
+  golden-result generator, question runner, offline evaluator and reading order.
 - [Troubleshooting](troubleshooting.md) records diagnosed deployment and runtime failures.
-- [Experiments](experiments/) contains exploratory runs and formal evaluation evidence.
+- [Saved experiments](../src/experiments/runs/) contains reference results and the four completed
+  model/repetition evaluations.
+- [Thesis writing plan](thesis-writing-plan.md) records current chapter progress and remaining work.
+- [Literature guide](thesis-literature-review.md) records source selection and verification limits.
+- [Thesis build guide](thesis/README.md) explains combined and standalone PDFs, analysis outputs
+  and appendices.
+- [Documentation status](documentation-status.md) records the latest consistency review and
+  distinguishes current guidance from historical proposals.
 - [Decision records](decisions/) explain important architectural choices.
 
 Keep deployment commands in the repository-level `README.md`. Update these documents when

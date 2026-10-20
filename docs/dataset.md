@@ -25,7 +25,7 @@ separate S3 prefix and discovered by AWS Glue.
 
 ## Relationships
 
-![hinook database schema](/docs/assets/image.png)
+![Chinook database schema](assets/image.png)
 
 _Schema diagram sourced from the
 [original Chinook database repository](https://github.com/lerocha/chinook-database/tree/master)._
@@ -64,5 +64,7 @@ Use explicit metric definitions in experiments and answers:
 
 The dataset supports catalogue lookups, ranked sales, time trends, geographic comparisons,
 customer segmentation, employee/support analysis, and multi-hop questions such as revenue by
-artist or genre. Evaluation examples are maintained in `evaluation.md` rather than embedded in
-the agent prompt.
+artist or genre. Authored questions and golden SQL are maintained in
+[`../benchmarks/chinook-bench-200.json`](../benchmarks/chinook-bench-200.json), with the generated
+[readable benchmark](../benchmarks/chinook-bench-200.md). The evaluation policy is documented in
+[evaluation.md](evaluation.md); the benchmark questions are not embedded in the agent prompt.

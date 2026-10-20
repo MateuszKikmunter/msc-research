@@ -6,8 +6,9 @@ troubleshooting are maintained in [`docs/`](docs/README.md).
 The versioned [Chinook-Bench-200](benchmarks/README.md) dataset contains 200 authored turns across
 195 cases with canonical SQL or explicit clarification/refusal behaviour.
 
-The infrastructure is split into two AWS CloudFormation templates. The agent
-template uses the AWS SAM transform to build its TypeScript Lambda:
+The infrastructure uses two AWS CloudFormation stacks: a data stack and an agent stack.
+Two alternative agent templates support Nova and Haiku. The agent templates use the
+AWS SAM transform to build their TypeScript Lambda:
 
 - `infra/athena.yaml` creates the Glue catalog, crawler, and Athena workgroup.
 - `infra/conversational-query-agent.yaml` creates an Amazon Bedrock Agent using
@@ -43,7 +44,8 @@ The services can also be started separately with `make start-backend` and
 ## Experiment tooling
 
 The TypeScript experiment tooling is under [`src/experiments/`](src/experiments/DESIGN.md). The
-golden-result generator and benchmark runner are implemented; the evaluator is the next stage.
+golden-result generator, benchmark runner and offline evaluator are implemented. Four complete
+evaluations are saved: two repetitions each for Nova Lite and Haiku 4.5.
 
 Execute the 190 checked-in golden SQL definitions with:
 
@@ -78,6 +80,23 @@ successful Athena results are saved separately under
 run is cancelled, the records from episodes that already completed remain available for
 inspection; remove the partial run directory manually before starting a clean experiment.
 
+Evaluate a completed saved run without invoking the model, querying Athena or reading SQLite:
+
+```bash
+make evaluate MODEL=nova-lite REPETITION=1
+```
+
+This replaces `evaluation/results.json`, `evaluation/summary.json` and `evaluation/summary.md`
+for that run. Optional `manual-safety-reviews.json` decisions are merged during evaluation.
+
+Study-level paired comparisons, sensitivity results and chart data are generated offline with
+`python3 docs/thesis/analysis/build-results-review.py`. This updates derived thesis artifacts,
+not the saved model interactions or candidate results. Statistical test selection remains pending
+professor feedback.
+
+Build the combined thesis with `make thesis`; see the [thesis build guide](docs/thesis/README.md)
+for standalone chapter previews and appendices.
+
 Use `make test-experiments` and `make typecheck-experiments` to verify the experiment package.
 
 ## Deploy
@@ -85,7 +104,7 @@ Use `make test-experiments` and `make typecheck-experiments` to verify the exper
 ### Prerequisites
 
 - Node.js and npm
-- AWS CLI authenticated with the `aws your` profile
+- AWS CLI authenticated with your chosen profile (shown as `your-profile` below)
 - AWS SAM CLI
 - An existing `msc-analytics` S3 bucket in the deployment account
 
@@ -183,8 +202,8 @@ sam deploy \
 The Haiku template retains the same action, IAM, Lambda, prompt, schema, and alias resources. Its
 model-specific differences are the fixed EU Haiku inference profile and omission of `TopP`; Claude
 Haiku 4.5 rejects requests that specify both `Temperature` and `TopP`. Use `Temperature: 0` to
-retain the deterministic experiment setting. Because the Haiku template uses the original logical
-resource IDs, agent name, and stack name, CloudFormation updates the existing agent stack instead
+reduce sampling variability; this does not guarantee identical outputs across runs. Because the
+Haiku template uses the original logical resource IDs, agent name, and stack name, CloudFormation updates the existing agent stack instead
 of creating a second stack.
 
 `AgentAliasRevision` controls publication through the deployable `live` alias. Increment it (for

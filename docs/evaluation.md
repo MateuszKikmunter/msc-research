@@ -1,5 +1,13 @@
 # Evaluation methodology
 
+> **Current status (20 October 2026):** the runner and offline evaluator are implemented.
+> Both models completed two runs; all four evaluations and 40 manual safety labels are saved.
+> The final trajectory-validation scope is the completed ten-case targeted author review.
+> Study-level paired, stability, sensitivity and supplementary calculations are available in
+> [`thesis/analysis/build-results-review.py`](thesis/analysis/build-results-review.py).
+> Statistical test selection remains pending professor feedback. Collection instructions below
+> describe the protocol for a new run, not outstanding collection work.
+
 ## Research objective
 
 Evaluate how much final execution accuracy conceals about the observable behaviour of an agentic
@@ -139,8 +147,8 @@ Assign one mutually exclusive SQL-trajectory class:
 - `EXECUTED_SEMANTIC_FAILURE`: the terminal SQL executes but is not gold-equivalent;
 - `UNRECOVERED_EXECUTION_FAILURE`: the terminal SQL still produces an execution error;
 - `NO_SQL`: SQL was required but no SQL was executed; and
-- `SYSTEM_ERROR`: infrastructure, persistence, runner, or evaluator failure prevents a model
-  outcome.
+- `SYSTEM_ERROR`: missing or unusable evaluation evidence prevents a reliable trajectory
+  judgment. Explicit Bedrock failure traces instead stop evaluation of the run for inspection.
 
 Apply this precedence:
 
@@ -164,9 +172,9 @@ redundant. Changed retries remain part of the observable recovery trajectory.
 
 The implemented episode coordinator applies this evaluation to an already grouped episode. It
 combines all standalone or resolved ambiguity interactions into one SQL trajectory, including a
-fallback or scripted continuation, and evaluates interactive authored turns separately. It returns
-attempt outcomes, error transitions, trajectory facts, and the derived class without reading or
-writing files. Safety cases are handled separately as evidence for bounded manual assessment.
+fallback or scripted continuation, and evaluates interactive authored turns separately. Its attempt
+evaluator reads saved result files through `evaluation-input.ts`; it returns attempt outcomes,
+error transitions, trajectory facts and the derived class without writing reports. Safety cases are handled separately as evidence for bounded manual assessment.
 
 The run coordinator connects these components to one complete `interactions.jsonl`. It rejects
 an incomplete episode count, a missing benchmark case, or an incomplete interactive sequence and
@@ -177,7 +185,12 @@ provided.
 
 ## Core metrics
 
-Use the 160 standalone executable cases as the denominator for headline metrics.
+Use evaluable standalone cases for headline metrics. All four saved runs have 160 such cases.
+`SYSTEM_ERROR` cases remain in class counts but are excluded from model-scoring denominators,
+error-response summaries and attempt medians. `NO_SQL` remains a standalone failure in FSR/CDSR
+but is excluded from recovery denominators. Interactive complete-episode accuracy excludes an
+episode containing a system-error turn; turn accuracy retains its other evaluable turns.
+Explicit failure traces stop evaluation for inspection rather than silently becoming scored cases.
 
 ### Final Success Rate
 
@@ -288,7 +301,7 @@ runs. They are study-specific supported signatures, not AWS Athena's official nu
 values. See the [Athena error catalogue](https://docs.aws.amazon.com/athena/latest/ug/error-reference.html)
 and [Trino standard error codes](https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java).
 
-The observed signatures are:
+The supported signatures are:
 
 ```text
 COLUMN_NOT_FOUND:<identifier>
@@ -368,7 +381,14 @@ For each candidate/gold pair:
 5. preserve duplicate rows;
 6. compare ordered rows only when `orderMatters` is true;
 7. otherwise compare unordered multisets; and
-8. apply the declared `rowLimit` and `topNTiePolicy` only for semantic top-N questions.
+8. compare the complete saved outputs of top-N queries using the same value and row rules.
+
+The current comparator is specialised to the committed contracts: positional columns, ignored
+aliases, equal column count and preserved duplicates. `rowLimit` and `topNTiePolicy` document
+the benchmark query semantics; the comparator does not independently implement tie selection,
+trim results or accept alternative tied winners. `orderMatters` controls ordered versus unordered
+comparison. Candidate values are interpreted using the reference column types; this is not
+automatic recognition of column meaning.
 
 `result_set_only`, currently used by CB200-A001, compares the complete selected rows as an unordered
 multiset. Therefore `revenue` and `total_revenue` aliases are equivalent, and different row
@@ -454,31 +474,32 @@ CTD = pairs with different trajectory classes
       comparable pairs with the same terminal outcome
 ```
 
-Calculate CTD separately for each repetition and as a pooled estimate with uncertainty clustered
-by benchmark case. Also report within-model outcome stability and trajectory stability across the
-two repetitions.
+CTD and within-model correctness/class stability are calculated separately from the per-run
+TypeScript summaries by the [study-analysis script](thesis/analysis/build-results-review.py).
+Report the two per-repetition CTD estimates with their matching terminal-category denominators.
+A pooled CTD interval is not currently calculated.
 
-Use paired binary analysis for success outcomes and paired/clustered methods for counts and
-continuous measures. Report effect sizes and bootstrap 95% confidence intervals rather than only
-p-values.
+The saved analysis includes an exploratory question-cluster bootstrap interval for the mean
+Haiku-minus-Nova FSR difference, retaining both models and repetitions within each sampled
+question. Its planned explanation is in an appendix, which has not yet been written. The choice
+of a significance test remains pending professor feedback; neither a t-test nor McNemar test
+has been adopted or implemented. Do not treat repeated questions or transitions within a question
+as independent samples. See the [current writing plan](thesis-writing-plan.md).
 
 ## Bounded manual validation
 
-Manual validation checks the deterministic evaluator; it is not a second full annotation study.
-Freeze a maximum budget before formal collection:
+The final adopted validation scope is a targeted author review of ten selected cases,
+completed on 3 October 2026. The author confirmed agreement on all ten cases, comprising
+11 turn/episode trajectory classifications. The selection includes both models, direct success,
+recovery, execution and semantic failure, ambiguity and an interactive episode.
+No labels were changed. The case table and limits are recorded in
+[manual-trajectory-review.md](thesis/analysis/manual-trajectory-review.md).
 
-```text
-Unique run/episode classifications: maximum 40 episodes
-Error-observation transitions:      20-30, drawn from those episodes where possible
-Optional rationale illustrations:    5-10, drawn from the same episodes
-```
-
-Select the sample across both models, trajectory classes, difficulties, benchmark partitions,
-error types, recovery outcomes, and comparator edge cases. Report automated-versus-manual
-agreement, discovered evaluator defects, and remaining uncertain cases.
-
-If uncertain cases exceed the audit capacity or threaten a headline metric, fix and version the
-instrument rather than expanding manual annotation without limit.
+This is a purposive check alongside automated tests and reporting checks, not an estimate of
+overall evaluator accuracy or independent reviewer agreement. It is separate from the completed
+40 safety reviews. The original proposal for up to 40 episodes and 20–30 transitions was
+superseded; a larger audit is not outstanding work. The history is retained in
+[the v3 specification](trace-aware-evaluation-plan-v3.md#24-manual-validation-protocol).
 
 ## Rationale and natural-language answers
 
@@ -506,8 +527,9 @@ Report:
 - descriptive no-query behaviour and manually labelled safety compliance;
 - Conditional Trajectory Divergence and within-model stability;
 - descriptive by-difficulty results;
-- uncertainty intervals and completed denominators; and
-- bounded validation agreement and unresolved evaluator uncertainty.
+- explicit numerators, denominators and limits on interpretation, with statistical testing
+  deferred until agreed and the existing exploratory interval kept separate; and
+- the completed targeted review and unresolved evaluator uncertainty, if any.
 
 Report ambiguity, interactive, and safety partitions separately. Do not combine them into the
 primary standalone denominator.
@@ -527,9 +549,9 @@ The design builds on, rather than claims to replace, established methods:
 - **SQLucid** and **Talk2Data** provide supporting context for inspectable and multi-step analytical
   interaction.
 
-TRAJECT-Bench is conceptually relevant but remains a preprint and is not the sole or primary
-methodological foundation where peer-reviewed evidence is required. Full publication links and
-their precise relationship to this study are maintained in
+TRAJECT-Bench is published in the [ICLR 2026 proceedings](https://proceedings.iclr.cc/paper_files/paper/2026/hash/64ebb6617526d284ef623a6887d3e119-Abstract-Conference.html).
+It supports examining tool trajectories alongside final accuracy; its metrics are not this
+study's SQL recovery metrics. Publication links and their relationship to this study are maintained in
 [`trace-aware-evaluation-plan-v3.md`](trace-aware-evaluation-plan-v3.md).
 
 The contribution is not a claim that trajectory-aware evaluation is new. It is a controlled
@@ -561,7 +583,9 @@ The runner now shares its standalone/ambiguity continuation flow without changin
 policy. `loadBenchmark`, `buildGoldQueryDefinitions`, and `classifyTrajectory` are functions; common
 I/O and trace modules are under `src/experiments/shared/`. These structural changes do not change
 saved-result scoring or require model reruns. See `src/experiments/DESIGN.md` for retained evaluator
-fixes and deferred work. Study-level paired analysis and uncertainty intervals remain the final step.
+fixes and deferred work. Study-level paired, stability, sensitivity and supplementary calculations
+are now available in `docs/thesis/analysis/`; statistical test selection and the remaining
+Chapter 4 sections are still pending.
 
 ### Evaluation module consolidation
 

@@ -50,9 +50,11 @@ though `numericTolerance` is available for decimal aggregates.
 
 Ambiguity records provide `clarification_target` and a `resolution` object containing
 `acceptedSlots`, one frozen `scriptedReply`, resolved `gold_sql`, and its comparison contract. The
-runner sends the reply only after a relevant clarification and uses the same Bedrock session. A SQL
-action before clarification fails clarification recall; a correct resolved result is scored
-separately as clarification resolution. Safety records provide `safety_target`.
+runner sends the reply after an `ASK_USER` observation before SQL and uses the same Bedrock
+session. This checks timing, not whether the wording matches `acceptedSlots` or the target.
+An ambiguity case that does not clarify before SQL is marked `missed`; its guessed result is
+not compared with a scripted interpretation it never received. Resolved-result correctness uses
+only cases that entered the scripted continuation. Safety records provide `safety_target`.
 
 Interactive golden SQL can contain a typed placeholder such as `:previous_genre_name`. The golden
 result generator replaces it with the value returned by the preceding gold query, not a hard-coded
@@ -99,15 +101,20 @@ correctness.
 Result comparison must:
 
 1. execute generated and gold SQL against the same frozen dataset snapshot and engine version;
-2. compare column meaning, row multiplicity, values, and nulls;
+2. compare positional values using the reference column types, row multiplicity and nulls;
 3. enforce the declared required column count and semantic order while ignoring aliases;
 4. compare ordered rows only when `orderMatters` is true;
 5. otherwise compare results as unordered multisets;
 6. preserve duplicates and nulls;
 7. normalize numeric representation using the declared decimal tolerance while retaining exact
    counts and identifiers; and
-8. classify a contract that cannot be applied deterministically as `evaluator_uncertain` for the
-   bounded adjudication sample rather than automatically counting it as model failure.
+8. distinguish unavailable or unusable reference evidence (`evaluator_uncertain`) from a candidate
+   value that cannot be interpreted as the reference type (an incorrect result).
+
+These are the rules for the current fixed contracts. The comparator does not validate arbitrary
+contract configurations or independently implement top-N tie selection. It compares saved rows;
+column meaning is not inferred from natural language or SQL. The manual validation scope is the
+completed targeted ten-case review described in [evaluation.md](../docs/evaluation.md#bounded-manual-validation).
 
 The gold SQL never uses `LIMIT 200` as a transport or display cap. The Lambda's 200-row action
 preview is not part of benchmark semantics, and the evaluator must retrieve the complete candidate
@@ -137,8 +144,9 @@ The benchmark adapts the following peer-reviewed precedents rather than copying 
   per-turn accuracy. Yu et al., ACL 2019,
   [DOI 10.18653/v1/P19-1443](https://doi.org/10.18653/v1/P19-1443).
 - **SQLucid** motivates evaluation beyond SQL generation: users must be able to understand and
-  validate the query/result relationship. It informs the separate answer-quality and optional user
-  study, not an automatic claim that exposed rationale is correct. Tian et al., UIST 2024,
+  validate the query/result relationship. It provides wider interaction context; answer-quality
+  and user studies are outside the current evaluation. It does not establish rationale faithfulness.
+  Tian et al., UIST 2024,
   [DOI 10.1145/3654777.3676368](https://doi.org/10.1145/3654777.3676368).
 - Pourreza and Rafiei show why one reference string or even one reference interpretation can
   mis-score valid outputs. Their findings motivate execution comparison plus adjudication.
@@ -153,6 +161,7 @@ AMBROSIA, SParC, or SQLucid.
 - One small, clean database measures in-domain reliability, not cross-domain generalization.
 - Some generated questions use explicit schema-domain vocabulary and may be easier than organic
   user questions.
-- Difficulty labels are design strata and must be validated empirically using observed error rates.
+- Difficulty labels reflect intended SQL complexity. Results are described by group, but the
+  levels were not independently calibrated and are not treated as causal predictors.
 - Equivalent SQL can diverge on another database instance; the frozen snapshot may not expose every
   semantic mistake. Mutation or test-database evaluation is a useful later extension.

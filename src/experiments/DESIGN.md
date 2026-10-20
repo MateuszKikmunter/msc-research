@@ -1,5 +1,11 @@
 # Chinook-Bench-200 Experiment Runner and Evaluator Design
 
+> **Collection and analysis status (20 October 2026):** two complete repetitions per model
+> have been collected and evaluated. All 40 safety cases have manual labels, and the final
+> targeted trajectory review covers ten selected cases. The separate Python study-analysis
+> script under `docs/thesis/analysis/` calculates paired counts, CTD, stability, sensitivity and
+> supplementary summaries. Statistical test selection remains undecided.
+
 > **Status:** golden SQL generation, benchmark runner, deterministic result comparison, episode
 > grouping, per-attempt evaluation, error-transition extraction, SQL-trajectory classification,
 > focused aggregate metrics, and JSON/Markdown report generation implemented.
@@ -21,8 +27,8 @@ Create a small TypeScript command-line application that:
 6. compares candidate results with golden results; and
 7. produces JSON and Markdown evaluation results.
 
-The runner will use one deployed model at a time. Nova Lite will be executed first. Haiku 4.5
-can be deployed and executed later using the same code.
+The runner uses one deployed model at a time. Nova Lite was deployed first and used for two
+runs; Haiku 4.5 replaced it in the same deployment and was used for two further runs.
 
 ## 2. Simplifications from the previous design
 
@@ -42,9 +48,11 @@ The following are intentionally removed:
 - a required backend change for returning an interaction ID.
 
 The earlier manifest and hashes were intended to prove that different runs used exactly the same
-code, data, and deployment. That is unnecessary for this project because the final questions and
-golden SQL are committed in source control, the application runs locally, and only one agent is
-deployed at a time.
+code, data and deployment. They were omitted to keep the controlled local runner simple.
+Committed questions, trace-supported model identity and sequential deployment provide useful
+evidence, but do not independently prove historical prompt versions or an unchanged database.
+The thesis must retain that provenance limitation. The later study-analysis script records input
+file hashes for derived calculations; those are not collection-time deployment manifests.
 
 There is also no separate cache. The saved golden JSON files are simply the reference results used
 by every later evaluation. They are generated once and read from disk when a run is evaluated.
@@ -131,7 +139,6 @@ src/experiments/
   tests/
     fixtures/
     unit/
-    integration/
 
   runs/
     golden-sql/
@@ -178,7 +185,7 @@ new metrics, or study-level analysis.
 
 ## 5. Commands
 
-The first implementation needs only three commands:
+The experiment package has three main commands:
 
 ```text
 gold       Execute all golden SQL and save reference results
@@ -548,8 +555,9 @@ matching observation is `transitionUncertain` because its execution result canno
 The original error text is retained beside its normalized signature for auditability. Rationale
 text is not read or scored.
 
-The supported symbolic prefixes are the seven types observed in the saved Nova Lite and Haiku
-trace corpus. They are not presented as AWS Athena's official error enum: AWS publishes numeric
+The normalizer supports seven symbolic prefixes, with identifier-bearing signatures for
+missing columns, tables, functions and ambiguous column names. Not every supported prefix
+necessarily occurs in the four saved runs. They are not presented as AWS Athena's official error enum: AWS publishes numeric
 `ErrorType` values, while Athena DML is based on Trino. Unobserved prefixes are retained as
 `OTHER:<original_code>`.
 
@@ -724,7 +732,7 @@ and SQL-attempt medians. Interactive turn accuracy includes evaluable turns; com
 accuracy excludes episodes containing any system-error turn. Standalone Markdown summaries
 with system-error exclusions are marked provisional and show the actual evaluable denominator.
 
-The later Haiku run can be compared with Nova Lite by matching the same question ID and repetition.
+The saved Haiku runs are compared with Nova Lite by matching the same question ID and repetition.
 No agent deployment identifiers are required for that comparison.
 
 ## 16. Tests
@@ -747,7 +755,8 @@ Implemented result-comparison tests cover:
 - ordered comparison;
 - unordered multiset comparison with duplicates;
 - NULL, integer, decimal, and timestamp normalization; and
-- invalid saved result artifacts failing closed as `evaluator_uncertain`.
+- reference normalization failures producing `evaluator_uncertain` and candidate type mismatches
+  producing an incorrect comparison. Arbitrary malformed-JSON structure validation was not retained.
 
 Implemented attempt-evaluation tests cover:
 
@@ -790,8 +799,9 @@ Implemented report tests mock filesystem operations and cover:
 - complete evaluation and metric JSON serialization; and
 - Markdown percentages, raw fractions, counts, and unavailable rates.
 
-Integration tests will use saved JSON fixtures and mocked server and Athena responses. Normal tests
-will not call AWS or the deployed agent.
+Tests are currently under `tests/unit/`, with shared data under `tests/fixtures/` where needed.
+Server, filesystem and Athena dependencies are mocked; normal tests do not call AWS or the agent.
+There is no separate integration-test directory.
 
 ## 17. Implementation progress
 
@@ -826,7 +836,8 @@ will not call AWS or the deployed agent.
     denominators.
 15. **Implemented:** evaluate a selected saved run and generate JSON and Markdown reports through
     `make evaluate MODEL=<condition> REPETITION=<number>`.
-16. Run the small pilot defined in the v3 plan before executing the complete benchmark.
+16. **Completed collection:** two complete repetitions for each model are saved and evaluated.
+    The earlier 20-case pilot was a design proposal; do not infer its completion from the formal runs.
 
 ## 18. Confirmed decisions
 
@@ -852,8 +863,10 @@ alternative tied winners and month representations may therefore fail comparison
 are managed manually. Lambda validation and frontend work are outside this maintenance scope.
 
 Infrastructure errors carried inside ordinary action observations remain deferred.
-Cross-model/repetition study-level analysis, paired comparisons, and uncertainty
-intervals are the final planned step; this cleanup does not implement them or recollect experiments.
+The TypeScript cleanup did not add cross-model analysis or recollect experiments. The separate
+`docs/thesis/analysis/build-results-review.py` now calculates paired counts, CTD, stability,
+sensitivity, supplementary trajectories and an exploratory FSR bootstrap interval. Test choice
+and final statistical reporting remain pending; none of these offline analyses requires model reruns.
 
 ### Final readability pass
 
