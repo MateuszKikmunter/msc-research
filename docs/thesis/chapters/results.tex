@@ -292,7 +292,7 @@ Recovery Rate (RR) measures recovery among questions whose first SQL attempt
 had an execution error or returned an incorrect result.
 In Nova's first run, 37 questions were initially unsuccessful:
 14 execution errors and 23 semantic errors. Five eventually returned a
-correct result, giving an RR of 13.51\% (5 out of 37).
+correct result, giving an RR of 13.51\%.
 \hyperref[fig:recovery-rates]{Figure~\ref*{fig:recovery-rates}} presents the
 RR values and their underlying counts for all four runs.
 Haiku's higher RR reflects fewer initially unsuccessful cases,
@@ -376,3 +376,369 @@ a correct final result. However, the experiment did not specifically
 prompt semantic revision or test it using correctness feedback.
 The zero count therefore does not show that the models were unable
 to correct such errors.
+
+\subsection{Responses to database errors}
+\label{sec:results-error-responses}
+
+RQ3 asks what happened after an execution-error observation. 
+Nova had more failed attempts than Haiku and its errors were often followed by another failed attempt.
+Also, Haiku's observed errors were followed by successful execution. 
+Additionally, one question could contribute several error
+observations, so counts below must be distinguished from the number of
+questions that encountered an error.
+
+\paragraph{Recovery after an execution error.}
+Observation-conditioned Recovery Rate measures how often questions containing
+an execution error ended correctly. Nova's first run had
+14 such questions, of which five recovered, giving a rate of 35.71\%.
+In its second run, the corresponding rate was 25\% and
+100\% in each Haiku run. 
+This differs from Recovery Rate (RR)
+(see \hyperref[sec:results-recovery]{Section~\ref*{sec:results-recovery}}).
+Nova's RR denominator in its first run was 37, including 23 semantic errors
+and 14 execution errors. 
+Here, only the 14 questions with execution errors are included. 
+
+Haiku had only five questions with an execution error and it was able to recover all of them.
+The models also did not face an identical set of failed queries or errors.
+
+\paragraph{What followed each error observation.}
+\hyperref[tab:results-error-responses]{Table~\ref*{tab:results-error-responses}}
+counts the response to each error observation, using the rules in
+\hyperref[sec:error-responses]{Section~\ref*{sec:error-responses}}.
+It differentiates successful execution from result correctness.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X*{4}{>{\centering\arraybackslash}p{0.115\textwidth}}@{}}
+\toprule
+\textbf{Response to an error} & \textbf{Nova 1} & \textbf{Nova 2} & \textbf{Haiku 1} & \textbf{Haiku 2} \\
+\midrule
+\textbf{Retry executed successfully} & \textbf{9} & \textbf{10} & \textbf{5} & \textbf{5} \\
+\quad Returned a correct result & 5 & 5 & 5 & 5 \\
+\quad Returned an incorrect result & 4 & 5 & 0 & 0 \\
+\midrule
+\textbf{Retry repeated the same error} & \textbf{71} & \textbf{158} & \textbf{0} & \textbf{0} \\
+\quad SQL text unchanged & 36 & 104 & 0 & 0 \\
+\quad SQL text changed & 35 & 54 & 0 & 0 \\
+\midrule
+Retry produced a different error & 3 & 4 & 0 & 0 \\
+\addlinespace[0.4em]
+No retry & 5 & 10 & 0 & 0 \\
+\midrule
+\textbf{Total error observations} & \textbf{88} & \textbf{182} & \textbf{5} & \textbf{5} \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Responses to standalone execution-error observations. Indented rows break down the preceding total (Source: Author, 2026).}
+\label{tab:results-error-responses}
+\end{table}
+
+The breakdown above shows that Nova's first run contained 88 error observations.
+Of these, 71 were followed by a retry with the same normalised error signature,
+giving 80.68\%. 
+The second-run proportion was 86.81\%.
+Moreover, only five of Nova's executed retries in each run returned correct results; 
+the others still failed the reference comparison. 
+Haiku's five executed retries per run all returned correct results.
+
+\hyperref[tab:results-error-responses]{Table~\ref*{tab:results-error-responses}} 
+also shows that repeated errors followed both unchanged and
+changed SQL. Nova sometimes submitted the same query again, but changing
+the query did not always resolve the preceding error.
+
+\paragraph{Error categories and a repeated failure.}
+
+Missing-column errors accounted for $85.23\%$ (75/88) of observations
+in Nova's first run and $70.33\%$ (128/182) in its second run.
+It also recorded 29 type mismatches and 18 \texttt{EXPRESSION\_NOT\_AGGREGATE} errors.
+Both Haiku runs contained similar issues but on a smaller scale.
+Each contained two missing-column errors, two type mismatches and one unavailable-function error. 
+
+Question CB200-H038 illustrates why that distinction matters. 
+In Nova's first run, it produced 32 SQL attempts, all of which failed to execute.
+The first failed because \texttt{strftime} function was unavailable. The next
+31 reported that the column \texttt{month} could not be resolved.
+The first transition was illustrated in
+\hyperref[lst:error-transition-example]{Listing~\ref*{lst:error-transition-example}}
+in \hyperref[sec:error-responses]{Section~\ref*{sec:error-responses}};
+\hyperref[lst:repeated-error-sequence]{Listing~\ref*{lst:repeated-error-sequence}}
+below summarises the complete sequence.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  basicstyle=\footnotesize\ttfamily,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{black!25},
+  framesep=6pt,
+  xleftmargin=7pt,
+  xrightmargin=7pt,
+  caption={Error sequence for CB200-H038, Nova repetition 1 (Source: Author, 2026).},
+  label={lst:repeated-error-sequence},
+  captionpos=b
+]
+Attempt 1:     FUNCTION_NOT_FOUND:strftime
+Attempts 2-32: COLUMN_NOT_FOUND:month
+
+Responses to the 32 error observations:
+  Different error on the next attempt:  1
+  Same error on the next attempt:      30
+  No further attempt:                  1
+
+Trajectory class: UNRECOVERED_EXECUTION_FAILURE
+\end{lstlisting}
+\end{minipage}
+
+This single question was responsible for 30 of the 71 repeated-error responses ($42.25\%$)
+in Nova's first run. 
+It counts as one failure, but its trace shows that it accounted for
+many of the run's repeated errors.
+
+\paragraph{Attempts and the retry policy.}
+Most questions required only one SQL attempt, but a small group of Nova's
+questions produced much longer sequences with multiple attempts.
+\hyperref[tab:results-attempt-distribution]{Table~\ref*{tab:results-attempt-distribution}}
+shows this distribution. The median was one attempt in every run. 
+Nova's maximum was 32 attempts
+in its first run and 29 in its second, 
+compared with two in each Haiku run.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrr@{}}
+\toprule
+\textbf{SQL attempts per question} & \textbf{Nova 1} & \textbf{Nova 2} & \textbf{Haiku 1} & \textbf{Haiku 2} \\
+\midrule
+None & 1 & 0 & 0 & 0 \\
+\addlinespace[0.4em]
+One & 145 & 139 & 155 & 155 \\
+\addlinespace[0.4em]
+Two & 8 & 9 & 5 & 5 \\
+\addlinespace[0.4em]
+More than two & 6 & 12 & 0 & 0 \\
+\midrule
+Total questions & 160 & 160 & 160 & 160 \\
+Maximum attempts on one question & 32 & 29 & 2 & 2 \\
+\bottomrule
+\end{tabularx}
+}
+\caption{SQL-attempt distribution across standalone questions (Source: Author, 2026).}
+\label{tab:results-attempt-distribution}
+\end{table}
+
+\hyperref[fig:results-attempts]{Figure~\ref*{fig:results-attempts}} shows the
+total number of SQL attempts per run. 
+Haiku used 165 attempts in each run:
+155 questions had one attempt and five had two.
+In Nova's first run, six questions had more than two SQL attempts.
+These used 4, 5, 5, 12, 23 and 32 attempts, accounting for 81 of the run's 242 attempts. 
+In the second run, 12 questions had more than two attempts.
+Together, they accounted for 177 of the run's 334 attempts, 
+while the remaining 148 questions used 157 attempts.
+\hyperref[app:extended-sql-trajectories]{Appendix~\ref*{app:extended-sql-trajectories}}
+lists these questions and their attempt counts in each run.
+
+\begin{figure}[H]
+\centering
+\input{figures/results-attempts}
+\caption{Total SQL attempts by model and repetition (Source: Author, 2026).}
+\label{fig:results-attempts}
+\end{figure}
+
+Six Nova questions in the first run and 12 in the second exceeded the retry policy of two attempts.
+Haiku did not break the policy and had only five questions with two attempts in each run.
+The prompt policy was not a hard execution cap, as explained in
+\hyperref[sec:methodology]{Chapter~\ref*{sec:methodology}}.
+
+Contrary to expectations, longer sequences did not always end in failure.
+Nova recovered CB200-M039 after five attempts in run 1 and CB200-H007 after three in run 2.
+In H007, the first two queries tried to join customers directly to
+\texttt{invoice\_items} using its nonexistent \texttt{customer\_id} column.
+The third query joined through \texttt{invoices} and returned a correct result.
+\hyperref[lst:unchanged-retry-recovery]{Listing~\ref*{lst:unchanged-retry-recovery}}
+shows the relevant joins and the saved error. The rest of the SQL is omitted for brevity
+and the error position refers to the original one-line query.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  basicstyle=\footnotesize\ttfamily,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{black!25},
+  framesep=6pt,
+  xleftmargin=7pt,
+  xrightmargin=7pt,
+  caption={Unchanged retry followed by recovery, CB200-H007, Nova repetition 2 (Source: Author, 2026).},
+  label={lst:unchanged-retry-recovery},
+  captionpos=b
+]
+Attempts 1 and 2: identical SQL, both failed
+  Join excerpt:
+    FROM customers c
+    JOIN invoice_items ii ON c.customer_id = ii.customer_id
+
+  Saved error on both attempts:
+    Athena query failed: COLUMN_NOT_FOUND: line 1:146:
+    Column 'ii.customer_id' cannot be resolved or requester
+    is not authorized to access requested resources
+
+Attempt 3: executed successfully
+  Revised join excerpt:
+    FROM customers c
+    JOIN invoices i ON c.customer_id = i.customer_id
+    JOIN invoice_items ii ON i.invoice_id = ii.invoice_id
+
+Evaluator: outcome = correct; resultCorrect = true
+Trajectory class: EXECUTION_ERROR_RECOVERED
+\end{lstlisting}
+\end{minipage}
+
+The main observation relevant to RQ3 was the difference 
+in how the models responded to execution errors.
+Haiku changed its SQL and reached a correct result after each observed execution error. 
+Nova also recovered, but its traces included unchanged retries,
+changes followed by the same error and long unsuccessful sequences.
+Those differences were much larger than the equal count of five recovered
+questions per run suggested on its own.
+
+\subsection{Correctness and trajectories by difficulty}
+\label{sec:results-difficulty}
+
+RQ4 asks how correctness and trajectories varied across the benchmark's
+difficulty groups. 
+The overall rates reported earlier used all 160 standalone questions as their denominator.
+Here, FSR and CDSR were calculated separately for each difficulty group,
+using 50 easy, 60 medium and 50 hard questions per run as their denominators.
+
+\paragraph{Where the accuracy difference appeared.}
+
+Both models solved all easy questions correctly in both runs.
+The difference between the models appeared in the medium and hard groups
+(\hyperref[fig:results-difficulty]{Figure~\ref*{fig:results-difficulty}}).
+On medium questions, Nova's FSR was 85\% in run 1 and
+81.67\% in run 2. Haiku reached 91.67\% in both runs.
+
+The largest accuracy difference was observed on hard questions.
+Nova answered 26 and 25 correctly, giving FSR values of 52\% and 50\%. 
+Haiku answered 41 and 42 correctly, giving 82\% and 84\%. 
+Its advantage was 30 percentage points in the first run and 34 in the second. 
+At the same time, hard questions accounted for 15 of the 19 additional correct answers 
+from Haiku in run 1 and 17 of the 23 in run 2. 
+
+\begin{figure}[H]
+\centering
+\input{figures/results-difficulty}
+\caption{Final Success Rate by difficulty, with percentages above the bars (Source: Author, 2026).}
+\label{fig:results-difficulty}
+\end{figure}
+
+\paragraph{Direct success and recovery within each group.}
+\hyperref[tab:results-difficulty-counts]{Table~\ref*{tab:results-difficulty-counts}}
+compares final and clean direct successes within each difficulty group.
+In Nova's first run, 23 of the 50 hard questions succeeded directly and three more
+succeeded after recovery. This gave a CDSR of 46\% and an FSR of 52\%. 
+The FDG was 6 percentage points.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrr@{}}
+\toprule
+\textbf{Group and measure} & \textbf{Nova 1} & \textbf{Nova 2} & \textbf{Haiku 1} & \textbf{Haiku 2} \\
+\midrule
+Easy: final / clean direct & 50 / 50 & 50 / 50 & 50 / 49 & 50 / 49 \\
+\addlinespace[0.4em]
+Medium: final / clean direct & 51 / 49 & 49 / 48 & 55 / 55 & 55 / 55 \\
+\addlinespace[0.4em]
+Hard: final / clean direct & 26 / 23 & 25 / 21 & 41 / 37 & 42 / 38 \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Final and clean direct success counts by difficulty (Source: Author, 2026).}
+\label{tab:results-difficulty-counts}
+\end{table}
+
+\hyperref[tab:results-difficulty-counts]{Table~\ref*{tab:results-difficulty-counts}}
+shows that even though the models achieved perfect final accuracy on the easy group, 
+it does not mean that their trajectories were identical.
+Nova solved all 50 questions directly and on the first attempt. 
+Haiku solved 49 directly and recovered on CB200-E030 in each run, 
+giving a CDSR of 98\% and an FDG of 2 percentage points. 
+On medium questions, all 55 of Haiku's successes were clean and direct. 
+Nova, in contrast, recovered on two questions in run 1 and one in run 2. 
+These counts explain why the same overall recovery
+count was distributed differently across difficulty groups.
+
+All remaining recoveries occurred on hard questions: three and four for
+Nova, and four in each Haiku run. 
+This resulted in Haiku's hard-question CDSR of 74\% and
+76\%, compared with Nova's 46\% and 42\%. 
+As a result, its advantage on this group remained when considering only clean direct successes.
+
+The terminal failures also differed. In the hard group, Nova 1 had
+18 semantic failures, five execution failures and one no-SQL outcome.
+Nova 2 had 17 semantic failures and eight execution failures.
+Haiku's nine and eight hard-question failures were all semantic failures
+under the comparison contract. On medium questions, Nova 1's nine failures
+were semantic; Nova 2 also had nine semantic failures and two execution failures.
+Haiku had five semantic failures in each run.
+
+\paragraph{Long sequences within the difficulty groups.}
+The median SQL-attempt count was one in every group and run.
+Nevertheless, \hyperref[tab:results-difficulty-attempts]{Table~\ref*{tab:results-difficulty-attempts}}
+shows that this common median masked different distributions.
+\hyperref[tab:results-difficulty-attempts]{The table} 
+counts questions with more than two SQL attempts and gives
+the longest sequence in each group. 
+All remaining questions had at most two attempts, 
+including the one no-SQL case already discussed.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrr@{}}
+\toprule
+\textbf{Group and measure} & \textbf{Nova 1} & \textbf{Nova 2} & \textbf{Haiku 1} & \textbf{Haiku 2} \\
+\midrule
+Easy: questions with $>2$ attempts & 0 & 0 & 0 & 0 \\
+Easy: maximum attempts & 1 & 1 & 2 & 2 \\
+\addlinespace[0.5em]
+Medium: questions with $>2$ attempts & 1 & 2 & 0 & 0 \\
+Medium: maximum attempts & 5 & 28 & 1 & 1 \\
+\addlinespace[0.5em]
+Hard: questions with $>2$ attempts & 5 & 10 & 0 & 0 \\
+Hard: maximum attempts & 32 & 29 & 2 & 2 \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Long SQL-attempt sequences by difficulty (Source: Author, 2026).}
+\label{tab:results-difficulty-attempts}
+\end{table}
+
+More than two attempts occurred on 10\% of Nova's hard questions in run 1
+and 20\% in run 2.
+The medium-group proportions were 1.67\% and 3.33\%. 
+Haiku had no such sequences in any difficulty group.
+
+Long sequences were nevertheless not limited to hard questions.
+In Nova's second run, the medium questions CB200-M039 and CB200-M051
+used 28 and 24 attempts and both ended as execution failures.
+Those two questions accounted for 52 of the medium group's 111 attempts
+(46.85\%).
+The other 58 questions used the remaining 59 attempts.
+This shows that despite a median of one attempt, 
+a few questions took up almost half the group's SQL activity.
+
+For RQ4, harder questions coincided with lower FSR and CDSR for both models.
+Harder questions also coincided with more long attempt sequences,
+especially in Nova's hard group. 
+These results show where the differences occurred, but the
+individual trajectories are needed to explain what went wrong.

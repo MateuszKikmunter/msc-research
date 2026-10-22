@@ -1,0 +1,50 @@
+% !TeX root = ../thesis.tex
+\section{Questions with more than two SQL attempts}
+\label{app:extended-sql-trajectories}
+
+\hyperref[tab:extended-sql-trajectories]{Table~\ref*{tab:extended-sql-trajectories}}
+lists the standalone questions with more than two recorded SQL attempts
+in either Nova run. Counts were taken from the saved case-level evaluations.
+Each count includes the first attempt and all subsequent attempts.
+A dash means that the question did not exceed two attempts in that run;
+it does not indicate missing data. Neither Haiku run contained a question
+with more than two attempts.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X
+  *{2}{>{\centering\arraybackslash}p{0.22\textwidth}}@{}}
+\toprule
+\textbf{Question} & \textbf{Nova 1 attempts} & \textbf{Nova 2 attempts} \\
+\midrule
+CB200-M039 & 5 & 28 \\
+CB200-M051 & -- & 24 \\
+CB200-H003 & -- & 29 \\
+CB200-H004 & 23 & -- \\
+CB200-H007 & -- & 3 \\
+CB200-H010 & 4 & -- \\
+CB200-H018 & 5 & 10 \\
+CB200-H022 & -- & 22 \\
+CB200-H024 & 12 & 23 \\
+CB200-H025 & -- & 3 \\
+CB200-H026 & -- & 3 \\
+CB200-H037 & -- & 3 \\
+CB200-H038 & 32 & 25 \\
+CB200-H049 & -- & 4 \\
+\midrule
+\textbf{Questions exceeding two attempts} & \textbf{6} & \textbf{12} \\
+\textbf{Attempts on those questions} & \textbf{81} & \textbf{177} \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Standalone questions exceeding two SQL attempts (Source: Author, 2026).}
+\label{tab:extended-sql-trajectories}
+\end{table}
+
+These are the cases behind the longer sequences discussed in
+\hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}.
+They include both recovered and unsuccessful outcomes; the attempt count
+alone does not describe whether the final result was correct.
