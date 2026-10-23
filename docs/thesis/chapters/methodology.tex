@@ -31,12 +31,10 @@ Standalone questions formed the main quantitative analysis. SQL trajectories
 were also assessed for resolved ambiguity cases and individual interactive
 turns, while safety cases were examined through recorded actions and manual review.
 
-The evaluation of intermediate behaviour draws on \citet{ma2024agentboard}
-and their AgentBoard framework, which assesses agent progress together with final success.
-This study adopts the distinction between outcomes and process, but does not
-reproduce AgentBoard's environments or progress metric.
-
-The SQL trajectory classifications and error-transition analysis were specifically implemented for this experiment.
+The distinction between final outcomes and intermediate behaviour draws on
+AgentBoard and TRAJECT-Bench \citep{ma2024agentboard,he2026trajectbench}.
+The SQL trajectory classifications and error-transition rules were defined for
+this experiment and did not reproduce either framework's metrics.
 \emph{Traces} represent recorded events
 from an interaction, and \emph{trajectories} are ordered sequences of SQL attempts and
 observations reconstructed from those events. Neither was treated as direct
@@ -101,10 +99,7 @@ subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol mode
 Afterwards, each query was executed manually in AWS Athena to check its returned results.
 
 Each interactive case contains two authored turns, giving ten turns in total for the five interactive cases.
-These cases test the use of context across successive requests, a capability
-also examined in the SQL-grounded dialogue state tracking task of CoSQL,
-a benchmark for conversational Text-to-SQL
-\citep{yu2019cosql}.
+These cases test the use of context across successive requests.
 Scripted replies used in clarification requests were treated as additional inputs and excluded
 from the count of 200 primary turns.
 
@@ -175,9 +170,7 @@ handling and numeric tolerance, as shown in \hyperref[lst:benchmark-record]{List
 \end{lstlisting}
 \end{minipage}
 
-Building on the work of \citet{dong2025practiq}, which examines ambiguous and
-unanswerable requests in conversational Text-to-SQL,
-Chinook-Bench-200 also includes ambiguous cases with scripted clarification responses.
+Chinook-Bench-200 includes ambiguous cases with scripted clarification responses.
 Each ambiguous case specifies a clarification target and one fixed reply.
 This scripted policy extends the benchmark beyond single-turn requests without
 requiring a human participant during collection.
@@ -238,19 +231,9 @@ returned its result or execution diagnostic to the agent.
 \label{fig:system}
 \end{figure}
 
-As model inference and agent orchestration were already provided through
-Amazon Bedrock in the cloud, a cloud-native architecture was a natural fit
-for integrating the remaining AWS services.
-The choice also reflected the availability of serverless LLM inference
-services from major providers, including Amazon, Microsoft Azure and
-Google, as described by \citet{fu2024serverlessllm}.
-Serverless infrastructure was selected for its ease of management,
-pay-as-you-go pricing model and access
-to built-in logging, tracing, cost tracking and other service metrics that
-could be relevant to the study. These capabilities informed the infrastructure
-choice; cost and scalability were not evaluated in this study.
 The serverless architecture covered the AWS services, while the experiment
 runner, Node.js backend and offline evaluator ran locally.
+Cost and scalability were not evaluated in this study.
 
 \subsubsection{Runner and saved evidence}
 \label{sec:runner-evidence}
@@ -466,12 +449,8 @@ Evaluator uncertainty was kept separate from observed model errors.
 Here, semantic error means disagreement with the benchmark result on the Chinook data,
 within the scope defined in \hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}}.
 
-In their study of LLM self-debugging, \citet[Table~4(a)]{chen2024selfdebug}
-report SQL errors corrected by the model, including incorrect filters,
-joins, selected columns and aggregate functions.
-Similarly, these errors can cause a result mismatch in this study.
-The evaluator recorded the mismatch but did not automatically identify which
-part of the SQL caused it.
+The evaluator recorded result mismatches but did not automatically identify which
+part of the SQL caused each mismatch.
 
 The result comparison covered standalone questions, resolved ambiguity cases
 and individual interactive turns. 
@@ -488,9 +467,7 @@ where a correct result was followed by an incorrect or failed attempt.
 
 \subsubsection{Evaluation units and trace matching}
 
-TRAJECT-Bench examines tool selection, arguments and call order alongside
-final accuracy \citep{he2026trajectbench}.
-In this study, trajectory evaluation focused on the recorded SQL attempts
+Trajectory evaluation focused on the recorded SQL attempts
 and database feedback, including failed attempts and subsequent revisions.
 
 The offline evaluator grouped interactions by Bedrock Session ID and ordered them by interaction number. 
