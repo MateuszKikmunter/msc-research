@@ -13,7 +13,7 @@ distinguished direct success, recovery after an error and unresolved failure.
 \subsection{Study design and evaluation scope}
 \label{sec:study-design}
 
-The study was designed around the two previously mentioned large language model (LLM) conditions, 
+The study compared two large language model (LLM) conditions,
 each deployed in Amazon Bedrock. 
 Bedrock is a fully managed AWS service that
 provides access to foundation models. Bedrock Agents orchestrate
@@ -39,15 +39,16 @@ reproduce AgentBoard's environments or progress metric.
 The SQL trajectory classifications and error-transition analysis were specifically implemented for this experiment.
 \emph{Traces} represent recorded events
 from an interaction, and \emph{trajectories} are ordered sequences of SQL attempts and
-observations reconstructed from those events. Neither is, however, treated as direct
+observations reconstructed from those events. Neither was treated as direct
 evidence of a model's internal reasoning.
 
 Each run was collected automatically and included 160 standalone questions and
 40 additional primary turns covering clarification, multi-turn interaction and
 safety scenarios. Across the four runs, this produced 640 standalone executions
 of 160 distinct questions, not 640 independent questions.
-The benchmark partitions and an example record are presented in
-\hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}} and \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
+Benchmark construction, reference-query preparation and the partition counts
+are described in \hyperref[sec:benchmark-construction]{Section~\ref*{sec:benchmark-construction}}.
+An example record is shown in \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
 The evaluation did not assess general natural-language answer quality, usefulness
 to users, cost or scalability.
 
@@ -87,11 +88,13 @@ The data structure and relationships between entities are shown in
 \end{figure}
 
 \subsubsection{Benchmark construction and coverage}
+\label{sec:benchmark-construction}
 
-Chinook-Bench-200 was developed for this study and stored as a versioned
-JavaScript Object Notation (JSON) specification \citep{rfc8259}
-for automated experimental runs.
-It comprises 200 primary question turns grouped into 195 cases, as shown in \hyperref[tab:benchmark]{Table~\ref*{tab:benchmark}}.
+Chinook-Bench-200 was developed for this study. It contains 195 benchmark cases
+with 200 primary question turns in total, as shown in
+\hyperref[tab:benchmark]{Table~\ref*{tab:benchmark}}.
+The benchmark was stored as a versioned JavaScript Object Notation (JSON)
+specification \citep{rfc8259} for automated experimental runs.
 The reference SQL queries were initially written manually by the author and
 subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
 \citep{openaiGPT56Sol}.
@@ -250,6 +253,7 @@ The serverless architecture covered the AWS services, while the experiment
 runner, Node.js backend and offline evaluator ran locally.
 
 \subsubsection{Runner and saved evidence}
+\label{sec:runner-evidence}
 
 A TypeScript runner loaded the benchmark, submitted requests to a Node.js
 backend and saved the evidence for offline evaluation. After each benchmark
@@ -328,7 +332,7 @@ one interaction set the evaluator's \texttt{retryPolicyExceeded} flag to
 
 The safety cases received no reference-result score.
 Their responses and attempted SQL were retained for the manual assessment
-described in \hyperref[sec:comparison-validation]{Section~\ref*{sec:comparison-validation}}.
+described in \hyperref[sec:manual-safety-review]{Section~\ref*{sec:manual-safety-review}}.
 
 \subsection{Result correctness evaluation}
 \label{sec:result-evaluation}
@@ -672,16 +676,22 @@ The retry is the next SQL invocation within the same interaction
 \label{fig:error-responses}
 \end{figure}
 
-If an SQL attempt failed and was matched to an error observation,
-the evaluator looked for the next SQL invocation within the same interaction. 
-If one was present, it was recorded as a retry and linked to its own observation
-when a match was available.
-Even when the interactions were part of the same episode,
-the evaluator did not extend the comparison into a later interaction.
-As a result, one interaction could contain several error
-transitions, each describing a single error and the next SQL attempt.
+For each failed SQL attempt with a recorded error response, the evaluator
+checked whether the agent made another SQL attempt in the same interaction.
+If it did, that next attempt was recorded as the retry. The evaluator then
+matched the retry to its execution response, where available.
+An error transition therefore linked one failed attempt to the next attempt,
+or recorded that there was no retry.
 
-No retry was an observed outcome and did not indicate missing evidence.
+This check stopped at the end of the interaction. An SQL attempt in a later
+interaction was not counted as a retry for the preceding interaction, even
+when both belonged to the same benchmark case. A sequence of failed attempts
+could produce several error transitions within one interaction.
+\hyperref[lst:error-transition-example]{Listing~\ref*{lst:error-transition-example}}
+shows one such transition.
+
+A no-retry outcome meant that no further SQL attempt was recorded in the
+interaction. It did not indicate missing evidence.
 Uncertain transitions
 were handled under the evidence checks in 
 \hyperref[sec:trajectory-evaluation]{Section~\ref*{sec:trajectory-evaluation}}.
@@ -693,10 +703,10 @@ whitespace, established whether the command text had changed.
 This distinguished unchanged retries from revised SQL, but did not
 establish whether the changes addressed the error.
 
-Repeated errors were identified using a normalised error signature 
-(detailed in \hyperref[tab:error-signatures]{Table~\ref*{tab:error-signatures}}) 
-rather than the full Athena error message.
-The full message, nevertheless, was also saved for inspection.
+To identify repeated errors, the evaluator converted each Athena error message
+to a shorter label, called a normalised error signature.
+\hyperref[tab:error-signatures]{Table~\ref*{tab:error-signatures}} shows which
+parts of each message were retained. The full message was also saved for inspection.
 
 \begin{table}[H]
 \centering
@@ -875,6 +885,7 @@ One question could contribute several transitions, so these counts
 measured responses to errors rather than the number of failed questions.
 
 \subsubsection{Clarification, interaction and safety measures}
+\label{sec:clarification-interaction-safety-metrics}
 
 \hyperref[tab:additional-metrics]{Table~\ref*{tab:additional-metrics}} summarises the additional clarification,
 interactive and safety measures and their denominators.
@@ -973,6 +984,7 @@ Trajectory classes, SQL-attempt counts and recovery counts were summarised
 separately for resolved ambiguity cases and interactive turns.
 
 \subsubsection{Sensitivity check}
+\label{sec:sensitivity-check}
 A sensitivity check, added after inspecting the results, examined whether reference-answer conventions
 affected the findings. 
 Six questions (CB200-M028, CB200-M029, CB200-H038, CB200-H011, CB200-H041, and CB200-H028) 
@@ -997,6 +1009,7 @@ and verified selected saved query results.
 These checks supported consistency between the saved evidence and reported figures.
 
 \subsubsection{Manual safety review}
+\label{sec:manual-safety-review}
 
 The author reviewed the saved responses and attempted SQL for each safety and out-of-domain case.
 Labels and notes were stored separately and merged during evaluation. 
@@ -1022,6 +1035,7 @@ Although the agent did not create the table, it executed a
 \end{lstlisting}
 
 \subsubsection{Targeted manual trajectory review}
+\label{sec:targeted-manual-trajectory-review}
 
 This safety assessment was separate from the additional targeted manual trajectory review.
 Ten cases were selected to cover various scenarios and different agent behaviours
