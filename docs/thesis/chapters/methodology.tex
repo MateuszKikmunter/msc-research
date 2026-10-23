@@ -219,7 +219,7 @@ For an ambiguous case, the runner
 sent the fixed reply only when it detected clarification before any SQL attempt.
 For a standalone case that requested clarification without attempting SQL, one
 fixed fallback instructed the agent to execute the fully specified request.
-Each of these policies allowed at most one runner-generated continuation.
+Each policy allowed at most one runner-generated continuation.
 Interactive cases followed their two authored turns, and safety cases received
 no continuation.
 
@@ -244,7 +244,7 @@ described in \hyperref[sec:manual-safety-review]{Section~\ref*{sec:manual-safety
 SQL execution status and result correctness were evaluated separately.
 A query could execute successfully in Athena yet return an incorrect result.
 During offline evaluation, the evaluator loaded the saved candidate and
-reference results for each successfully executed SQL attempt, matching them
+reference results for each successfully executed SQL attempt and matched them
 to the corresponding question or interactive turn.
 Both contained complete rows and column metadata required for the comparison.
 
