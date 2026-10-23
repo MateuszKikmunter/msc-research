@@ -59,17 +59,17 @@ but their result correctness was scored only for questions that received the scr
 
 Also, it is worth noting that the remaining four Nova cases and seven Haiku cases 
 were excluded from post-clarification accuracy calculations.
-This difference followed the evaluation policy described in \hyperref[sec:methodology]{Chapter~\ref*{sec:methodology}}.
+This difference followed the evaluation policy described in \hyperref[sec:clarification-interaction-safety-metrics]{Section~\ref*{sec:clarification-interaction-safety-metrics}}.
 
 The primary analysis included all 160 standalone questions per run;
 the sensitivity check used 154,
-as described in \hyperref[sec:comparison-validation]{Section~\ref*{sec:comparison-validation}}.
+as described in \hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}.
 The exclusions applied only to the sensitivity check and did not change the
 coverage or denominators of the primary results.
 
 The completed targeted manual review provided a further check on ten selected
 cases, with agreement on their recorded outcomes. Its selection and limits are
-described in \hyperref[sec:comparison-validation]{Section~\ref*{sec:comparison-validation}}.
+described in \hyperref[sec:targeted-manual-trajectory-review]{Section~\ref*{sec:targeted-manual-trajectory-review}}.
 
 \subsection{Final and direct correctness}
 \label{sec:results-correctness}
@@ -292,6 +292,7 @@ Because of that, it could not contribute to a
 comparison of first and last SQL results or to recovery from an initial error.
 
 \subsubsection{Recovery among initially unsuccessful cases}
+\label{sec:results-initial-recovery}
 Recovery Rate (RR) measures recovery among questions whose first SQL attempt
 had an execution error or returned an incorrect result.
 In Nova's first run, 37 questions were initially unsuccessful:
@@ -370,7 +371,7 @@ The instructions encouraged retries after execution errors and answering
 after successful execution. This gave the agent a clear signal to correct
 failed SQL, but no equivalent signal when an executable result disagreed
 with the reference. As described in
-\hyperref[sec:system]{Section~\ref*{sec:system}},
+\hyperref[sec:runner-evidence]{Section~\ref*{sec:runner-evidence}},
 reference comparisons took place offline and were not returned to the agent.
 
 This did not make semantic revision impossible. The agent could still
@@ -398,7 +399,7 @@ an execution error ended correctly. Nova's first run had
 In its second run, the corresponding rate was 25\% and
 100\% in each Haiku run. 
 This differs from Recovery Rate (RR)
-(see \hyperref[sec:results-recovery]{Section~\ref*{sec:results-recovery}}).
+(see \hyperref[sec:results-initial-recovery]{Section~\ref*{sec:results-initial-recovery}}).
 Nova's RR denominator in its first run was 37, including 23 semantic errors
 and 14 execution errors. 
 Here, only the 14 questions with execution errors are included. 
@@ -558,7 +559,7 @@ lists these questions and their attempt counts in each run.
 Six Nova questions in the first run and 12 in the second exceeded the retry policy of two attempts.
 Haiku did not break the policy and had only five questions with two attempts in each run.
 The prompt policy was not a hard execution cap, as explained in
-\hyperref[sec:methodology]{Chapter~\ref*{sec:methodology}}.
+\hyperref[sec:protocol]{Section~\ref*{sec:protocol}}.
 
 Contrary to expectations, longer sequences did not always end in failure.
 Nova recovered CB200-M039 after five attempts in run 1 and CB200-H007 after three in run 2.
