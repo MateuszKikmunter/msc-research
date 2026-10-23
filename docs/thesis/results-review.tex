@@ -1,4 +1,4 @@
-% Standalone preview of Chapter 4. Build methodology-review.tex first for cross-references.
+% Standalone preview of Chapter 5. See README.md for build order.
 \documentclass[12pt,a4paper]{article}
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
@@ -21,9 +21,11 @@
 \usetikzlibrary{arrows.meta,positioning}
 \usepackage[round,authoryear]{natbib}
 \usepackage{xurl}
+\usepackage{refcount}
 \usepackage{xr-hyper}
 \usepackage[hidelinks]{hyperref}
-\externaldocument{methodology-review}
+\externaldocument[][nocite]{architecture-review}
+\externaldocument[][nocite]{methodology-review}
 \urlstyle{same}
 \renewcommand{\harvardurl}[1]{\url{#1}}
 \hypersetup{pdftitle={Experimental results and analysis},
@@ -34,6 +36,10 @@
 \setlength{\bibsep}{0.65\baselineskip}
 \renewcommand{\refname}{References}
 \begin{document}
-\setcounter{section}{3}
+\setcounter{section}{4}
+\setcounter{figure}{\getrefnumber{fig:error-responses}}
+\setcounter{table}{\getrefnumber{tab:manual-trajectory-review}}
+\setcounter{lstlisting}{\getrefnumber{lst:manual-safety-review}}
 \input{chapters/results}
+\input{appendices}
 \end{document}

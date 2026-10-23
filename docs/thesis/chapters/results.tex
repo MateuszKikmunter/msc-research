@@ -459,7 +459,7 @@ the query did not always resolve the preceding error.
 
 Missing-column errors accounted for $85.23\%$ (75/88) of observations
 in Nova's first run and $70.33\%$ (128/182) in its second run.
-It also recorded 29 type mismatches and 18 \texttt{EXPRESSION\_NOT\_AGGREGATE} errors.
+Nova's second run also recorded 29 type mismatches and 18 \texttt{EXPRESSION\_NOT\_AGGREGATE} errors.
 Both Haiku runs contained similar issues but on a smaller scale.
 Each contained two missing-column errors, two type mismatches and one unavailable-function error. 
 
@@ -561,7 +561,7 @@ Haiku did not break the policy and had only five questions with two attempts in 
 The prompt policy was not a hard execution cap, as explained in
 \hyperref[sec:protocol]{Section~\ref*{sec:protocol}}.
 
-Contrary to expectations, longer sequences did not always end in failure.
+Longer sequences did not always end in failure.
 Nova recovered CB200-M039 after five attempts in run 1 and CB200-H007 after three in run 2.
 In H007, the first two queries tried to join customers directly to
 \texttt{invoice\_items} using its nonexistent \texttt{customer\_id} column.

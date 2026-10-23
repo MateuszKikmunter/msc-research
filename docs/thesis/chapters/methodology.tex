@@ -1,11 +1,12 @@
 % !TeX root = ../methodology-review.tex
-\section{Methodology and experimental system}
+\section{Methodology}
 \label{sec:methodology}
 
-The following chapter describes the methodology and experimental system used to evaluate
-an agentic Text-to-SQL system.
-The study compared Amazon Nova Lite v1.0 \citep{awsNovaLite} and Claude Haiku
-4.5 \citep{anthropicClaudeHaiku45} using a shared benchmark. The model condition
+The following chapter describes the methodology used to evaluate the agentic
+Text-to-SQL system presented in
+\hyperref[sec:architecture]{Chapter~\ref*{sec:architecture}}.
+The study compared Amazon Nova Lite v1.0 and Claude Haiku
+4.5 using a shared benchmark. The model condition
 was the independent variable, while final result
 correctness was the primary outcome variable. Trajectory measures further
 distinguished direct success, recovery after an error and unresolved failure.
@@ -15,17 +16,13 @@ distinguished direct success, recovery after an error and unresolved failure.
 
 The study compared two large language model (LLM) conditions,
 each deployed in Amazon Bedrock. 
-Bedrock is a fully managed AWS service that
-provides access to foundation models. Bedrock Agents orchestrate
-interactions between a model, software applications and user conversations
-\citep{awsBedrockOverview,awsBedrockAgents}. Both conditions were evaluated
+Both conditions were evaluated
 using the same project-specific benchmark described in
 \hyperref[sec:benchmark]{Section~\ref*{sec:benchmark}} and the same application workflow.
 
 Each model completed the same benchmark twice, producing four complete runs.
 The repeated runs were used to compare results and trajectories, including
 whether failures occurred on the same questions or shifted between runs.
-They were not used to establish statistical significance.
 
 Standalone questions formed the main quantitative analysis. SQL trajectories
 were also assessed for resolved ambiguity cases and individual interactive
@@ -53,46 +50,22 @@ to users, cost or scalability.
 \subsection{Database and benchmark}
 \label{sec:benchmark}
 
-\subsubsection{Database and schema}
+\subsubsection{Database and study scope}
 
-The experimental database was Chinook, a sample digital media-store database
-maintained by \citet{chinook}. Its schema represents artists, albums, tracks,
-genres, playlists, customers, employees and sales.
-
-The Chinook dataset was selected because of its small size and simple schema,
+The Chinook (see \hyperref[sec:architecture-data]{Section~\ref*{sec:architecture-data}}) 
+dataset was selected because of its small size and simple schema,
 which make manual querying and result analysis easier.
 It is also complex enough to support joins, aggregations and subqueries.
-
-For this project, the Chinook Parquet version developed by \citet{chinook-parquet}
-was selected for its columnar storage format. AWS Athena can read the columns required
-by a query rather than all columns, reducing the data scanned for suitable queries
-\citep{apacheParquetDocs,awsColumnar}. Performance and cost savings were not
-measured in this study. The files were stored in Amazon S3 \citep{awsS3Docs}
-and registered through the AWS Glue Data Catalog \citep{awsGlueDataCatalog}
-for querying with Amazon Athena \citep{awsAthena}.
-The deployed Athena workgroup used engine version 3 \citep{awsAthenaEngineV3}.
-
-The relational dataset comprises eleven tables,
-enabling analytical questions such as sales trends, top customers, revenue by country, or product performance.
-The data structure and relationships between entities are shown in
-\hyperref[fig:chinook-schema]{Figure~\ref*{fig:chinook-schema}}.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../assets/image.png}
-    \caption{Chinook dataset structure and relationships between entities
-    (Source: \citealp{chinook}).}
-    \label{fig:chinook-schema}
-\end{figure}
 
 \subsubsection{Benchmark construction and coverage}
 \label{sec:benchmark-construction}
 
-Chinook-Bench-200 was developed for this study. It contains 195 benchmark cases
+A custom benchmark, Chinook-Bench-200, was developed for this study. 
+It contains 195 benchmark cases
 with 200 primary question turns in total, as shown in
 \hyperref[tab:benchmark]{Table~\ref*{tab:benchmark}}.
-The benchmark was stored as a versioned JavaScript Object Notation (JSON)
-specification \citep{rfc8259} for automated experimental runs.
+The benchmark was stored as a versioned JSON
+specification for automated experimental runs.
 The reference SQL queries were initially written manually by the author and
 subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
 \citep{openaiGPT56Sol}.
@@ -193,89 +166,31 @@ Different SQL formulations were accepted when their results satisfied the
 comparison contract. Establishing query equivalence across other database
 instances is outside the research scope.
 
-\subsection{Experimental system and evidence collection}
-\label{sec:system}
+\subsection{Evidence collection and execution protocol}
+\label{sec:protocol}
 
-\subsubsection{Deployed pipeline}
-
-The system was designed as a cloud-native serverless architecture utilising
-managed services spanning across four specialised layers:
-
-\begin{itemize}
-    \item Data layer: the Chinook dataset stored as Apache Parquet in
-    Amazon S3, with table metadata maintained in the AWS Glue Data Catalog.
-    S3 also stored Athena query results.
-
-    \item Inference and orchestration layer: an Amazon Bedrock Agent
-    using the selected model, Nova Lite or Claude Haiku 4.5, to generate
-    SQL, request clarification and respond to query results or errors.
-
-    \item Query action layer: an AWS Lambda function \citep{awsLambdaDocs} that submitted
-    generated SQL to Athena and returned results or execution errors
-    to the agent.
-
-    \item Query engine layer: Amazon Athena executing SQL queries
-    against the Chinook data stored in S3.
-\end{itemize}
-
-\hyperref[fig:system]{Figure~\ref*{fig:system}} summarises the custom system implemented for the study.
-The backend invoked an Amazon Bedrock agent, which received schema information and instructions for
-read-only analysis. The agent could request clarification or call a Lambda
-action with generated SQL. That action submitted the query to Athena and
-returned its result or execution diagnostic to the agent.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figures/experiment-pipeline.pdf}
-\caption{Deployed pipeline and offline evaluation. The runner also retrieves complete results directly from Athena (Source: Author, 2026).}
-\label{fig:system}
-\end{figure}
-
-The serverless architecture covered the AWS services, while the experiment
-runner, Node.js backend and offline evaluator ran locally.
-Cost and scalability were not evaluated in this study.
-
-\subsubsection{Runner and saved evidence}
+\subsubsection{Collection and saved results}
 \label{sec:runner-evidence}
 
-A TypeScript runner loaded the benchmark, submitted requests to a Node.js
-backend and saved the evidence for offline evaluation. After each benchmark
-case, it appended the interactions, including the model responses and trace
-events, to an \texttt{interactions.jsonl} file. Complete results from successful
-SQL attempts were saved as separate JSON files. The backend also stored responses
-and traces in a SQLite database \citep{sqliteDocs} for convenient inspection and
-initial data-shape checks, but the offline evaluator did not read this database.
+A TypeScript runner loaded the benchmark and submitted requests to the Node.js
+backend described in
+\hyperref[sec:architecture-evidence]{Section~\ref*{sec:architecture-evidence}}.
+After each benchmark case, it appended the interactions, including the model
+responses and trace events, to an \texttt{interactions.jsonl} file.
+Complete results from successful SQL attempts were saved as separate JSON files.
 
-For each successfully executed attempt, the runner used the Athena execution identifier to retrieve all result
-pages and save the complete candidate result.
+For each successfully executed attempt, the runner used the Athena execution
+identifier to retrieve all result pages and save the complete candidate result.
 The runner saved interactions, session identifiers, ordered trace events and
 links to candidate results. The offline evaluator read these artifacts and the
 saved reference results without invoking the model or executing new SQL.
 Evaluation could be repeated with updated manual safety labels using the saved
 model responses.
-Reference-result judgments were not
-returned to the agent during execution: an executable but incorrect query did
-not automatically produce correctness feedback or trigger another attempt.
+Reference-result judgments were not returned to the agent during execution:
+an executable but incorrect query did not automatically produce correctness
+feedback or trigger another attempt.
 
-\subsubsection{Demonstration interface}
-
-An Angular chat interface was developed for demonstration and manual interaction
-with the agent through the same backend; experimental runs bypassed the user
-interface (UI).
-It provided an illustrative and interactive way of presenting the
-pipeline's capabilities in a user-friendly form.
-The interface is illustrated in \hyperref[fig:chat-interface]{Figure~\ref*{fig:chat-interface}}.
-
-\begin{figure}[H]
-    \centering
-    % Keep the figure at its native size so the key remains exactly 12 pt.
-    \includegraphics{figures/chat-interface-annotated.pdf}
-    \caption{Angular interface showing the request, response, SQL and trace details (Source: Author, 2026).}
-    \label{fig:chat-interface}
-\end{figure}
-
-\subsection{Execution protocol and comparison controls}
-\label{sec:protocol}
+\subsubsection{Comparison controls and inference settings}
 
 The two model conditions shared the benchmark, schema information, instructions,
 query-action contract and application code.
@@ -294,6 +209,8 @@ To reduce sampling variability, \texttt{TopK: 1} restricted selection to the
 most probable next token, while \texttt{TopP: 1} left cumulative-probability
 filtering unrestricted for Nova \citep{awsInferenceParameters}.
 
+\subsubsection{Sessions and continuation policies}
+
 All cases were sent to the agent sequentially in benchmark order,
 with a fresh Bedrock session for each independent case.
 Interactive turns and clarification continuations reused their case's session
@@ -305,6 +222,8 @@ fixed fallback instructed the agent to execute the fully specified request.
 Each of these policies allowed at most one runner-generated continuation.
 Interactive cases followed their two authored turns, and safety cases received
 no continuation.
+
+\subsubsection{SQL retry policy}
 
 Runner continuations were distinct from SQL retries within an agent response.
 The agent instructions permitted one SQL retry after a query error within each
@@ -1061,5 +980,4 @@ label for CB200-H038 reflected a difference in month representation.
 The targeted review, automated tests and reporting checks formed the validation
 approach used in this study. The cases were deliberately selected and reviewed
 by the author, so the observed agreement does not estimate overall evaluator
-accuracy or independent second-reviewer agreement. The findings and remaining evaluation
-limits are discussed in \hyperref[sec:results]{Chapter~\ref*{sec:results}}.
+accuracy or independent second-reviewer agreement.

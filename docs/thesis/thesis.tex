@@ -1,4 +1,4 @@
-% Combined preview of Chapters 3 and 4, with a shared bibliography.
+% Combined preview of Chapters 3, 4 and 5, with a shared bibliography.
 \documentclass[12pt,a4paper]{article}
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
@@ -24,7 +24,7 @@
 \usepackage[hidelinks]{hyperref}
 \urlstyle{same}
 \renewcommand{\harvardurl}[1]{\url{#1}}
-\hypersetup{pdftitle={Methodology and experimental results},
+\hypersetup{pdftitle={System architecture, methodology and experimental results},
   pdfauthor={Mateusz Kikmunter}}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.5\baselineskip}
@@ -35,6 +35,8 @@
 % Match the template's section-based chapter numbering; restart page numbers
 % for this review excerpt rather than implying final thesis pagination.
 \setcounter{section}{2}
+\input{chapters/architecture}
+\clearpage
 \input{chapters/methodology}
 \clearpage
 \input{chapters/results}
