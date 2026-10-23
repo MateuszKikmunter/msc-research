@@ -74,6 +74,8 @@ described in \hyperref[sec:comparison-validation]{Section~\ref*{sec:comparison-v
 \subsection{Final and direct correctness}
 \label{sec:results-correctness}
 
+\subsubsection{Final and clean direct success rates}
+
 Final Success Rate (FSR) is the share of standalone questions ending with a
 correct result. Clean Direct Success Rate (CDSR) counts those solved with one
 correct SQL attempt, no redundant action and no unnecessary clarification.
@@ -103,7 +105,7 @@ Between repetitions, final-success and clean-direct counts changed slightly.
 Nova's final-success count fell by three and Haiku's increased by one. 
 The clean-direct counts changed by the same amounts.
 
-\paragraph{What the equal gap shows.}
+\subsubsection{What the equal gap shows}
 
 Each run had five more final successes than clean direct successes.
 With 160 standalone questions per run, the Final-to-Direct Gap (FDG),
@@ -117,7 +119,7 @@ For example, CB200-E030 required recovery in both Haiku runs,
 and Nova recovered CB200-M026 in both runs. 
 Nova's recovered cases also changed between repetitions.
 
-\paragraph{Share of successes that were not direct.}
+\subsubsection{Share of successes that were not direct}
 RQ1 concerns the proportion of successful cases, so its denominator differs
 from the gap: \hyperref[tab:results-nondirect-share]{Table~\ref*{tab:results-nondirect-share}}
 reports successes that were not clean direct successes as a share of all final successes.
@@ -161,6 +163,8 @@ was not tested.
 \subsection{Recovery and terminal failure}
 \label{sec:results-recovery}
 
+\subsubsection{Terminal trajectory classes}
+
 The models differed in their terminal failures, although both recovered on five questions per run.
 \hyperref[fig:results-trajectories]{Figure~\ref*{fig:results-trajectories}} shows the recorded
 trajectory classes. 
@@ -184,7 +188,7 @@ These counts should not all be read as evidence of faulty analytical reasoning.
 The sensitivity analysis mentioned earlier examines cases affected by output conventions and
 reference assumptions.
 
-\paragraph{From the first attempt to the final outcome.}
+\subsubsection{From the first attempt to the final outcome}
 Nova encountered execution errors on 14 and 20 questions in its first and second runs respectively, 
 while Haiku had only five in each run.
 Each question was counted once and the number of attempts it contained did not matter. 
@@ -287,7 +291,7 @@ the case was categorised as a no-SQL outcome.
 Because of that, it could not contribute to a
 comparison of first and last SQL results or to recovery from an initial error.
 
-\paragraph{Recovery among initially unsuccessful cases.}
+\subsubsection{Recovery among initially unsuccessful cases}
 Recovery Rate (RR) measures recovery among questions whose first SQL attempt
 had an execution error or returned an incorrect result.
 In Nova's first run, 37 questions were initially unsuccessful:
@@ -356,7 +360,7 @@ succeeded on its first attempt.
 Both received a correct final outcome,
 but only Nova's trajectory included recovery.
 
-\paragraph{No observed semantic-revision successes.}
+\subsubsection{No observed semantic-revision successes}
 Every case whose first SQL attempt returned an executable but incorrect
 result also ended with a semantic error
 (\hyperref[tab:first-terminal-outcomes]{Table~\ref*{tab:first-terminal-outcomes}}).
@@ -387,7 +391,7 @@ Additionally, one question could contribute several error
 observations, so counts below must be distinguished from the number of
 questions that encountered an error.
 
-\paragraph{Recovery after an execution error.}
+\subsubsection{Recovery after an execution error}
 Observation-conditioned Recovery Rate measures how often questions containing
 an execution error ended correctly. Nova's first run had
 14 such questions, of which five recovered, giving a rate of 35.71\%.
@@ -402,7 +406,7 @@ Here, only the 14 questions with execution errors are included.
 Haiku had only five questions with an execution error and it was able to recover all of them.
 The models also did not face an identical set of failed queries or errors.
 
-\paragraph{What followed each error observation.}
+\subsubsection{What followed each error observation}
 \hyperref[tab:results-error-responses]{Table~\ref*{tab:results-error-responses}}
 counts the response to each error observation, using the rules in
 \hyperref[sec:error-responses]{Section~\ref*{sec:error-responses}}.
@@ -450,7 +454,7 @@ also shows that repeated errors followed both unchanged and
 changed SQL. Nova sometimes submitted the same query again, but changing
 the query did not always resolve the preceding error.
 
-\paragraph{Error categories and a repeated failure.}
+\subsubsection{Error categories and a repeated failure}
 
 Missing-column errors accounted for $85.23\%$ (75/88) of observations
 in Nova's first run and $70.33\%$ (128/182) in its second run.
@@ -498,7 +502,7 @@ in Nova's first run.
 It counts as one failure, but its trace shows that it accounted for
 many of the run's repeated errors.
 
-\paragraph{Attempts and the retry policy.}
+\subsubsection{Attempts and the retry policy}
 Most questions required only one SQL attempt, but a small group of Nova's
 questions produced much longer sequences with multiple attempts.
 \hyperref[tab:results-attempt-distribution]{Table~\ref*{tab:results-attempt-distribution}}
@@ -616,7 +620,7 @@ The overall rates reported earlier used all 160 standalone questions as their de
 Here, FSR and CDSR were calculated separately for each difficulty group,
 using 50 easy, 60 medium and 50 hard questions per run as their denominators.
 
-\paragraph{Where the accuracy difference appeared.}
+\subsubsection{Where the accuracy difference appeared}
 
 Both models solved all easy questions correctly in both runs.
 The difference between the models appeared in the medium and hard groups
@@ -638,7 +642,7 @@ from Haiku in run 1 and 17 of the 23 in run 2.
 \label{fig:results-difficulty}
 \end{figure}
 
-\paragraph{Direct success and recovery within each group.}
+\subsubsection{Direct success and recovery within each group}
 \hyperref[tab:results-difficulty-counts]{Table~\ref*{tab:results-difficulty-counts}}
 compares final and clean direct successes within each difficulty group.
 In Nova's first run, 23 of the 50 hard questions succeeded directly and three more
@@ -690,7 +694,7 @@ under the comparison contract. On medium questions, Nova 1's nine failures
 were semantic; Nova 2 also had nine semantic failures and two execution failures.
 Haiku had five semantic failures in each run.
 
-\paragraph{Long sequences within the difficulty groups.}
+\subsubsection{Long sequences within the difficulty groups}
 The median SQL-attempt count was one in every group and run.
 Nevertheless, \hyperref[tab:results-difficulty-attempts]{Table~\ref*{tab:results-difficulty-attempts}}
 shows that this common median masked different distributions.
