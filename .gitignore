@@ -1,6 +1,7 @@
 .env
 .DS_Store
 .venv/
+.venv-statistics/
 notes.md
 node_modules
 dist/
@@ -9,3 +10,5 @@ src/backend/data/*.db
 src/backend/data/*.db-shm
 src/backend/data/*.db-wal
 .github
+docs/thesis/analysis/__pycache__/*
+

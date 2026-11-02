@@ -1,0 +1,43 @@
+% Case groups checked against the four saved case-level evaluations.
+\begingroup
+\definecolor{direct}{HTML}{24557A}
+\definecolor{recovery}{HTML}{168475}
+\definecolor{execution}{HTML}{A34C40}
+\begin{tikzpicture}[font=\small,
+  outcome/.style={rounded corners=2pt,minimum height=.9cm,
+    text width=3.6cm,font=\footnotesize,align=center,inner sep=5pt},
+  recovered/.style={outcome,draw=recovery,fill=recovery!7},
+  succeeded/.style={outcome,draw=direct,fill=direct!7},
+  failed/.style={outcome,draw=execution,fill=execution!7},
+  arrow/.style={-{Stealth[length=2.5mm]},draw=black!60,line width=.8pt}]
+\node[font=\small\bfseries] at (3.3,1.65) {Repetition 1};
+\node[font=\small\bfseries] at (9.2,1.65) {Repetition 2};
+\node[anchor=west,font=\small\bfseries] at (0,-2.2) {Nova};
+
+\node[recovered] (n1a) at (3.3,0) {\mbox{Execution-error}\\recovery};
+\node[recovered] (n2a) at (9.2,0) {\mbox{Execution-error}\\recovery};
+\draw[arrow] (n1a.east) -- (n2a.west);
+\node[font=\footnotesize] at (6.25,.9) {H030, H031, M026};
+
+\node[recovered] (n1b) at (3.3,-2.2) {\mbox{Execution-error}\\recovery};
+\node[failed] (n2b) at (9.2,-2.2) {Unrecovered\\execution failure};
+\draw[arrow] (n1b.east) -- (n2b.west);
+\node[font=\footnotesize] at (6.25,-1.3) {H003, M039};
+
+\node[succeeded] (n1c) at (3.3,-4.4) {Direct success};
+\node[recovered] (n2c) at (9.2,-4.4) {\mbox{Execution-error}\\recovery};
+\draw[arrow] (n1c.east) -- (n2c.west);
+\node[font=\footnotesize] at (6.25,-3.5) {H007, H023};
+
+\draw[black!20] (0,-5.3) -- (11.2,-5.3);
+\node[anchor=west,font=\small\bfseries] at (0,-7.0) {Haiku};
+\node[recovered] (h1) at (3.3,-7.0) {\mbox{Execution-error}\\recovery};
+\node[recovered] (h2) at (9.2,-7.0) {\mbox{Execution-error}\\recovery};
+\draw[arrow] (h1.east) -- (h2.west);
+\node[font=\footnotesize] at (6.25,-6.1) {E030, H014, H025, H045, H050};
+\draw[black!35,line width=.5pt] (6.25,0.63) -- (6.25,0.16);
+\draw[black!35,line width=.5pt] (6.25,-1.57) -- (6.25,-2.04);
+\draw[black!35,line width=.5pt] (6.25,-3.77) -- (6.25,-4.24);
+\draw[black!35,line width=.5pt] (6.25,-6.37) -- (6.25,-6.84);
+\end{tikzpicture}
+\endgroup

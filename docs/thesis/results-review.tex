@@ -9,6 +9,7 @@
 \usepackage{microtype}
 \usepackage{booktabs,tabularx,array}
 \usepackage{listings}
+\usepackage{caption}
 \lstset{
   basicstyle=\normalsize\ttfamily,
   breaklines=true,
@@ -41,5 +42,11 @@
 \setcounter{table}{\getrefnumber{tab:manual-trajectory-review}}
 \setcounter{lstlisting}{\getrefnumber{lst:manual-safety-review}}
 \input{chapters/results}
+\clearpage
+\begingroup
+\interlinepenalty=10000
+\bibliographystyle{agsm}
+\bibliography{references}
+\endgroup
 \input{appendices}
 \end{document}

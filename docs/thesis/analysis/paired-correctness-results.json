@@ -1,0 +1,1363 @@
+{
+    "analysis": "Exploratory two-sided paired t-test of per-question mean final correctness",
+    "direction": "Haiku minus Nova",
+    "alpha": 0.05,
+    "unit": "Standalone question, averaging its two observed repetitions for each model",
+    "primary": {
+        "n_question_pairs": 160,
+        "df": 159,
+        "nova_mean_fsr_percent": 78.4375,
+        "haiku_mean_fsr_percent": 91.5625,
+        "mean_difference_pp": 13.125,
+        "standard_error_pp": 3.2118436240590547,
+        "t_statistic": 4.08643805124389,
+        "p_two_sided": 6.93109461359699e-5,
+        "confidence_interval_95_pp": [6.781621006482003, 19.468378993517998],
+        "difference_distribution": {
+            "-1": 5,
+            "-0.5": 1,
+            "0": 122,
+            "0.5": 11,
+            "1": 21
+        },
+        "nonzero_differences": 38
+    },
+    "checks": {
+        "existing_154_question_sensitivity": {
+            "excluded_ids": [
+                "CB200-H011",
+                "CB200-H028",
+                "CB200-H038",
+                "CB200-H041",
+                "CB200-M028",
+                "CB200-M029"
+            ],
+            "n_question_pairs": 154,
+            "df": 153,
+            "nova_mean_fsr_percent": 80.84415584415584,
+            "haiku_mean_fsr_percent": 94.8051948051948,
+            "mean_difference_pp": 13.96103896103896,
+            "standard_error_pp": 3.240912325232785,
+            "t_statistic": 4.307749658126337,
+            "p_two_sided": 2.9369140423109677e-5,
+            "confidence_interval_95_pp": [
+                7.558323959527928, 20.363753962549993
+            ],
+            "difference_distribution": {
+                "-1": 4,
+                "-0.5": 1,
+                "0": 118,
+                "0.5": 10,
+                "1": 21
+            },
+            "nonzero_differences": 36
+        }
+    },
+    "scope": [
+        "Approximate t inference; question differences are discrete and not normally distributed.",
+        "Question independence and representativeness are assumptions, not validated by small p-values.",
+        "Repeated questions are averaged; similarities between different questions remain.",
+        "Conditional on this benchmark, contract and two observed repetitions; not future-run variability.",
+        "Analysis selected after seeing results; no causal or universal model-superiority claim.",
+        "The sensitivity analysis is a supporting check, not an independent replication."
+    ],
+    "software": {
+        "python": "3.13.5",
+        "scipy": "1.18.0",
+        "numpy": "2.5.4"
+    },
+    "script_sha256": "bdd63eeb7f94365ad89d74df98a96a1f098e61974df086084fc1b074a7745adb",
+    "source_sha256": {
+        "benchmarks/chinook-bench-200.json": "d672567991232112af19639439f838ffd939ca025c67fb542e34dc617041b7a7",
+        "src/experiments/runs/nova-lite/repetition-1/evaluation/results.json": "da35e73e9e9356f20dd2c2b474cf7e240106f8c429a52027af7f4f6b380148ae",
+        "src/experiments/runs/nova-lite/repetition-1/evaluation/summary.json": "ca08bf8f67e28ba98896347ca10d04a41930c4fd2f9d0454ca3b2dc4d9491572",
+        "src/experiments/runs/nova-lite/repetition-2/evaluation/results.json": "79d1ff479989e89ed19bc33de33b1b3862c92897b60291a37d1447c6166f1306",
+        "src/experiments/runs/nova-lite/repetition-2/evaluation/summary.json": "461a93eea0794d4d6f436583cdd9cec8ba225e40d42385fc7c2d341c5b845244",
+        "src/experiments/runs/haiku-4-5/repetition-1/evaluation/results.json": "f8277fdc8f71f52b3d85695bd1a0c2ee1438aba28baef5d80071de5f0c466de4",
+        "src/experiments/runs/haiku-4-5/repetition-1/evaluation/summary.json": "c48cd442d76a2756fdf85d44b6953d63da5c7fb35a9d85104ed6cc2b3c393748",
+        "src/experiments/runs/haiku-4-5/repetition-2/evaluation/results.json": "fb3dae362b8f2714a8f309fa895fed18cc462845a4705860fdc61d26ac379dfa",
+        "src/experiments/runs/haiku-4-5/repetition-2/evaluation/summary.json": "f9c0dc188ef5ecf2b2f666e2f3b6340c686b5da3fd47dc0bb3f780dcfe065d3c"
+    },
+    "question_pairs": [
+        {
+            "question_id": "CB200-E001",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E002",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E003",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E004",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E005",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E006",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E007",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E008",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E009",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E010",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E011",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E012",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E013",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E014",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E015",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E016",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E017",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E018",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E019",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E020",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E021",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E022",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E023",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E024",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E025",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E026",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E027",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E028",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E029",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E030",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E031",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E032",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E033",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E034",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E035",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E036",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E037",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E038",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E039",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E040",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E041",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E042",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E043",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E044",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E045",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E046",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E047",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E048",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E049",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-E050",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H001",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H002",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H003",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H004",
+            "nova_repetitions": [0, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H005",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H006",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H007",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H008",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H009",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H010",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H011",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 1],
+            "nova_mean": 0,
+            "haiku_mean": 0.5,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H012",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H013",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 1,
+            "haiku_mean": 0,
+            "difference": -1
+        },
+        {
+            "question_id": "CB200-H014",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H015",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H016",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H017",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H018",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H019",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H020",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H021",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H022",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H023",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H024",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H025",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H026",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H027",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H028",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 1,
+            "haiku_mean": 0,
+            "difference": -1
+        },
+        {
+            "question_id": "CB200-H029",
+            "nova_repetitions": [0, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-H030",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H031",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H032",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H033",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 1,
+            "haiku_mean": 0,
+            "difference": -1
+        },
+        {
+            "question_id": "CB200-H034",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H035",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H036",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H037",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H038",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H039",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H040",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H041",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H042",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H043",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H044",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 1,
+            "haiku_mean": 0,
+            "difference": -1
+        },
+        {
+            "question_id": "CB200-H045",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H046",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H047",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-H048",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H049",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-H050",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M001",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M002",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M003",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M004",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M005",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M006",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M007",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M008",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M009",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M010",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M011",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M012",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M013",
+            "nova_repetitions": [0, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-M014",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-M015",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-M016",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M017",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-M018",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M019",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M020",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M021",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M022",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M023",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M024",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M025",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M026",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M027",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M028",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M029",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M030",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M031",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M032",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M033",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M034",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M035",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M036",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M037",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M038",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M039",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-M040",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M041",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0,
+            "haiku_mean": 0,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M042",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 1,
+            "haiku_mean": 0,
+            "difference": -1
+        },
+        {
+            "question_id": "CB200-M043",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M044",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-M045",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M046",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M047",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M048",
+            "nova_repetitions": [0, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-M049",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M050",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [0, 0],
+            "nova_mean": 0.5,
+            "haiku_mean": 0,
+            "difference": -0.5
+        },
+        {
+            "question_id": "CB200-M051",
+            "nova_repetitions": [1, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0.5,
+            "haiku_mean": 1,
+            "difference": 0.5
+        },
+        {
+            "question_id": "CB200-M052",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M053",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M054",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M055",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M056",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M057",
+            "nova_repetitions": [0, 0],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 0,
+            "haiku_mean": 1,
+            "difference": 1
+        },
+        {
+            "question_id": "CB200-M058",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M059",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        },
+        {
+            "question_id": "CB200-M060",
+            "nova_repetitions": [1, 1],
+            "haiku_repetitions": [1, 1],
+            "nova_mean": 1,
+            "haiku_mean": 1,
+            "difference": 0
+        }
+    ]
+}

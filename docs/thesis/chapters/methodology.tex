@@ -23,6 +23,8 @@ using the same project-specific benchmark described in
 Each model completed the same benchmark twice, producing four complete runs.
 The repeated runs were used to compare results and trajectories, including
 whether failures occurred on the same questions or shifted between runs.
+The repetitions also provided the scores for an exploratory paired t-test,
+described in \hyperref[sec:paired-test-method]{Section~\ref*{sec:paired-test-method}}.
 
 Standalone questions formed the main quantitative analysis. SQL trajectories
 were also assessed for resolved ambiguity cases and individual interactive
@@ -717,7 +719,7 @@ recovery and responses to errors.
 These metrics formed a profile of the agent's behaviour rather than a single weighted score. 
 Final Success Rate (FSR) measured execution accuracy \citep{yu2018spider}
 for the terminal SQL result under this study's comparison contract.
-The author defined the accompanying direct-success and recovery measures
+The author specified the operational definitions of the accompanying direct-success and recovery measures
 using the trajectory classes in \hyperref[tab:trajectory-classes]{Table~\ref*{tab:trajectory-classes}}.
 Their definitions are summarised in \hyperref[tab:main-metrics]{Table~\ref*{tab:main-metrics}} and
 the measured values are presented in \hyperref[sec:results]{Chapter~\ref*{sec:results}}.
@@ -757,11 +759,20 @@ FSR based on execution accuracy, \citealp{yu2018spider}).}
 \label{tab:main-metrics}
 \end{table}
 
-FDG was expressed in percentage points and did not represent recovery alone.
+First-attempt success is also reported in LLM coding evaluation
+\citep{boominathan2026llm4ds}, but CDSR
+additionally required no redundant action
+or unnecessary clarification and exactly one SQL attempt across the trajectory.
+FDG and RSC were descriptive summaries of this study's trajectory counts.
+FDG was expressed in percentage points and was not limited to recovery.
 For example, a correct result could also follow an unnecessary SQL attempt
 or clarification and would contribute to that gap.
 
-RR included cases whose first attempt had an execution or semantic error.
+RR was similar to the Incorrect to Correct Rate in
+LLM self-correction research \citep[Appendix E.3.1, Eq.~10]{ma2025s2r} and
+used the same conditional structure, i.e.,
+initially unsuccessful cases ending correctly divided by initially unsuccessful cases.
+Here, RR included cases whose first attempt had an execution or semantic error.
 Observation-conditioned recovery, on the other hand, included cases with an execution error
 at any point in the trajectory.
 
@@ -837,11 +848,28 @@ results to calculate cross-model comparisons and repetition stability and perfor
 an exploratory sensitivity check.
 
 \subsubsection{Comparisons on the same questions}
+\label{sec:paired-test-method}
 Results for each standalone question were matched by question identifier within each repetition.
 Each matched pair of results fell into one of four groups: both models correct, only Nova correct,
 only Haiku correct, or neither correct. 
 The accuracy difference (expressed in percentage points) was calculated
 as Haiku's FSR minus Nova's FSR. 
+
+\citet{dror2018significance} discuss the importance of statistical significance
+testing in Natural Language Processing (NLP) research. They provide an overview
+of various statistical tests, including the paired t-test, which assesses the
+mean difference between measurements made on the same cases.
+Here, both models answered the same questions, so their correctness scores
+were paired by question identifier. An exploratory two-sided paired t-test
+was conducted to assess whether the mean Haiku-minus-Nova correctness
+difference was statistically distinguishable from zero.
+
+For this study, each question's two correctness scores were averaged separately
+for each model before comparison. 
+Averaging the repetitions was a choice made for this study and kept
+repeated executions of the same question together.
+The test results are reported in
+\hyperref[sec:results-paired-test]{Section~\ref*{sec:results-paired-test}}.
 
 \begin{samepage}
 Conditional Trajectory Divergence (CTD) measured how often the models received
@@ -861,8 +889,9 @@ If 10 pairs
 had matching final outcomes and 2 of those had different trajectory classes,
 CTD would be $2/10 = 20\%$.
 
-Pairs were included when both models returned correct results or both executed
-SQL with incorrect results. A pair in which one model failed to execute SQL
+Pairs were retained when their terminal-outcome categories matched.
+In these runs, the retained pairs were either both correct or both executable
+but incorrect. A pair in which one model failed to execute SQL
 and the other executed SQL with an incorrect result was excluded, because
 the terminal-outcome categories differed.
 
