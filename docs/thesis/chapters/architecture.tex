@@ -4,7 +4,7 @@
 
 This chapter describes the system used to answer natural-language questions
 against the Chinook database and collect evidence for evaluation. 
-It also presents the deployed pipeline, data storage and local application.
+It also presents the deployed pipeline, data storage, local application and benchmark.
 
 \subsection{System overview and deployment boundaries}
 \label{sec:system}
@@ -64,12 +64,19 @@ These capabilities supported inspection of the deployed pipeline. The saved
 SQL actions, observations and results used for formal evaluation are described
 in \hyperref[sec:architecture-evidence]{Section~\ref*{sec:architecture-evidence}}.
 
-\subsection{Database and query services}
+\subsection{Database and benchmark}
+\label{sec:benchmark}
+
+\subsubsection{Database and study scope}
 \label{sec:architecture-data}
 
 The experimental database was Chinook, a sample digital media-store database
 maintained by \citet{chinook}. Its schema represents artists, albums, tracks,
 genres, playlists, customers, employees and sales.
+
+The dataset was selected because of its small size and simple schema,
+which make manual querying and result analysis easier.
+It is also complex enough to support joins, aggregations and subqueries.
 
 For this project, the Chinook Parquet version developed by \citet{chinook-parquet}
 was selected for its columnar storage format. AWS Athena can read the columns required
@@ -92,6 +99,97 @@ shows the data structure and relationships between entities.
     (Source: \citealp{chinook}).}
     \label{fig:chinook-schema}
 \end{figure}
+
+\subsubsection{Benchmark construction and coverage}
+\label{sec:benchmark-construction}
+
+A custom benchmark, Chinook-Bench-200, was developed for this study.
+It contains 195 benchmark cases
+with 200 primary question turns in total, as shown in
+\hyperref[tab:benchmark]{Table~\ref*{tab:benchmark}}.
+The benchmark was stored as a versioned JSON
+specification for automated experimental runs.
+The reference SQL queries were initially written manually by the author and
+subsequently reviewed and revised with assistance from OpenAI's GPT-5.6 Sol model
+\citep{openaiGPT56Sol}.
+Afterwards, each query was executed manually in AWS Athena to check its returned results.
+
+Each interactive case contains two authored turns, giving ten turns in total for the five interactive cases.
+These cases test the use of context across successive requests.
+Scripted replies used in clarification requests were treated as additional inputs and excluded
+from the count of 200 primary turns.
+
+\begin{table}[H]
+\centering
+{\small
+\begin{tabularx}{\linewidth}{@{}lrrX@{}}
+\toprule
+Partition & Cases & Turns & Principal coverage \\
+\midrule
+Easy & 50 & 50 & Retrieval, filtering and basic aggregation \\
+Medium & 60 & 60 & Joins, grouped metrics and date operations \\
+Hard & 50 & 50 & Multi-hop joins, subqueries and window functions \\
+Ambiguous & 20 & 20 & Clarification before execution \\
+Interactive & 5 & 10 & Context across successive requests \\
+Safety/out-of-domain & 10 & 10 & Refusal and domain boundaries \\
+\midrule
+Total & 195 & 200 & \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Composition of the project-specific Chinook-Bench-200 benchmark.
+(Source: Author, 2026)}
+\label{tab:benchmark}
+\end{table}
+
+The Spider benchmark \citep{yu2018spider} and its categorisation of SQL queries by complexity
+were used as references when designing Chinook-Bench-200.
+However, Chinook-Bench-200 is not an extension of Spider.
+It uses its own questions and difficulty levels
+and does not test cross-domain generalisation or multiple database scenarios.
+Using one schema kept reference-result verification manageable and held the
+database context constant across model conditions.
+The questions' difficulty levels were intended to cover various SQL constructs,
+moving from simple data retrieval or counting to multi-table joins, subqueries and more.
+
+Each benchmark record defines an executable question or turn, specifying a
+natural-language request, a reference SQL query stored in the
+\texttt{gold\_sql} field and a result comparison contract.
+Ambiguous cases provide the query
+and contract for the resolved request, while safety cases specify the expected
+behaviour without a reference SQL query. The contract describes how to compare a candidate
+result with the reference, including whether row order matters, duplicate
+handling and numeric tolerance, as shown in \hyperref[lst:benchmark-record]{Listing~\ref*{lst:benchmark-record}}.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Example benchmark record with its reference SQL and comparison contract (Source: Author, 2026).},label={lst:benchmark-record},captionpos=b]
+{
+    "id": "CB200-E001",
+    "difficulty": "easy",
+    "category": "single_table_count",
+    "question": "How many artists are in the catalogue?",
+    "expected_behavior": "execute",
+    "gold_sql": "SELECT COUNT(*) AS artist_count FROM artists",
+    "comparison": {
+        "mode": "exact_result",
+        "requiredColumns": ["artist_count"],
+        "orderMatters": false,
+        "columnOrderMatters": true,
+        "preserveDuplicates": true,
+        "numericTolerance": 0.000001,
+        "rowLimit": null,
+        "topNTiePolicy": null,
+        "compareColumnNames": false,
+        "allowExtraColumns": false
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+Chinook-Bench-200 includes ambiguous cases with scripted clarification responses.
+Each ambiguous case specifies a clarification target and one fixed reply.
+This scripted policy extends the benchmark beyond single-turn requests without
+requiring a human participant during collection.
 
 \subsection{Agent, backend and query action}
 \label{sec:architecture-agent}
