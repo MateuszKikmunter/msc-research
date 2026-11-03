@@ -1,0 +1,43 @@
+% Counts from the four saved manual safety reviews, checked against evaluation summaries.
+\begingroup
+\definecolor{compliant}{HTML}{168475}
+\definecolor{partial}{HTML}{E4B15A}
+\definecolor{noncompliant}{HTML}{A34C40}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small]
+\foreach \x in {0,2,4,6,8,10} {
+  \draw[black!10] (\x,-.45) -- (\x,3.65);
+  \node[below=4pt] at (\x,-.45) {\x};
+}
+\node at (5,-1.45) {Number of reviewed safety cases};
+\node[anchor=east,font=\small\bfseries] at (-.2,3.2) {Nova 1};
+\filldraw[fill=compliant,draw=white,line width=.5pt] (0,2.9000000000000004) rectangle (7,3.5);
+\node[text=white,font=\small\bfseries] at (3.5,3.2) {7};
+\filldraw[fill=noncompliant,draw=white,line width=.5pt] (7,2.9000000000000004) rectangle (10,3.5);
+\node[text=white,font=\small\bfseries] at (8.5,3.2) {3};
+\node[anchor=east,font=\small\bfseries] at (-.2,2.2) {Nova 2};
+\filldraw[fill=compliant,draw=white,line width=.5pt] (0,1.9000000000000001) rectangle (8,2.5);
+\node[text=white,font=\small\bfseries] at (4.0,2.2) {8};
+\filldraw[fill=noncompliant,draw=white,line width=.5pt] (8,1.9000000000000001) rectangle (10,2.5);
+\node[text=white,font=\small\bfseries] at (9.0,2.2) {2};
+\node[anchor=east,font=\small\bfseries] at (-.2,1.2000000000000002) {Haiku 1};
+\filldraw[fill=compliant,draw=white,line width=.5pt] (0,0.9000000000000001) rectangle (7,1.5000000000000002);
+\node[text=white,font=\small\bfseries] at (3.5,1.2000000000000002) {7};
+\filldraw[fill=partial,draw=white,line width=.5pt] (7,0.9000000000000001) rectangle (8,1.5000000000000002);
+\node[text=black,font=\small\bfseries] at (7.5,1.2000000000000002) {1};
+\filldraw[fill=noncompliant,draw=white,line width=.5pt] (8,0.9000000000000001) rectangle (10,1.5000000000000002);
+\node[text=white,font=\small\bfseries] at (9.0,1.2000000000000002) {2};
+\node[anchor=east,font=\small\bfseries] at (-.2,0.20000000000000018) {Haiku 2};
+\filldraw[fill=compliant,draw=white,line width=.5pt] (0,-0.09999999999999981) rectangle (7,0.5000000000000002);
+\node[text=white,font=\small\bfseries] at (3.5,0.20000000000000018) {7};
+\filldraw[fill=partial,draw=white,line width=.5pt] (7,-0.09999999999999981) rectangle (8,0.5000000000000002);
+\node[text=black,font=\small\bfseries] at (7.5,0.20000000000000018) {1};
+\filldraw[fill=noncompliant,draw=white,line width=.5pt] (8,-0.09999999999999981) rectangle (10,0.5000000000000002);
+\node[text=white,font=\small\bfseries] at (9.0,0.20000000000000018) {2};
+\fill[compliant] (0,-2.25) rectangle (0.25,-2.0);
+\node[anchor=west,font=\footnotesize] at (0.35,-2.125) {Compliant};
+\fill[partial] (3.2,-2.25) rectangle (3.45,-2.0);
+\node[anchor=west,font=\footnotesize] at (3.5500000000000003,-2.125) {Partially compliant};
+\fill[noncompliant] (7.6,-2.25) rectangle (7.85,-2.0);
+\node[anchor=west,font=\footnotesize] at (7.949999999999999,-2.125) {Non-compliant};
+\end{tikzpicture}
+\endgroup
