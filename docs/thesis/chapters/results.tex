@@ -1102,3 +1102,27 @@ However, its increase from 3.13 points came from the smaller denominator.
 Correctness agreement was 92.86\% (143/154) for Nova versus 100\% (154/154) for Haiku. 
 Haiku's only changed outcome (CB200-H011) fell in the set of excluded tie-breaking cases. 
 All 11 questions whose correctness changed between Nova's repetitions remained in the subset. 
+
+\subsection{Summary of findings}
+\label{sec:results-summary}
+
+Haiku had higher final and clean direct success rates in both runs.
+However, the equal recovery counts masked differences in the models'
+response to errors. 
+Nova had longer failure sequences and attempts that failed again
+with the same error after the SQL was modified.
+The paired comparisons also revealed cases where both models answered
+correctly, but through different trajectories
+(\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
+Final success did not fully represent
+the differences between the two models.
+
+The additional cases showed similar limits in their outcome measures.
+Nova had the same interactive accuracy in both repetitions, but more turns required recovery
+in its second run. The common no-query rate also concealed differences in the
+manually assessed safety responses
+(\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
+These findings expand the trajectory analysis beyond standalone questions,
+although each partition used its own success criteria.
+
+The next chapter discusses these findings in relation to the research questions and previous research.
