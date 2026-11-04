@@ -1,0 +1,28 @@
+% Counts checked against saved case evaluations; 154 retained questions per run.
+\begingroup
+\definecolor{finalbar}{HTML}{24557A}
+\definecolor{directbar}{HTML}{168475}
+\begin{tikzpicture}[x=0.085cm,y=1cm,font=\small]
+\foreach \x in {0,20,40,60,80,100} {
+  \draw[black!10] (\x,-0.6) -- (\x,4.9);
+  \node[anchor=north,font=\footnotesize] at (\x,-0.68) {\x};
+}
+\draw[black!45,line width=.6pt] (0,-0.6) -- (100,-0.6);
+\node at (50,-1.9) {Retained standalone questions (\%)};
+\foreach \name/\y/\final/\direct/\fc/\dc in {
+  Nova 1/4.2/81.82/78.57/126/121,
+  Nova 2/2.8/79.87/76.62/123/118,
+  Haiku 1/1.4/94.81/91.56/146/141,
+  Haiku 2/0/94.81/91.56/146/141} {
+  \node[anchor=east,font=\small\bfseries] at (-3,\y) {\name};
+  \fill[finalbar] (0,\y+0.08) rectangle (\final,\y+0.40);
+  \fill[directbar] (0,\y-0.40) rectangle (\direct,\y-0.08);
+  \node[anchor=west,font=\footnotesize] at (103,\y+0.24) {\final\% (\fc/154)};
+  \node[anchor=west,font=\footnotesize] at (103,\y-0.24) {\direct\% (\dc/154)};
+}
+\fill[finalbar] (2,5.35) rectangle (5,5.57);
+\node[anchor=west,font=\footnotesize] at (6,5.46) {Final success (FSR)};
+\fill[directbar] (56,5.35) rectangle (59,5.57);
+\node[anchor=west,font=\footnotesize] at (60,5.46) {Clean direct success (CDSR)};
+\end{tikzpicture}
+\endgroup

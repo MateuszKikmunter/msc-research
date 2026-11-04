@@ -460,7 +460,7 @@ Nova's second run also recorded 29 type mismatches and 18 \texttt{EXPRESSION\_NO
 Both Haiku runs contained similar issues but on a smaller scale.
 Each contained two missing-column errors, two type mismatches and one unavailable-function error. 
 
-Question CB200-H038 illustrates why that distinction matters.
+Question CB200-H038 illustrates repeated execution failure.
 The question asked: ``Which month in 2012 had the highest invoice revenue?
 Return the month and invoice revenue. If months are tied, choose the earliest month.''
 In Nova's first run, it produced 32 SQL attempts, all of which failed to execute.
@@ -769,9 +769,9 @@ different trajectory classes by the total number of retained pairs.
 \end{figure}
 
 The excluded pairs had different terminal outcome categories. These included
-CB200-H038, where Nova ended with an execution error and Haiku returned an
-incorrect result (see
-\hyperref[sec:targeted-manual-trajectory-review]{Section~\ref*{sec:targeted-manual-trajectory-review}}).
+CB200-H038, where Nova ended with an execution error. 
+Haiku's query executed successfully, but its result failed the comparison contract
+(see \hyperref[sec:results-sensitivity]{Section~\ref*{sec:results-sensitivity}}).
 Both models failed, but their categories differed.
 
 Seven retained pairs had different trajectory classes in each repetition.
@@ -1063,3 +1063,42 @@ would indicate wealth." [...]
 purchase frequency, average transaction value)" [...]
 \end{lstlisting}
 \end{minipage}
+
+\subsection{Scoring sensitivity}
+\label{sec:results-sensitivity}
+
+The expected output representation was not always specified in the question.
+As a result, some result mismatches occurred.
+For example, in CB200-H038, Haiku returned month 8 and revenue 47.62 in both repetitions.
+The reference returned the same revenue with August represented as a timestamp (\texttt{2012-08-01 00:00:00.000}).
+The difference in month representation caused the mismatch under the comparison contract.
+
+The sensitivity check described in
+\hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}
+excluded six questions.
+These involved result representation, unspecified tie-breaking
+or the treatment of empty playlists. 
+
+\hyperref[fig:results-sensitivity]{Figure~\ref*{fig:results-sensitivity}}
+reports Final Success Rate (FSR) and Clean Direct Success Rate (CDSR).
+Since six questions were excluded, both use 154 as the denominator here. 
+Nova lost one correct answer from each run through these exclusions.
+Haiku lost none from its first run and one from its second.
+
+\begin{figure}[H]
+\centering
+\input{figures/results-sensitivity}
+\caption{Success rates after excluding six questions (Source: Author, 2026).}
+\label{fig:results-sensitivity}
+\end{figure}
+
+Recomputing FSR and CDSR with just the reduced set confirmed that Haiku achieved 
+the same higher final and clean direct success rates in both repetitions 
+(\hyperref[fig:results-sensitivity]{Figure~\ref*{fig:results-sensitivity}}). 
+Since both models had five execution-error recoveries in each repetition, 
+those five cases were responsible for producing the Final-to-Direct Gap (FDG) of 3.25 percentage points. 
+However, its increase from 3.13 points came from the smaller denominator. 
+
+Correctness agreement was 92.86\% (143/154) for Nova versus 100\% (154/154) for Haiku. 
+Haiku's only changed outcome (CB200-H011) fell in the set of excluded tie-breaking cases. 
+All 11 questions whose correctness changed between Nova's repetitions remained in the subset. 
