@@ -67,7 +67,7 @@ However, that was not sufficient to understand the errors behind the failures.
 The individual traces were needed to understand the errors and repeated actions behind those results.
 
 \citet{mitsopoulou2025analysis} similarly explain that broad difficulty 
-categories can obscure certain SQL challenges. 
+categories can obscure certain SQL issues. 
 They propose more detailed query and error analysis. 
 Likewise, in this study's medium group, 
 the traces showed repeated execution problems that the overall group score did not explain.
@@ -96,7 +96,73 @@ The supplementary cases also showed
 the limits of a single measure of success. 
 For example, interactive accuracy treated direct and recovered correct results equally. 
 The safety cases, on the other hand, presented a different issue: 
-the lack of an SQL query did not show that the model had followed the instructions. 
+the lack of an SQL query did not show that the model had followed the instructions correctly. 
 These situations required an examination 
 of both the recorded actions and the content of the model's response 
 (\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
+
+\subsection{Relationship to previous research}
+\label{sec:discussion-previous-research}
+
+\subsubsection{What this study adds to trajectory evaluation}
+
+AgentBoard measures progress on tasks by breaking them into subgoals.
+It was able to find differences in progress for agents that all had low
+scores \citep{ma2024agentboard}.
+In this case, both models have the same amount of recovery attempts, 
+which highlight a related issue when interpreting their final success rate. 
+The recovery results extend this comparison to SQL error handling.
+The important detail is whether subsequent attempts resolved the execution error
+and returned the correct result.
+By looking at database errors these outcomes can be connected 
+to the failures and repeated attempts within each deployed SQL interaction.
+
+\subsubsection{Observed recovery and designed correction procedures}
+
+Chen et al.'s self-debugging procedure is an example of explicitly prompted SQL review \citep{chen2024selfdebug}.
+Their model compared the generated SQL statements with the question.
+However, the effectiveness of explanation varied by model.
+It improved performance for some models,
+while others obtained the same score under both conditions.
+
+This study examined agents' interactions with the database
+and the corrections they applied to recover from execution errors.
+These recoveries show that the models could revise failed SQL.
+They do not show if the agents could identify a working query
+that answered the wrong question under an explicit review procedure.
+This ability remains untested in this study.
+Chen et al.'s findings suggest that explicit SQL review could be worth testing,
+but do not show whether it would improve either model's performance in this deployment.
+
+RetrySQL shows how models can correct errors while generating SQL queries \citet{raczkowska2026retrysql}. 
+It further trained models on reasoning steps
+containing deliberate errors followed by corrections.
+They were able to improve overall SQL-generation scores 
+by using certain retry-data variations compared with training on error-free reasoning.
+However, the improvements varied across variants and difficulty groups.
+
+Unlike the recoveries observed in this study after database feedback,
+RetrySQL examines corrections made before database execution.
+These findings highlight the importance of when correction occurs
+and what information is used.
+
+\subsubsection{Recovery and consistency across attempts}
+
+\citet{boominathan2026llm4ds} examine first-attempt correctness,
+recovery and consistency in Python data-science coding.
+They report that problems solved correctly on an initial attempt
+are not always solved correctly again with the same prompt.
+Similarly, results presented in this study show that some correct answers could not be re-achieved on another attempt. 
+This was especially true for Nova, which had a lower rate of repeated correctness than Haiku.
+(see \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}})
+
+Although both studies examine consistency, they measure it differently. 
+Boominathan et al. look at fresh attempts on initially successful problems.
+This study's metric, correctness agreement, includes all standalone questions, 
+even those answered incorrectly in both runs.
+
+Agreement must therefore be considered alongside correctness, 
+since repeated failure also contributes to agreement.
+Additionally, Boominathan et al.'s recovery protocol supplies task hints after failure,
+which changes the information available for correction.
+The studies therefore highlight the importance of evaluating consistency alongside correctness and recovery.
