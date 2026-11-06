@@ -1,0 +1,102 @@
+% !TeX root = ../discussion-review.tex
+\section{Discussion}
+\label{sec:discussion}
+
+This chapter discusses the findings in relation to previous work before considering their implications and limitations.
+
+\subsection{Discussion of the research questions}
+\label{sec:discussion-rqs}
+
+\subsubsection{Final success and recovery}
+
+Most of the standalone questions were answered correctly on the first SQL attempt. 
+Recovery contributed only a small number of final successes. 
+Both models recovered on exactly five questions in each run, 
+but their performance differed when execution errors occurred. 
+Haiku recovered in all cases with execution errors. 
+Nova failed to recover on nine and fifteen questions in the first and second runs, 
+respectively (see \hyperref[tab:first-terminal-outcomes]{Table~\ref*{tab:first-terminal-outcomes}}). 
+The recovery counts alone do not capture these differences.
+
+At the same time, the models were also able to fix incorrect queries 
+with the help of information returned from the database. 
+However, just having the final correct answer does not tell us 
+if the question was answered right the first time or took multiple attempts to get the right result. 
+This is important when using a model in the real world because obtaining 
+the correct result is only part of the picture. 
+The recorded trajectories additionally show what issues were encountered 
+and how many additional SQL attempts were needed to reach the final answer.
+
+The absence of semantic-revision successes needs a different interpretation. 
+This may be partly due to the instructions used in the experiments, 
+which encouraged the agents to answer the question after a successful execution 
+and did not require a separate correctness check. 
+Nonetheless, the agent received the executed SQL and a preview of its results, 
+so it could potentially identify a mismatch with the question. 
+Thus, semantic revision was possible but was not deliberately prompted, 
+and the agent received no reference-correctness feedback.
+
+\subsubsection{What responses to errors reveal}
+
+The models varied in their reactions to execution errors, 
+and sending another query did not always fix the issue. 
+The models created different SQL statements for the same questions 
+and sometimes faced different errors. 
+Moreover, the same error could appear in multiple attempts despite modified SQL. 
+This was seen in some of Nova's cases, 
+where it would change its SQL and get the same error signature on the next attempt. 
+In other cases, a retry produced executable SQL, 
+but the returned data still failed the reference comparison. 
+Therefore, treating every SQL modification as a repair, 
+or assuming that successful execution meant the problem had been resolved, 
+would give a misleading account of the model's behaviour 
+(\hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}).
+
+\subsubsection{Difficulty and concentrated failures}
+
+The gathered results show a difference between the models on hard questions.
+When looking only at clean direct successes, 
+Haiku still outperformed Nova (\hyperref[sec:results-difficulty]{Section~\ref*{sec:results-difficulty}}).
+
+While the median number of attempts was one, 
+there were longer strings of failures on some of Nova's queries. 
+A few questions accounted for much of its SQL activity. 
+These included medium-difficulty questions with long retry sequences. 
+Breaking down the results by difficulty category helped to identify where performance was weaker. 
+However, that was not sufficient to understand the errors behind the failures. 
+The individual traces were needed to understand the errors and repeated actions behind those results.
+
+\citet{mitsopoulou2025analysis} similarly explain that broad difficulty 
+categories can obscure certain SQL challenges. 
+They propose more detailed query and error analysis. 
+Likewise, in this study's medium group, 
+the traces showed repeated execution problems that the overall group score did not explain.
+
+\subsubsection{Equal outcomes and repetition stability}
+
+Final correctness does not provide a complete account of model performance. 
+Comparing the models' trajectories on the same questions provided further detail. 
+In the paired examples discussed in \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}, 
+both models eventually returned correct results, 
+but they did not always reach them in the same way. 
+In some cases, one model's first SQL attempt returned a correct result 
+while the other needed to recover from an error. 
+The final correctness judgment was identical, 
+but the trajectory classifications revealed how the results were obtained.
+
+Also, the comparison across runs identified another difference. 
+For Nova in particular, the same question could be answered correctly 
+in one run and incorrectly in the other. 
+That highlights why correctness and the consistency 
+of the process need to be considered separately. 
+Across the two runs, Haiku showed greater consistency 
+in both final correctness and trajectory classifications (\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
+
+The supplementary cases also showed 
+the limits of a single measure of success. 
+For example, interactive accuracy treated direct and recovered correct results equally. 
+The safety cases, on the other hand, presented a different issue: 
+the lack of an SQL query did not show that the model had followed the instructions. 
+These situations required an examination 
+of both the recorded actions and the content of the model's response 
+(\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
