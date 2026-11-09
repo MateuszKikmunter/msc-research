@@ -75,34 +75,32 @@ the traces showed repeated execution problems that the overall group scores did 
 
 \subsubsection{Equal outcomes and repetition stability}
 
-Final correctness does not provide a complete account of model performance. 
-Comparing the models' trajectories on the same questions provided further detail. 
-In the paired examples discussed in \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}, 
-both models eventually returned correct results, 
-but they did not always reach them in the same way. 
-In some cases, one model's first SQL attempt returned a correct result 
-while the other needed to recover from an error. 
-The final correctness judgment was identical, 
-but the trajectory classifications revealed how the results were obtained.
+Final correctness does not provide a complete view of models' performance. 
+Comparing the agents' behaviour over the same set of questions revealed more detail. 
+Both models eventually returned correct results, 
+as shown by the paired examples in \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}. 
+However, in some cases, one model was able to produce the right answer on the first attempt, 
+whereas the other model had to recover from an error. 
+Their final correctness judgments were identical in the end, 
+but their trajectories show the paths they took to get the results.
 
-Also, the comparison across runs identified another difference. 
-For Nova in particular, the same question could be answered correctly 
-in one run and incorrectly in the other. 
-That highlights why correctness and the consistency 
-of the process need to be considered separately. 
-Across the two runs, Haiku showed greater consistency 
-in both final correctness and trajectory classifications (\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
+Additionally, the comparison across runs identified another important factor. 
+Nova, in particular, would answer the same question correctly in one run and incorrectly in the other. 
+This again shows that correctness and the consistency of the process need to be considered separately. 
+Across both runs, Haiku showed greater consistency in final correctness 
+and trajectory classifications.
 
-The supplementary cases also showed 
-the limits of a single measure of success. 
-For example, interactive accuracy treated direct and recovered correct results equally. 
-The safety cases, on the other hand, presented a different issue: 
-the lack of an SQL query did not show that the model had followed the instructions correctly. 
-These situations required an examination 
-of both the recorded actions and the content of the model's response 
-(\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
+The additional test cases also showed the limitations of having one measure of success. 
+For example, interactive accuracy treated direct and recovered correct results equally, 
+despite the differences in how those results were obtained. 
+The safety questions provided a different perspective on this as well: 
+issuing no SQL statement generated did not mean that the model followed instructions correctly.
 
-\subsection{Relationship to previous research}
+These findings show why relying on success scores alone is 
+not sufficient when evaluating models' behaviour 
+(\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
+
+\subsection{Trajectory evaluation and recovery in context}
 \label{sec:discussion-previous-research}
 
 \subsubsection{What this study adds to trajectory evaluation}
@@ -110,12 +108,12 @@ of both the recorded actions and the content of the model's response
 AgentBoard measures progress on tasks by breaking them into subgoals.
 It was able to find differences in progress for agents that all had low
 scores \citep{ma2024agentboard}.
-In this case, both models have the same amount of recovery attempts, 
-which highlight a related issue when interpreting their final success rate. 
+In this case, both models had the same amount of recovery attempts, 
+which highlights a related issue when interpreting their final success rate. 
 The recovery results extend this comparison to SQL error handling.
 The important detail is whether subsequent attempts resolved the execution error
 and returned the correct result.
-By looking at database errors these outcomes can be connected 
+By looking at database, errors these outcomes can be connected 
 to the failures and repeated attempts within each deployed SQL interaction.
 
 \subsubsection{Observed recovery and designed correction procedures}
@@ -135,11 +133,11 @@ This ability remains untested in this study.
 Chen et al.'s findings suggest that explicit SQL review could be worth testing,
 but do not show whether it would improve either model's performance in this deployment.
 
-RetrySQL shows how models can correct errors while generating SQL queries \citet{raczkowska2026retrysql}. 
+RetrySQL shows how models can correct errors while generating SQL queries \citep{raczkowska2026retrysql}.
 It further trained models on reasoning steps
 containing deliberate errors followed by corrections.
 They were able to improve overall SQL-generation scores 
-by using certain retry-data variations compared with training on error-free reasoning.
+by using certain retry-data variations, compared with training on error-free reasoning.
 However, the improvements varied across variants and difficulty groups.
 
 Unlike the recoveries observed in this study after database feedback,
@@ -154,8 +152,8 @@ recovery and consistency in Python data-science coding.
 They report that problems solved correctly on an initial attempt
 are not always solved correctly again with the same prompt.
 Similarly, results presented in this study show that some correct answers could not be re-achieved on another attempt. 
-This was especially true for Nova, which had a lower rate of repeated correctness than Haiku.
-(see \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}})
+This was especially true for Nova, which had a lower rate of repeated correctness than Haiku
+(see \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
 
 Although both studies examine consistency, they measure it differently. 
 Boominathan et al. look at fresh attempts on initially successful problems.
@@ -167,3 +165,15 @@ since repeated failure also contributes to agreement.
 Additionally, Boominathan et al.'s recovery protocol supplies task hints after failure,
 which changes the information available for correction.
 The studies therefore highlight the importance of evaluating consistency alongside correctness and recovery.
+
+Additionally, the clarification findings expose a separate limit on interpreting success.
+Haiku was able to answer the continued scenarios correctly; however, it asked for clarification less frequently than Nova.
+PRACTIQ separates question classification from
+SQL generation after clarification \citep{dong2025practiq}.
+A correct answer after receiving the scripted reply did not show
+whether the model consistently recognised when clarification was needed.
+That was measured separately by the clarification detection rate.
+The conditional score also excludes cases with no reply.
+Selecting a model for conversational use therefore requires evaluating not only SQL correctness,
+but also whether the model gathers the necessary information and completes the interaction
+(\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
