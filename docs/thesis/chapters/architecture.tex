@@ -1,12 +1,12 @@
 % !TeX root = ../architecture-review.tex
-\section{System architecture and implementation}
+\section{System Architecture and Implementation}
 \label{sec:architecture}
 
 This chapter describes the system used to answer natural-language questions
 against the Chinook database and collect evidence for evaluation. 
 It also presents the deployed pipeline, data storage, local application and benchmark.
 
-\subsection{System overview and deployment boundaries}
+\subsection{System Overview and Deployment Boundaries}
 \label{sec:system}
 
 The system combined managed AWS services in four layers:
@@ -43,7 +43,7 @@ returned its result or execution diagnostic to the agent.
 \label{fig:system}
 \end{figure}
 
-\subsubsection{Rationale for the serverless architecture}
+\subsubsection{Rationale For The Serverless Architecture}
 
 Because Amazon Bedrock already provided model inference and agent orchestration in the cloud, 
 a cloud-native architecture was a natural fit
@@ -64,10 +64,10 @@ These capabilities supported inspection of the deployed pipeline. The saved
 SQL actions, observations and results used for formal evaluation are described
 in \hyperref[sec:architecture-evidence]{Section~\ref*{sec:architecture-evidence}}.
 
-\subsection{Database and benchmark}
+\subsection{Database and Benchmark}
 \label{sec:benchmark}
 
-\subsubsection{Database and study scope}
+\subsubsection{Database and Study Scope}
 \label{sec:architecture-data}
 
 The experimental database was Chinook, a sample digital media-store database
@@ -100,7 +100,7 @@ shows the data structure and relationships between entities.
     \label{fig:chinook-schema}
 \end{figure}
 
-\subsubsection{Benchmark construction and coverage}
+\subsubsection{Benchmark Construction and Coverage}
 \label{sec:benchmark-construction}
 
 A custom benchmark, Chinook-Bench-200, was developed for this study.
@@ -191,10 +191,10 @@ Each ambiguous case specifies a clarification target and one fixed reply.
 This scripted policy extends the benchmark beyond single-turn requests without
 requiring a human participant during collection.
 
-\subsection{Agent, backend and query action}
+\subsection{Agent, Backend and Query Action}
 \label{sec:architecture-agent}
 
-\subsubsection{Request handling and database feedback}
+\subsubsection{Request Handling and Database Feedback}
 
 Bedrock is a fully managed AWS service that
 provides access to foundation models. Bedrock Agents orchestrate
@@ -216,7 +216,7 @@ agent through the action's \texttt{REPROMPT} response so that it could revise
 the query. The experimental retry policy is described in
 \hyperref[sec:protocol]{Section~\ref*{sec:protocol}}.
 
-\subsubsection{Model versions and availability}
+\subsubsection{Model Versions and Availability}
 \label{sec:model-availability}
 
 The model used by the Bedrock Agent was Amazon Nova Lite v1.0
@@ -237,7 +237,7 @@ Haiku 5.5.
 The findings remain valid for the evaluated model versions, benchmark and
 saved executions.
 
-\subsubsection{Demonstration interface}
+\subsubsection{Demonstration Interface}
 
 An Angular \citep{angularOverview} chat interface was developed for demonstration and manual interaction
 with the agent through the same backend; experimental runs bypassed the user
@@ -254,7 +254,7 @@ The interface is illustrated in \hyperref[fig:chat-interface]{Figure~\ref*{fig:c
     \label{fig:chat-interface}
 \end{figure}
 
-\subsection{Evidence capture and offline integration}
+\subsection{Evidence Capture and Offline Integration}
 \label{sec:architecture-evidence}
 
 A TypeScript \citep{typescriptWebsite} runner called the same backend used by the demonstration

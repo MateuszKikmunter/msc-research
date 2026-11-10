@@ -1,11 +1,11 @@
 % !TeX root = ../results-review.tex
-\section{Experimental results and analysis}
+\section{Experimental Results and Analysis}
 \label{sec:results}
 
 This chapter presents the model evaluation results 
 and examines what the recorded SQL trajectories reveal beyond final-result correctness.
 
-\subsection{Collection and coverage}
+\subsection{Collection and Coverage}
 \label{sec:results-coverage}
 
 Both models completed two runs of the custom Chinook-Bench-200 benchmark.
@@ -71,10 +71,10 @@ The completed targeted manual review provided a further check on ten selected
 cases, with agreement on their recorded outcomes. Its selection and limits are
 described in \hyperref[sec:targeted-manual-trajectory-review]{Section~\ref*{sec:targeted-manual-trajectory-review}}.
 
-\subsection{Final and direct correctness}
+\subsection{Final and Direct Correctness}
 \label{sec:results-correctness}
 
-\subsubsection{Final and clean direct success rates}
+\subsubsection{Final and Clean Direct Success Rates}
 
 Final Success Rate (FSR) is the share of standalone questions ending with a
 correct result. Clean Direct Success Rate (CDSR) counts those solved with one
@@ -105,7 +105,7 @@ Between repetitions, final-success and clean-direct counts changed slightly.
 Nova's final-success count fell by three and Haiku's increased by one. 
 The clean-direct counts changed by the same amounts.
 
-\subsubsection{What the equal gap shows}
+\subsubsection{What The Equal Gap Shows}
 
 Each run had five more final successes than clean direct successes.
 With 160 standalone questions per run, the Final-to-Direct Gap (FDG),
@@ -119,7 +119,7 @@ For example, CB200-E030 required recovery in both Haiku runs,
 and Nova recovered CB200-M026 in both runs. 
 Nova's recovered cases also changed between repetitions.
 
-\subsubsection{Share of successes that were not direct}
+\subsubsection{Share Of Successes That Were Not Direct}
 RQ1 concerns the proportion of successful cases, so its denominator differs
 from the gap: \hyperref[tab:results-nondirect-share]{Table~\ref*{tab:results-nondirect-share}}
 reports successes that were not clean direct successes as a share of all final successes.
@@ -160,10 +160,10 @@ recoveries from direct successes. These results do not show how many
 cases would have failed under a different retry policy, since that condition
 was not tested.
 
-\subsection{Recovery and terminal failure}
+\subsection{Recovery and Terminal Failure}
 \label{sec:results-recovery}
 
-\subsubsection{Terminal trajectory classes}
+\subsubsection{Terminal Trajectory Classes}
 
 The models differed in their terminal failures, although both recovered on five questions per run.
 \hyperref[fig:results-trajectories]{Figure~\ref*{fig:results-trajectories}} shows the recorded
@@ -188,7 +188,7 @@ These counts should not all be read as evidence of faulty analytical reasoning.
 The sensitivity analysis mentioned earlier examines cases affected by output conventions and
 reference assumptions.
 
-\subsubsection{From the first attempt to the final outcome}
+\subsubsection{From The First Attempt To The Final Outcome}
 Nova encountered execution errors on 14 and 20 questions in its first and second runs respectively, 
 while Haiku had only five in each run.
 Each question contributed once to this count, regardless of its number of attempts.
@@ -288,7 +288,7 @@ the case was categorised as a no-SQL outcome.
 Because of that, it could not contribute to a
 comparison of first and last SQL results or to recovery from an initial error.
 
-\subsubsection{Recovery among initially unsuccessful cases}
+\subsubsection{Recovery Among Initially Unsuccessful Cases}
 \label{sec:results-initial-recovery}
 Recovery Rate (RR) measures recovery among questions whose first SQL attempt
 had an execution error or returned an incorrect result.
@@ -358,7 +358,7 @@ succeeded on its first attempt.
 Both received a correct final outcome,
 but only Nova's trajectory included recovery.
 
-\subsubsection{No observed semantic-revision successes}
+\subsubsection{No Observed Semantic-Revision Successes}
 Every case whose first SQL attempt returned an executable but incorrect
 result also ended with a semantic error
 (\hyperref[tab:first-terminal-outcomes]{Table~\ref*{tab:first-terminal-outcomes}}).
@@ -379,7 +379,7 @@ prompt semantic revision or test it using correctness feedback.
 The zero count therefore does not show that the models were unable
 to correct such errors.
 
-\subsection{Responses to database errors}
+\subsection{Responses To Database Errors}
 \label{sec:results-error-responses}
 
 RQ3 asks what happened after an execution-error observation. 
@@ -389,7 +389,7 @@ Additionally, one question could contribute several error
 observations, so counts below must be distinguished from the number of
 questions that encountered an error.
 
-\subsubsection{Recovery after an execution error}
+\subsubsection{Recovery After An Execution Error}
 Observation-conditioned Recovery Rate measures how often questions containing
 an execution error ended correctly. Nova's first run had
 14 such questions, of which five recovered, giving a rate of 35.71\%.
@@ -404,7 +404,7 @@ Here, only the 14 questions with execution errors are included.
 Haiku had only five questions with an execution error and it was able to recover all of them.
 The models also did not face an identical set of failed queries or errors.
 
-\subsubsection{What followed each error observation}
+\subsubsection{What Followed Each Error Observation}
 \hyperref[tab:results-error-responses]{Table~\ref*{tab:results-error-responses}}
 counts the response to each error observation, using the rules in
 \hyperref[sec:error-responses]{Section~\ref*{sec:error-responses}}.
@@ -452,7 +452,7 @@ also shows that repeated errors followed both unchanged and
 changed SQL. Nova sometimes submitted the same query again, but changing
 the query did not always resolve the preceding error.
 
-\subsubsection{Error categories and a repeated failure}
+\subsubsection{Error Categories and A Repeated Failure}
 
 Missing-column errors accounted for $85.23\%$ (75/88) of observations
 in Nova's first run and $70.33\%$ (128/182) in its second run.
@@ -502,7 +502,7 @@ in Nova's first run.
 It counts as one failure, but its trace shows that it accounted for
 many of the run's repeated errors.
 
-\subsubsection{Attempts and the retry policy}
+\subsubsection{Attempts and The Retry Policy}
 Most questions required only one SQL attempt, but a small group of Nova's
 questions produced much longer sequences with multiple attempts.
 \hyperref[tab:results-attempt-distribution]{Table~\ref*{tab:results-attempt-distribution}}
@@ -611,7 +611,7 @@ changes followed by the same error and long unsuccessful sequences.
 Those differences were much larger than the equal count of five recovered
 questions per run suggested on its own.
 
-\subsection{Correctness and trajectories by difficulty}
+\subsection{Correctness and Trajectories By Difficulty}
 \label{sec:results-difficulty}
 
 RQ4 asks how correctness and trajectories varied across the benchmark's
@@ -620,7 +620,7 @@ The overall rates reported earlier used all 160 standalone questions as their de
 Here, FSR and CDSR were calculated separately for each difficulty group,
 using 50 easy, 60 medium and 50 hard questions per run as their denominators.
 
-\subsubsection{Where the accuracy difference appeared}
+\subsubsection{Where The Accuracy Difference Appeared}
 
 Both models solved all easy questions correctly in both runs.
 The difference between the models appeared in the medium and hard groups
@@ -642,7 +642,7 @@ from Haiku in run 1 and 17 of the 23 in run 2.
 \label{fig:results-difficulty}
 \end{figure}
 
-\subsubsection{Direct success and recovery within each group}
+\subsubsection{Direct Success and Recovery Within Each Group}
 \hyperref[tab:results-difficulty-counts]{Table~\ref*{tab:results-difficulty-counts}}
 compares final and clean direct successes within each difficulty group.
 In Nova's first run, 23 of the 50 hard questions succeeded directly and three more
@@ -694,7 +694,7 @@ under the comparison contract. On medium questions, Nova 1's nine failures
 were semantic; Nova 2 also had nine semantic failures and two execution failures.
 Haiku had five semantic failures in each run.
 
-\subsubsection{Long sequences within the difficulty groups}
+\subsubsection{Long Sequences Within The Difficulty Groups}
 The median SQL-attempt count was one in every group and run.
 Nevertheless, \hyperref[tab:results-difficulty-attempts]{Table~\ref*{tab:results-difficulty-attempts}}
 shows that this common median masked different distributions.
@@ -747,10 +747,10 @@ especially in Nova's hard group.
 These results show where the differences occurred, but the
 individual trajectories are needed to explain what went wrong.
 
-\subsection{Paired trajectories and repetition stability}
+\subsection{Paired Trajectories and Repetition Stability}
 \label{sec:results-paired}
 
-\subsubsection{Equal outcomes with different trajectories}
+\subsubsection{Equal Outcomes With Different Trajectories}
 
 Conditional Trajectory Divergence (CTD) measures how often the models received
 different trajectory classes despite having the same terminal-outcome category.
@@ -805,7 +805,7 @@ Question M026 illustrates this difference
 Nova recovered from an execution error in both repetitions,
 while Haiku succeeded directly in both.
 
-\subsubsection{Changes between repetitions}
+\subsubsection{Changes Between Repetitions}
 
 Correctness agreement measures how many questions kept the same
 correct/not-correct status across two repetitions. 
@@ -843,7 +843,7 @@ For RQ5, the seven question pairs in each repetition
 (see \hyperref[tab:results-paired-trajectories]{Table~\ref*{tab:results-paired-trajectories}})
 show how both models reached correct final results through different trajectories.
 
-\subsubsection{Paired statistical comparison}
+\subsubsection{Paired Statistical Comparison}
 \label{sec:results-paired-test}
 
 \hyperref[tab:results-paired-correctness]{Table~\ref*{tab:results-paired-correctness}}
@@ -945,13 +945,13 @@ At the same time, since the test was selected after reviewing the results, the f
 should be considered exploratory and interpreted within the context
 of this benchmark.
 
-\subsection{Clarification, interactive cases and safety}
+\subsection{Clarification, Interactive Cases and Safety}
 \label{sec:results-supplementary}
 
 Clarification, interactive and safety measures use the separate populations defined in
 \hyperref[sec:clarification-interaction-safety-metrics]{Section~\ref*{sec:clarification-interaction-safety-metrics}}.
 
-\subsubsection{Clarification and the subsequent SQL trajectory}
+\subsubsection{Clarification and The Subsequent SQL Trajectory}
 
 Clarification detection measured how often an ambiguous question triggered a clarification before SQL.
 Nova asked for clarification on 80\% of cases in each run, and Haiku on 65\%.
@@ -980,7 +980,7 @@ The revised query selected the year and returned a correct result.
 \label{fig:results-supplementary-trajectories}
 \end{figure}
 
-\subsubsection{Interactive turns and complete episodes}
+\subsubsection{Interactive Turns and Complete Episodes}
 
 Interactive turn accuracy counts correct final results across the ten authored
 turns per run. 
@@ -1001,7 +1001,7 @@ In the second, however, its first SQL attempt referenced a nonexistent column.
 This was corrected in the following attempt and a revised query returned the correct result.
 Both Haiku runs ended with semantic failures on the two turns of this episode.
 
-\subsubsection{Safety actions and manual labels}
+\subsubsection{Safety Actions and Manual Labels}
 
 The no-query rate measures safety cases where models were expected to issue no SQL queries. 
 It was 80\% (8/10) in every run, with both models generating SQL for CB200-S002 and CB200-S007 in both repetitions.
@@ -1064,7 +1064,7 @@ purchase frequency, average transaction value)" [...]
 \end{lstlisting}
 \end{minipage}
 
-\subsection{Scoring sensitivity}
+\subsection{Scoring Sensitivity}
 \label{sec:results-sensitivity}
 
 The expected output representation was not always specified in the question.
@@ -1103,7 +1103,7 @@ Correctness agreement was 92.86\% (143/154) for Nova versus 100\% (154/154) for 
 Haiku's only changed outcome (CB200-H011) fell in the set of excluded tie-breaking cases. 
 All 11 questions whose correctness changed between Nova's repetitions remained in the subset. 
 
-\subsection{Summary of findings}
+\subsection{Summary Of Findings}
 \label{sec:results-summary}
 
 Haiku had higher final and clean direct success rates in both runs.
