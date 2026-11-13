@@ -4,10 +4,10 @@
 
 This chapter discusses the findings in relation to previous work before considering their implications and limitations.
 
-\subsection{Discussion of the research questions}
+\subsection{Discussion Of The Research Questions}
 \label{sec:discussion-rqs}
 
-\subsubsection{Final success and recovery}
+\subsubsection{Final Success and Recovery}
 
 Most of the standalone questions were answered correctly on the first SQL attempt. 
 Recovery contributed only a small number of final successes. 
@@ -36,7 +36,7 @@ so it could potentially identify a mismatch with the question.
 Thus, semantic revision was possible but was not deliberately prompted, 
 and the agent received no reference-correctness feedback.
 
-\subsubsection{What responses to errors reveal}
+\subsubsection{What Responses To Errors Reveal}
 
 The models varied in their reactions to execution errors, 
 and sending another query did not always fix the issue. 
@@ -45,14 +45,18 @@ and sometimes faced different errors.
 Moreover, the same error could appear in multiple attempts despite modified SQL. 
 This was seen in some of Nova's cases, 
 where it would change its SQL and get the same error signature on the next attempt. 
-In other cases, a retry produced executable SQL, 
-but the returned data still failed the reference comparison. 
+In other cases, a retry produced executable SQL,
+but the returned data still failed the reference comparison.
+The examples in
+\hyperref[sec:results-initial-terminal]{Section~\ref*{sec:results-initial-terminal}}
+show how correcting the reported error could leave other requirements unmet,
+particularly when several SQL operations had to work together. 
 Therefore, treating every SQL modification as a repair, 
 or assuming that successful execution meant the problem had been resolved, 
 would give a misleading account of the model's behaviour 
 (\hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}).
 
-\subsubsection{Difficulty and concentrated failures}
+\subsubsection{Difficulty and Concentrated Failures}
 
 Haiku answered more medium and hard questions correctly than Nova,
 with a larger difference on hard questions.
@@ -73,7 +77,7 @@ They propose more detailed query and error analysis.
 Likewise, in this study's medium and hard groups, 
 the traces showed repeated execution problems that the overall group scores did not explain.
 
-\subsubsection{Equal outcomes and repetition stability}
+\subsubsection{Equal Outcomes and Repetition Stability}
 
 Final correctness does not provide a complete view of models' performance. 
 Comparing the agents' behaviour over the same set of questions revealed more detail. 
@@ -100,10 +104,10 @@ These findings show why relying on success scores alone is
 not sufficient when evaluating models' behaviour 
 (\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
 
-\subsection{Trajectory evaluation and recovery in context}
+\subsection{Trajectory Evaluation and Recovery In Context}
 \label{sec:discussion-previous-research}
 
-\subsubsection{What this study adds to trajectory evaluation}
+\subsubsection{What This Study Adds To Trajectory Evaluation}
 
 AgentBoard measures progress on tasks by breaking them into subgoals.
 It was able to find differences in progress for agents that all had low
@@ -116,7 +120,7 @@ and returned the correct result.
 By looking at database, errors these outcomes can be connected 
 to the failures and repeated attempts within each deployed SQL interaction.
 
-\subsubsection{Observed recovery and designed correction procedures}
+\subsubsection{Observed Recovery and Designed Correction Procedures}
 
 Chen et al.'s self-debugging procedure is an example of explicitly prompted SQL review \citep{chen2024selfdebug}.
 Their model compared the generated SQL statements with the question.
@@ -145,7 +149,7 @@ RetrySQL examines corrections made before database execution.
 These findings highlight the importance of when correction occurs
 and what information is used.
 
-\subsubsection{Recovery and consistency across attempts}
+\subsubsection{Recovery and Consistency Across Attempts}
 
 \citet{boominathan2026llm4ds} examine first-attempt correctness,
 recovery and consistency in Python data-science coding.
