@@ -215,3 +215,26 @@ on one database instance.
 The observed successes show agreement on the experimental data.
 Testing whether the queries would remain correct if the data changed
 was outside the scope of this research.
+
+\subsection{Practical Implications and Future Work}
+\label{sec:discussion-implications}
+
+\subsubsection{Comparing Models For A Deployment}
+
+This study allows a comparison of models, which can be used as a foundation for evaluating Text-to-SQL systems. 
+Their performance can be evaluated based on their final answers, 
+ability to recover from errors, repeated mistakes and consistency across runs. 
+In the course of this study, Haiku outperformed Nova on most of these factors.
+
+Similarly, the same evaluation can applied to different models 
+and tasks in another deployment to find a suitable model for a specific use case. 
+The experiment runner and evaluator could also be reused for other
+Text-to-SQL systems using Athena and Bedrock Agents.
+They, however, have to produce compatible query-action responses, 
+trace records and saved query results.
+
+Model selection should also consider the impact of a model giving a wrong answer 
+and the effort required from users when failures continue.
+The study did not measure these consequences, 
+the effort required from users or the usefulness of the final explanations.
+These could be considered as extensions for future work.
