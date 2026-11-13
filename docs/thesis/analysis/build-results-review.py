@@ -555,7 +555,7 @@ correctness_chart = [
     r'  \node[anchor=east] at (-.1,\y) {\y};',
     r'}',
     r'\draw[black!45,line width=.6pt] (0,0) -- (12,0);',
-    r'\node[rotate=90] at (-1.1,50) {Standalone questions (\%)};',
+    r'\node[rotate=90] at (-1.35,50) {Standalone Questions Answered Correctly (\%)};',
 ]
 gaps = []
 for index, (label, run) in enumerate(zip(['Nova 1', 'Nova 2', 'Haiku 1', 'Haiku 2'], ordered_runs)):
@@ -576,14 +576,15 @@ for index, (label, run) in enumerate(zip(['Nova 1', 'Nova 2', 'Haiku 1', 'Haiku 
     gaps.append(gap['numerator'])
 assert gaps == [5, 5, 5, 5]
 correctness_chart.extend([
-    r'\fill[finalbar] (1.8,-22) rectangle (2.05,-18);',
-    r'\node[anchor=west] at (2.15,-20) {Final success (FSR)};',
-    r'\fill[directbar] (6.5,-22) rectangle (6.75,-18);',
-    r'\node[anchor=west] at (6.85,-20) {Clean direct success (CDSR)};',
+    r'\fill[finalbar] (1.8,113) rectangle (2.05,117);',
+    r'\node[anchor=west] at (2.15,115) {Final Success Rate (FSR)};',
+    r'\fill[directbar] (6.5,113) rectangle (6.75,117);',
+    r'\node[anchor=west] at (6.85,115) {Clean Direct Success Rate (CDSR)};',
+    r'\node at (6,-18) {Model and Repetition};',
     r'\node[draw=black!50,fill=black!3,rounded corners=2pt,',
     r'  inner sep=8pt,align=center,text width=10.6cm] at (6,-42)',
     r'  {\textbf{Final-to-direct gap: 3.13 percentage points in every run}\\[3pt]',
-    r'   Five additional successes out of 160 questions per run};',
+    r'   Five recovered questions per run;\\ different questions across models};',
     r'\end{tikzpicture}', r'\endgroup',
 ])
 (OUT.parent / 'figures/results-correctness.tex').write_text('\n'.join(correctness_chart)+'\n')
