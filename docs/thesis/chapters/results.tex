@@ -2,8 +2,13 @@
 \section{Experimental Results and Analysis}
 \label{sec:results}
 
-This chapter presents the model evaluation results 
-and examines what the recorded SQL trajectories reveal beyond final-result correctness.
+This chapter compares the models' final correctness with the
+SQL trajectories that led to those outcomes.
+It analyses recovery, responses to errors and question difficulty.
+The models are compared on the same questions, and their consistency
+is examined across repetitions.
+Clarification, interactive and safety cases are reported separately,
+followed by a check of how scoring conventions affected the findings.
 
 \subsection{Collection and Coverage}
 \label{sec:results-coverage}
@@ -14,7 +19,9 @@ including the five interactive cases with two turns each.
 Across four runs, this produced 780 case evaluations and
 800 primary question turns.
 
-\hyperref[tab:results-coverage]{Table~\ref*{tab:results-coverage}} summarises the recorded coverage.
+\hyperref[tab:results-coverage]{Table~\ref*{tab:results-coverage}} 
+summarises the evidence collected using the procedure in
+\hyperref[sec:runner-evidence]{Section~\ref*{sec:runner-evidence}}.
 Nova 1, Nova 2, Haiku 1 and Haiku 2 identify each model's two repetitions.
 All benchmark cases were present in every run.
 
@@ -50,26 +57,35 @@ System-error trajectories & 0 & 0 & 0 & 0 \\
 \label{tab:results-coverage}
 \end{table}
 
-Saved interactions exceeded the 200 primary turns because the runner provided
-additional replies after clarification requests.
-Nova Lite received 16 scripted replies per run, giving 216
-interactions, while Haiku received 13, giving 213.
-Ambiguity cases were assessed for clarification behaviour, 
-but their result correctness was scored only for questions that received the scripted reply.
+\subsection{Evaluation Coverage and Scoring}
 
-Also, it is worth noting that the remaining four Nova cases and seven Haiku cases 
-were excluded from post-clarification accuracy calculations.
-This difference followed the evaluation policy described in \hyperref[sec:clarification-interaction-safety-metrics]{Section~\ref*{sec:clarification-interaction-safety-metrics}}.
+The benchmark execution runner 
+(see \hyperref[sec:architecture-evidence]{Section~\ref*{sec:architecture-evidence}}) 
+sent additional scripted replies to the agent whenever it first detected a clarification request before any
+SQL attempt in an ambiguity case. 
+Nova Lite received 16 replies per run, giving 216 interactions. 
+Haiku received 13, giving 213. 
+All 20 ambiguity cases per run were assessed for clarification behaviour. 
+However, only questions that received a scripted reply were scored for post-clarification accuracy.
 
-The primary analysis included all 160 standalone questions per run;
-the sensitivity check used 154,
-as described in \hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}.
-The exclusions applied only to the sensitivity check and did not change the
-coverage or denominators of the primary results.
+Of the ambiguity questions in each run, 
+Nova did not request clarification before SQL 
+on four and Haiku on seven. 
+Since these cases received no scripted reply, 
+they were excluded from post-clarification accuracy 
+but remained in the clarification measures 
+(see \hyperref[sec:clarification-interaction-safety-metrics]{Section~\ref*{sec:clarification-interaction-safety-metrics}}).
 
-The completed targeted manual review provided a further check on ten selected
-cases, with agreement on their recorded outcomes. Its selection and limits are
-described in \hyperref[sec:targeted-manual-trajectory-review]{Section~\ref*{sec:targeted-manual-trajectory-review}}.
+The primary analysis used the 160 standalone questions for each run. 
+These served as the denominator when calculating Final Success Rate (FSR) 
+and Clean Direct Success Rate (CDSR).
+The sensitivity check used 154 questions, as discussed in 
+\hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}. 
+This did not affect the primary scores or the recorded coverage.
+
+The targeted manual review checked ten selected cases.
+Its selection and limits are described in 
+\hyperref[sec:targeted-manual-trajectory-review]{Section~\ref*{sec:targeted-manual-trajectory-review}}.
 
 \subsection{Final and Direct Correctness}
 \label{sec:results-correctness}
@@ -81,18 +97,27 @@ correct result. Clean Direct Success Rate (CDSR) counts those solved with one
 correct SQL attempt, no redundant action and no unnecessary clarification.
 Both use all 160 standalone questions as their denominator. In Nova's first
 run, 122 questions succeeded directly and five after recovery, giving
-127 final successes. Thus,
-\[
+127 final successes. Equation~\ref{eq:results-success-rates} gives the two rates.
+\begin{equation}
+\label{eq:results-success-rates}
 \mathrm{FSR} = 100 \times \frac{127}{160} = 79.38\%, \qquad
 \mathrm{CDSR} = 100 \times \frac{122}{160} = 76.25\%.
-\]
+\end{equation}
 
 Haiku achieved more correct final results than Nova in both repetitions
-(\hyperref[fig:results-correctness]{Figure~\ref*{fig:results-correctness}}). The difference was 19 questions in the
-first repetition and 23 in the second. With 160 questions per run, these
+(see \hyperref[fig:results-correctness]{Figure~\ref*{fig:results-correctness}}). 
+The difference was 19 questions in the first repetition and 23 in the second. 
+With 160 questions per run, these
 correspond to FSR differences of 11.88 and 14.38 percentage points.
-Haiku also had more clean direct successes. Its advantage therefore
-remained when considering only cases that succeeded without additional actions.
+
+Haiku also had a higher CDSR.
+It answered more questions correctly with one SQL attempt, 
+without redundant actions or unnecessary clarifications.
+Each run included five recovered questions.
+However, these were not the same across the two models. 
+They are compared in
+\hyperref[tab:results-paired-trajectories]{Table~\ref*{tab:results-paired-trajectories}}
+and \hyperref[fig:results-recovery-stability]{Figure~\ref*{fig:results-recovery-stability}}.
 
 \begin{figure}[H]
 \centering
@@ -102,12 +127,13 @@ remained when considering only cases that succeeded without additional actions.
 \end{figure}
 
 Between repetitions, final-success and clean-direct counts changed slightly.
-Nova's final-success count fell by three and Haiku's increased by one. 
+Nova's final-success count fell by three questions and Haiku's increased by one question. 
 The clean-direct counts changed by the same amounts.
 
 \subsubsection{What The Equal Gap Shows}
 
-Each run had five more final successes than clean direct successes.
+In each run, recovery added five correctly answered questions
+to the clean direct successes.
 With 160 standalone questions per run, the Final-to-Direct Gap (FDG),
 the difference between FSR and CDSR, was therefore 3.13 percentage points
 in all four runs.
@@ -119,15 +145,20 @@ For example, CB200-E030 required recovery in both Haiku runs,
 and Nova recovered CB200-M026 in both runs. 
 Nova's recovered cases also changed between repetitions.
 
-\subsubsection{Share Of Successes That Were Not Direct}
-RQ1 concerns the proportion of successful cases, so its denominator differs
-from the gap: \hyperref[tab:results-nondirect-share]{Table~\ref*{tab:results-nondirect-share}}
-reports successes that were not clean direct successes as a share of all final successes.
-In these runs, this share equals Recovered Success Contribution (RSC), which
-measures how much final success involved recovery. Every non-direct success
-was a recovery, so Nova's first-run RSC was 3.94\%:
-five recovered successes out of 127 final successes.
-Unlike FDG, RSC uses only final successes as its denominator.
+\subsubsection{Indirect Success Analysis}
+
+Indirect successes are successful cases that did not meet the clean direct
+success criteria.
+This distinction addresses RQ1.
+\hyperref[tab:results-nondirect-share]{Table~\ref*{tab:results-nondirect-share}}
+reports their share of final successes. 
+In these runs, every indirect success was an execution-error recovery 
+under the classification rules described in 
+\hyperref[sec:trajectory-evaluation]{Section~\ref*{sec:trajectory-evaluation}}.
+Their share therefore equals Recovered Success Contribution (RSC).
+RSC divides recovered successes by all final successes.
+For Nova's first run, this was five out of 127, or 3.94\%.
+FDG instead subtracts FSR and CDSR, both calculated over all 160 standalone questions.
 
 \begin{table}[H]
 \centering
@@ -182,13 +213,18 @@ results that did not match the reference contract.
 \end{figure}
 
 Semantic failures were the largest group of terminal failures in every run.
-This distribution is presented in \hyperref[fig:results-trajectories]{Figure~\ref*{fig:results-trajectories}} 
-with Nova having 27 and 26 and Haiku 14 and 13 such cases.
-These counts should not all be read as evidence of faulty analytical reasoning.
-The sensitivity analysis mentioned earlier examines cases affected by output conventions and
-reference assumptions.
+This distribution is presented in \hyperref[fig:results-trajectories]{Figure~\ref*{fig:results-trajectories}},
+with Nova having 27 and 26, and Haiku 14 and 13 such cases.
+These failures involved query errors, such as incorrect grouping
+or aggregation.
+Some also involved differences in output representation.
+For example, Haiku's answer to CB200-H038 returned the same month and revenue
+as the reference, but represented the month differently. 
+This case is discussed in the scoring sensitivity analysis
+(see \hyperref[sec:results-sensitivity]{Section~\ref*{sec:results-sensitivity}}).
 
-\subsubsection{From The First Attempt To The Final Outcome}
+\subsubsection{Initial and Terminal Outcomes}
+\label{sec:results-initial-terminal}
 Nova encountered execution errors on 14 and 20 questions in its first and second runs respectively, 
 while Haiku had only five in each run.
 Each question contributed once to this count, regardless of its number of attempts.
@@ -198,15 +234,6 @@ The remaining nine cases in Nova's first run ended with either an executable but
 (four cases) or an execution error (five cases). 
 In its second run, five ended with incorrect results and ten with execution errors 
 (see \hyperref[tab:first-terminal-outcomes]{Table~\ref*{tab:first-terminal-outcomes}}). 
-These results show that successful execution was not enough to count as a recovery.
-The query result also had to match the reference answer.
-
-These cases also show what a final failure label leaves out.
-Some of Nova's semantic failures followed an execution error and others were
-incorrect on the first attempt. 
-They ended in the same category, but reached it through different paths.
-The first-to-final comparison identifies that difference, 
-but explaining the SQL changes requires the intermediate attempts.
 
 \begin{table}[H]
 \centering
@@ -234,13 +261,81 @@ No SQL & No SQL & 1 & 0 & 0 & 0 \\
 \label{tab:first-terminal-outcomes}
 \end{table}
 
-CB200-H043 from Nova's second run illustrates an execution error followed by
-an incorrect result. The question asked: ``Show monthly invoice revenue and
+These cases also show what a final failure label leaves out.
+Some of Nova's semantic failures followed an execution error, and others were
+incorrect on the first attempt. 
+They ended in the same category, but reached it through different paths.
+The first-to-final comparison identifies that difference, 
+but explaining the SQL changes requires the intermediate attempts.
+
+Eight of the nine cases across the two repetitions that transitioned
+from execution errors to semantic failures belonged to the hard difficulty group.
+Nova was able to correct errors reported by Athena.
+However, the revised queries often left other requirements unmet.
+For example, in H010, both runs returned all country-genre groups instead
+of the highest-revenue genre per country.
+Similarly, H025 in the second run compared all invoice pairs instead of consecutive invoices.
+In H034 of the same run, Nova corrected the date-literal types but continued
+to count invoice totals repeatedly after joining invoice items
+(see \hyperref[lst:revenue-aggregation-error]{Listing~\ref*{lst:revenue-aggregation-error}}).
+These cases show difficulties in Nova's handling of several SQL requirements, 
+such as selecting results within groups, 
+comparing adjacent rows and aggregating values after joins. 
+The execution traces partially explain why Nova performed worse on the hard questions.
+
+H034 asked which support representative's customers generated the most
+realised revenue in 2012. 
+\hyperref[lst:revenue-aggregation-error]{Listing~\ref*{lst:revenue-aggregation-error}} 
+shows the relevant SQL fragments;
+the remaining joins, selected columns, grouping and ordering are omitted.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  basicstyle=\footnotesize\ttfamily,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{black!25},
+  framesep=6pt,
+  xleftmargin=7pt,
+  xrightmargin=7pt,
+  caption={SQL correction and revenue mismatch for CB200-H034, Nova repetition 2 (Source: Author, 2026).},
+  label={lst:revenue-aggregation-error},
+  captionpos=b
+]
+SQL fragments retained in both attempts:
+  SUM(i.total) AS realised_revenue
+  JOIN invoice_items ii ON i.invoice_id = ii.invoice_id
+
+Attempt 1: execution error
+  WHERE i.invoice_date BETWEEN '2012-01-01' AND '2012-12-31'
+  Athena: TYPE_MISMATCH:
+    Cannot check if timestamp(3) is BETWEEN varchar(10)
+    and varchar(10)
+
+Attempt 2: executed successfully
+  WHERE i.invoice_date BETWEEN DATE '2012-01-01'
+                           AND DATE '2012-12-31'
+
+Saved result:      4 | Margaret | Park | 2045.44
+Reference result:  4 | Margaret | Park | 197.20
+Evaluator: Ordered row 1 differs.
+\end{lstlisting}
+\end{minipage}
+
+The JOIN clause produced one row per invoice item. 
+This repeated the invoice total on each row. 
+Summing \texttt{i.total} counted that total once for every item.
+The reference query summed each item's unit price multiplied by its quantity.
+Nova selected the expected representative, but returned an inflated revenue figure.
+
+CB200-H043 from Nova's second run illustrates a different limitation 
+in building a query after resolving an execution error.
+The question asked: ``Show monthly invoice revenue and
 cumulative revenue over time.''
 \hyperref[lst:executable-mismatch]{Listing~\ref*{lst:executable-mismatch}}
 shows the relevant SQL expressions, database feedback and saved results.
 The expressions appeared in the selection, grouping and ordering of months;
-the rest of the queries is omitted for readability.
+the remaining parts of the queries are omitted for readability.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[
@@ -281,6 +376,20 @@ and a single revenue total, as shown in
 \hyperref[lst:executable-mismatch]{Listing~\ref*{lst:executable-mismatch}}.
 It returned one row instead of the expected 60 monthly rows, so the
 trajectory ended in semantic failure.
+
+This was a date-formatting issue, 
+although the pattern could be mistaken for a regular expression.
+The \texttt{date\_format} function uses format specifiers such as
+\texttt{\%Y} and \texttt{\%m}; Nova used \texttt{yyyy-MM},
+which belongs to a different date-formatting convention
+\citep{trinoDateTimeFunctions}.
+The saved query grouped invoices by the literal value \texttt{yyyy-MM},
+combining all months into one group.
+No further SQL attempt followed the successful execution, and the agent
+received no reference-correctness feedback.
+The recorded sequence does not show whether additional attempts would have
+corrected the result. Its deployment implications are discussed in
+\hyperref[sec:discussion-implications]{Section~\ref*{sec:discussion-implications}}.
 
 There was also one case (CB200-H025) in Nova's first run that did not produce a SQL attempt.
 The question asked about the longest interval between each customer's consecutive invoices and

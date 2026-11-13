@@ -8,7 +8,7 @@
   \node[anchor=east] at (-.1,\y) {\y};
 }
 \draw[black!45,line width=.6pt] (0,0) -- (12,0);
-\node[rotate=90] at (-1.1,50) {Standalone questions (\%)};
+\node[rotate=90] at (-1.35,50) {Standalone Questions Answered Correctly (\%)};
 \node[below,font=\small\bfseries] at (1.65,-2) {Nova 1};
 \fill[finalbar] (0.5499999999999998,0) rectangle (1.45,79.375);
 \node[above=3pt,font=\small\bfseries] at (0.9999999999999999,79.375) {79.38};
@@ -29,13 +29,14 @@
 \node[above=3pt,font=\small\bfseries] at (9.7,91.875) {91.88};
 \fill[directbar] (10.55,0) rectangle (11.45,88.75);
 \node[above=3pt,font=\small\bfseries] at (11.0,88.75) {88.75};
-\fill[finalbar] (1.8,-22) rectangle (2.05,-18);
-\node[anchor=west] at (2.15,-20) {Final success (FSR)};
-\fill[directbar] (6.5,-22) rectangle (6.75,-18);
-\node[anchor=west] at (6.85,-20) {Clean direct success (CDSR)};
+\fill[finalbar] (1.8,113) rectangle (2.05,117);
+\node[anchor=west] at (2.15,115) {Final Success Rate (FSR)};
+\fill[directbar] (6.5,113) rectangle (6.75,117);
+\node[anchor=west] at (6.85,115) {Clean Direct Success Rate (CDSR)};
+\node at (6,-18) {Model and Repetition};
 \node[draw=black!50,fill=black!3,rounded corners=2pt,
   inner sep=8pt,align=center,text width=10.6cm] at (6,-42)
   {\textbf{Final-to-direct gap: 3.13 percentage points in every run}\\[3pt]
-   Five additional successes out of 160 questions per run};
+   Five recovered questions per run;\\ different questions across models};
 \end{tikzpicture}
 \endgroup
