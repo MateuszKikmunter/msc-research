@@ -181,3 +181,37 @@ The conditional score also excludes cases with no reply.
 Selecting a model for conversational use therefore requires evaluating not only SQL correctness,
 but also whether the model gathers the necessary information and completes the interaction
 (\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
+
+\subsection{Validity and Limitations}
+\label{sec:discussion-validity}
+
+\subsubsection{Benchmark Coverage and Correctness Judgments}
+
+The study conducted two models comparison based on a custom project-specific benchmark,
+limited to one schema and one database.
+The three questions difficulty levels helped 
+to identify and highlight models' capabilities and their weaknesses
+within the Chinook benchmark.
+The clarification cases and the interactive episodes
+were of moderate length and complexity.
+Nevertheless, they were quite limited in their ability
+of testing longer conversations with repeatedly changing requests.
+
+During the evaluation it became apparent that design of some questions
+did not handle tied results precisely enough which led to incorrect interpretation.
+Similarly, \citet{pourreza2023evaluating} showed that unspecified handling 
+of tied results can make reasonable SQL interpretations disagree with a reference answer. 
+There were six cases of reference-answer conventions that affected the findings. 
+As a result, these questions were excluded from all four runs with their labels unchanged.
+This did not, however, affect Haiku's performance and it 
+kept its advantage after these questions were removed.
+
+A query was considered correct if it had the same result as the reference
+on the stored Chinook database.
+The same rule was applied to identify successful recoveries.
+According to \citet{zhong2020semantic},
+semantically distinct queries may produce an identical result
+on one database instance.
+The observed successes show agreement on the experimental data.
+Testing whether the queries would remain correct if the data changed
+was outside the scope of this research.
