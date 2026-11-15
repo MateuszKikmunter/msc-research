@@ -238,3 +238,52 @@ and the effort required from users when failures continue.
 The study did not measure these consequences, 
 the effort required from users or the usefulness of the final explanations.
 These could be considered as extensions for future work.
+
+\subsubsection{Human Review and Escalation}
+
+As this study showed, some queries executed successfully but returned incorrect results.
+In a real-world deployment, repeated errors or uncertainty about the user's intent
+could be reasons to ask a human reviewer to inspect the query.
+The observed failures provide examples of cases where such checks might be useful.
+
+SQLucid allows users to inspect intermediate query results and edit explanations
+to guide query correction \citep{tian2024sqlucid}.
+As mentioned in \hyperref[sec:demonstration-interface]{Section~\ref*{sec:demonstration-interface}},
+a user interface with similar basic functions was developed for demonstration purposes.
+It allows users to ask questions and review the generated SQL and returned data together.
+A reviewer could then check whether the query matches the intended request.
+If the request is ambiguous, the system could ask for clarification before executing SQL.
+Such behaviour was tested as part of the experiments.
+Nevertheless, the agents did not consistently request clarification
+despite explicit instructions to do so.
+Modified prompts could be tested to assess whether they improve adherence
+to these instructions.
+
+The usefulness of such an approach and its impact on model performance
+would have to be evaluated as part of future work.
+
+\subsubsection{Focused Extensions}
+
+CB200-H043 also prompts investigation into whether more explicit guidance could alleviate issues with date formatting 
+(see \hyperref[lst:executable-mismatch]{Listing~\ref*{lst:executable-mismatch}}), 
+e.g., by giving examples of the available date functions or validating month outputs. 
+This could then be assessed in terms of accuracy, number of further attempts and tokens consumed.
+
+BIRD-CRITIC provides faulty SQL along with its questions \citep{li2025swesql}. 
+A comparable approach could give both models the same question, schema and faulty SQL. 
+Additionally, the same correction prompt and limit on attempts would be supplied. 
+This could enable a comparison of models' responses to the same failure, 
+without differences in their initial queries affecting which errors they encounter.
+
+Another experiment could test the explicit SQL review discussed in
+\hyperref[sec:discussion-previous-research]{Section~\ref*{sec:discussion-previous-research}}.
+It could examine whether review corrects executable but incorrect queries
+and whether it introduces errors into queries that were already correct.
+
+Further tests with different databases,
+a broader set of representative user queries and
+additional repetitions would help assess the generalisability of the results.
+Extending the number of interaction turns between the agent and the user 
+may allow investigation into whether agents re-use earlier context 
+as users iteratively refine or modify their queries. 
+A hard retry limit could also be tested to assess its effect on recovery and long failure sequences.
