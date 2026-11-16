@@ -1,0 +1,26 @@
+% !TeX root = ../thesis.tex
+\section{Conclusion}
+\label{sec:conclusion}
+
+This study demonstrated that the final accuracy of the deployed Text-to-SQL system 
+did not fully describe how it answered questions and reached its results.
+Correct results could be produced after an unsuccessful query execution, 
+and revised queries could still yield the wrong answer.
+By capturing query execution traces, database feedback and result correctness, 
+it was possible to characterise this discrepancy.
+The comparison of the models across repeated runs showed 
+behaviour that their final scores alone did not explain.
+
+The main contribution was an evaluation methodology that leveraged 
+the captured traces to help explain how the system arrived at both correct and incorrect results. 
+It allowed the examination of individual failures alongside patterns across questions and runs. 
+This could support the debugging process by detecting repeated errors, 
+unsuccessful query revisions and unfulfilled requirements. 
+If extended to a broader set of questions and databases relevant to the deployment, 
+the methodology could help with model selection by accounting for answer accuracy, 
+query error recovery and consistency.
+
+Further evaluation using additional datasets and repeated runs would be necessary to confirm these uses. 
+Nevertheless, the gathered results showed that the captured traces provided insights into how 
+the system produced its answers beyond the accuracy score alone—in particular, 
+whether query execution recovered from an error or whether additional analysis was required.
