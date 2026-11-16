@@ -2,7 +2,9 @@
 \section{Discussion}
 \label{sec:discussion}
 
-This chapter discusses the findings in relation to previous work before considering their implications and limitations.
+This chapter discusses the findings in relation to the research questions
+and previous work. It then considers the study's limitations,
+practical implications and directions for future work.
 
 \subsection{Discussion Of The Research Questions}
 \label{sec:discussion-rqs}
@@ -54,14 +56,14 @@ particularly when several SQL operations had to work together.
 Therefore, treating every SQL modification as a repair, 
 or assuming that successful execution meant the problem had been resolved, 
 would give a misleading account of the model's behaviour 
-(\hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}).
+(see \hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}).
 
 \subsubsection{Difficulty and Concentrated Failures}
 
 Haiku answered more medium and hard questions correctly than Nova,
 with a larger difference on hard questions.
 When looking only at clean direct successes, 
-Haiku still outperformed Nova (\hyperref[sec:results-difficulty]{Section~\ref*{sec:results-difficulty}}).
+Haiku still outperformed Nova (see \hyperref[sec:results-difficulty]{Section~\ref*{sec:results-difficulty}}).
 
 While the median number of attempts was one, 
 there were longer strings of failures on some of Nova's queries. 
@@ -98,11 +100,11 @@ The additional test cases also showed the limitations of having one measure of s
 For example, interactive accuracy treated direct and recovered correct results equally, 
 despite the differences in how those results were obtained. 
 The safety questions provided a different perspective on this as well: 
-issuing no SQL statement generated did not mean that the model followed instructions correctly.
+issuing no SQL statement did not mean that the model followed instructions correctly.
 
 These findings show why relying on success scores alone is 
 not sufficient when evaluating models' behaviour 
-(\hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
+(see \hyperref[sec:results-paired]{Section~\ref*{sec:results-paired}}).
 
 \subsection{Trajectory Evaluation and Recovery In Context}
 \label{sec:discussion-previous-research}
@@ -112,12 +114,12 @@ not sufficient when evaluating models' behaviour
 AgentBoard measures progress on tasks by breaking them into subgoals.
 It was able to find differences in progress for agents that all had low
 scores \citep{ma2024agentboard}.
-In this case, both models had the same amount of recovery attempts, 
+In this case, both models had the same amount of successful recoveries, 
 which highlights a related issue when interpreting their final success rate. 
 The recovery results extend this comparison to SQL error handling.
 The important detail is whether subsequent attempts resolved the execution error
 and returned the correct result.
-By looking at database, errors these outcomes can be connected 
+By looking at database errors, these outcomes can be connected 
 to the failures and repeated attempts within each deployed SQL interaction.
 
 \subsubsection{Observed Recovery and Designed Correction Procedures}
@@ -180,7 +182,7 @@ That was measured separately by the clarification detection rate.
 The conditional score also excludes cases with no reply.
 Selecting a model for conversational use therefore requires evaluating not only SQL correctness,
 but also whether the model gathers the necessary information and completes the interaction
-(\hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
+(see \hyperref[sec:results-supplementary]{Section~\ref*{sec:results-supplementary}}).
 
 \subsection{Validity and Limitations}
 \label{sec:discussion-validity}
