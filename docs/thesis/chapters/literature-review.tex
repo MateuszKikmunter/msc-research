@@ -58,3 +58,39 @@ The final result may therefore follow several SQL attempts.
 Checking that result shows whether it matches the expected answer.
 Examining the attempts also shows which errors occurred and how
 the queries changed after database feedback.
+
+\subsection{Correctness and Benchmark Limitations}
+\label{sec:literature-correctness}
+
+\subsubsection{Result Agreement and Query Meaning}
+
+Different SQL queries can answer the same question correctly.
+Comparing only their SQL strings introduces a risk that valid alternatives could be rejected.
+Conversely, comparing results on one database can lead to incorrect queries being accepted 
+because they return the same data.
+\citet{zhong2020semantic} illustrate both problems in their evaluation study.
+In their example, a query asking for people older than 34 returns the same
+names as a query without an age filter when everyone in the database is
+older than 34. Changing one person's age exposes the missing condition.
+\hyperref[fig:query-equivalence]{Figure~\ref*{fig:query-equivalence}}
+illustrates this example.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../assets/zhong.png}
+  \caption{SQL text and result comparison across database instances.
+  Reproduced from \citet[p.~396, Figure~1]{zhong2020semantic}
+  under \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.}
+  \label{fig:query-equivalence}
+\end{figure}
+
+To reduce such accidental matches, \citet{zhong2020semantic} compare
+query results on a small test suite selected from randomly generated
+databases. This provides an approximation of semantic equivalence.
+
+Similarly, evaluating only the final result does not show the sequence of attempts leading to it. 
+Agreement with a reference result does not
+show whether the agent produced a query that met this criterion on
+the first attempt or only after earlier incorrect attempts.
+Understanding this difference requires examining the SQL attempts
+and database feedback.
