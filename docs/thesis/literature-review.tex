@@ -1,0 +1,41 @@
+% Standalone preview of Chapter 2.
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{texgyretermes-math.otf}
+\usepackage[british]{babel}
+\usepackage[margin=1.25in]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs,tabularx,array}
+\usepackage{listings}
+\usepackage{caption}
+\lstset{
+  basicstyle=\normalsize\ttfamily,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[round,authoryear]{natbib}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\urlstyle{same}
+\renewcommand{\harvardurl}[1]{\url{#1}}
+\hypersetup{pdftitle={Literature review},
+  pdfauthor={Mateusz Kikmunter}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\emergencystretch}{1.5em}
+\setlength{\bibsep}{0.65\baselineskip}
+\renewcommand{\refname}{References}
+\begin{document}
+\setcounter{section}{1}
+\input{chapters/literature-review}
+\clearpage
+\bibliographystyle{agsm}
+\bibliography{references}
+\end{document}

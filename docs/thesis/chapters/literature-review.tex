@@ -1,0 +1,60 @@
+% !TeX root = ../literature-review.tex
+\section{Literature Review}
+\label{sec:literature-review}
+
+This chapter reviews research on Text-to-SQL systems, 
+particularly in terms of correctness, 
+recovering from errors and evaluating query trajectories.  
+
+\subsection{Text-to-SQL Systems and Their Evaluation}
+\label{sec:literature-foundations}
+
+\subsubsection{From Natural Language To SQL}
+
+The primary task of Text-to-SQL systems is to translate natural-language 
+questions into SQL queries that answer the user's request.
+These systems enable users to interact with databases in natural language 
+and can be beneficial to non-expert users 
+who may not be familiar with SQL \citep{shi2025survey}.
+It is, however, necessary to use the correct tables and columns 
+in the generated query to answer the question.
+Merely outputting a valid SQL query that the database can execute is therefore insufficient.
+
+\citet{shi2025survey} describe the progression of Text-to-SQL systems from 
+rule and template-based to learning approaches.  
+Systems leveraging LLMs benefit from pre-training  
+and the ability to learn from in-context examples. 
+\citet{shi2025survey} classify these into  
+prompting and fine-tuning LLMs, which further trains models on task-related data.
+
+Prompt design can affect the correctness of generated SQL.
+\citet{gao2024benchmark} examined question representation,
+example selection and prompt organisation, showing how these choices
+affected Text-to-SQL performance.
+
+Schema linking refers to associating the relevant database entities with the question.
+In their survey, \citet{shi2025survey} describe it as a step 
+to build the context used to prompt the model to produce an SQL query.
+This includes the table and column names and their relationships.
+Depending on the question, producing the correct query 
+may require information from several related tables.
+
+\subsubsection{Benchmarks and Execution Feedback}
+
+Existing Text-to-SQL benchmarks evaluate different aspects of the systems.
+For example, Spider introduces the challenge of unfamiliar database schemas at test time \citep{yu2018spider}.
+BIRD additionally tests the use of database contents and external knowledge, 
+as well as the efficiency of SQL queries \citep{li2023bird}.
+Hence, differences in performance on these benchmarks may reflect the different challenges they present.
+
+Benchmark evaluation also depends on how correctness is measured.
+\citet{gao2024benchmark} describe execution accuracy as agreement
+between the results of generated and reference queries.
+A query can execute successfully and still return different data.
+
+The survey by \citet{shi2025survey} describes SQL correction methods
+that use returned results or execution errors to check and revise a query.
+The final result may therefore follow several SQL attempts.
+Checking that result shows whether it matches the expected answer.
+Examining the attempts also shows which errors occurred and how
+the queries changed after database feedback.
