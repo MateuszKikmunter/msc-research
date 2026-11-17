@@ -94,3 +94,52 @@ show whether the agent produced a query that met this criterion on
 the first attempt or only after earlier incorrect attempts.
 Understanding this difference requires examining the SQL attempts
 and database feedback.
+
+\subsubsection{Question Interpretation and Reference Assumptions}
+
+Natural-language queries can be ambiguous and open to multiple interpretations.
+A challenge then arises when the reference query represents
+only one interpretation of the question.
+\citet{pourreza2023evaluating} discuss issues where a question may result in ties
+or require assumptions about the schema or underlying data.
+In their example, a request for a manufacturer's name allows either its
+full name or its shorter common name.
+The generated and reference queries differ in output columns, 
+but both were deemed correct in their human evaluation
+(see \hyperref[fig:schema-interpretations]{Figure~\ref*{fig:schema-interpretations}}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{../assets/pourreza.png}
+  \caption{Two interpretations of a request for a manufacturer's name.
+  Reproduced from \citet[p.~1601, Figure~1]{pourreza2023evaluating}
+  under \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.}
+  \label{fig:schema-interpretations}
+\end{figure}
+
+The same ambiguity arises when queries request maximum values 
+and do not specify whether one record or all tied records should be returned. 
+As \citet{pourreza2023evaluating} demonstrate, 
+this can cause valid answers to fail the reference comparison.
+Furthermore, they found that re-evaluation impacted the 
+relative performance of the evaluated models. 
+Hence, when interpreting a mismatch, it is important to check both  
+the question and the assumptions made in its reference query.
+
+Additionally, testing more database instances 
+will not eliminate this ambiguity in question formulation.
+Clear question wording and explicit comparison rules make the expected
+answer easier to assess.
+
+\subsubsection{Difficulty Groups and Error Analysis}
+
+Benchmark evaluation is a highly valuable tool for assessing 
+the accuracy of generated SQL queries and their outputs.
+However, it has a number of drawbacks and an overall reported score 
+does not show which types of questions the system struggled with.
+Grouping questions by difficulty gives a more detailed view of performance.
+
+\citet{mitsopoulou2025analysis} explain that broad difficulty categories
+can still hide specific challenges faced by Text-to-SQL systems.
+For this reason, they propose analysis of query structures, operators and errors types.
+This helps connect unsuccessful queries to particular SQL features.
