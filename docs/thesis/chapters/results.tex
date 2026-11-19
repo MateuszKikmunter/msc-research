@@ -997,48 +997,7 @@ If a model was correct in both repetitions, its score was 1.
 It received a score of 0.5 if it was correct in only one repetition, 
 and 0 if it was incorrect in both repetitions.
 
-\hyperref[lst:paired-t-test]{Listing~\ref*{lst:paired-t-test}} shows the input checks
-and paired t-test calculation from \nolinkurl{paired-correctness-test.py}.
-Each row contains Nova's and Haiku's average correctness for the same question.
-The \texttt{require} helper stops the script if a check fails.
-Haiku was supplied first, so the estimated difference was Haiku minus Nova.
-Data loading, pairing and subsequent numerical validation are omitted from the excerpt.
-
-\noindent\begin{minipage}{\linewidth}
-\captionsetup[lstlisting]{justification=raggedright,singlelinecheck=false}
-\begin{lstlisting}[
-  language=Python,
-  basicstyle=\footnotesize\ttfamily,
-  backgroundcolor=\color{black!3},
-  frame=single,
-  rulecolor=\color{black!25},
-  framesep=6pt,
-  xleftmargin=7pt,
-  xrightmargin=7pt,
-  caption={Paired t-test calculation (Source: Author, 2026).},
-  label={lst:paired-t-test},
-  captionpos=b
-]
-nova = [row['nova_mean'] for row in rows]
-haiku = [row['haiku_mean'] for row in rows]
-differences = [h - n for h, n in zip(haiku, nova)]
-require(
-    len(rows) >= 2 and statistics.stdev(differences) > 0,
-    'The t-test needs at least two pairs and nonzero difference variance',
-)
-
-# Run the paired t-test and obtain its 95% confidence interval.
-result = stats.ttest_rel(
-    haiku,
-    nova,
-    alternative='two-sided',
-    nan_policy='raise',
-)
-interval = result.confidence_interval(confidence_level=0.95)
-\end{lstlisting}
-\end{minipage}
-
-Using SciPy version 1.18.0 \citep{scipyTtestRel}, the test gave $t(159)=4.09$ and
+Using SciPy version 1.18.0, the test gave $t(159)=4.09$ and
 $p=0.000069$, below the exploratory significance threshold of 0.05.
 The approximate 95\% confidence interval for the Haiku-minus-Nova difference
 was 6.78--19.47 percentage points. 
