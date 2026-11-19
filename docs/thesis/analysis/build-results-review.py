@@ -583,7 +583,7 @@ correctness_chart.extend([
     r'\node at (6,-18) {Model and Repetition};',
     r'\node[draw=black!50,fill=black!3,rounded corners=2pt,',
     r'  inner sep=8pt,align=center,text width=10.6cm] at (6,-42)',
-    r'  {\textbf{Final-to-direct gap: 3.13 percentage points in every run}\\[3pt]',
+    r'  {\textbf{Final-to-direct gap: 3.13\% in every run}\\[3pt]',
     r'   Five recovered questions per run;\\ different questions across models};',
     r'\end{tikzpicture}', r'\endgroup',
 ])
@@ -765,7 +765,7 @@ for d in ('easy', 'medium', 'hard'):
         tables['DifficultyRows'] += table_row(f'{d.capitalize()}: {label}',
             [pct(r['summary']['byDifficulty'][d][key]) for r in ordered_runs])
     gaps = [r['summary']['byDifficulty'][d]['finalToDirectGap'] for r in ordered_runs]
-    tables['DifficultyRows'] += table_row(f'{d.capitalize()}: gap (pp)', [
+    tables['DifficultyRows'] += table_row(f'{d.capitalize()}: absolute gap (\\%)', [
         str((Decimal(g['numerator'])*100/Decimal(g['denominator'])).quantize(
             Decimal('0.01'), rounding=ROUND_HALF_UP)) for g in gaps])
 tables['PairedRows'] = ''.join(table_row(label, [paired[str(r)][key] for r in REPETITIONS])

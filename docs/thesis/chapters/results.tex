@@ -108,7 +108,7 @@ Haiku achieved more correct final results than Nova in both repetitions
 (see \hyperref[fig:results-correctness]{Figure~\ref*{fig:results-correctness}}). 
 The difference was 19 questions in the first repetition and 23 in the second. 
 With 160 questions per run, these
-correspond to FSR differences of 11.88 and 14.38 percentage points.
+correspond to absolute FSR differences of 11.88\% and 14.38\%.
 
 Haiku also had a higher CDSR.
 It answered more questions correctly with one SQL attempt, 
@@ -135,7 +135,7 @@ The clean-direct counts changed by the same amounts.
 In each run, recovery added five correctly answered questions
 to the clean direct successes.
 With 160 standalone questions per run, the Final-to-Direct Gap (FDG),
-the difference between FSR and CDSR, was therefore 3.13 percentage points
+the difference between FSR and CDSR, was therefore 3.13\%
 in all four runs.
 All five cases in each run were execution-error recoveries;
 no other type of successful trajectory contributed to the gap.
@@ -743,7 +743,7 @@ On medium questions, Nova's FSR was 85\% in run 1 and
 The largest accuracy difference was observed on hard questions.
 Nova answered 26 and 25 correctly, giving FSR values of 52\% and 50\%. 
 Haiku answered 41 and 42 correctly, giving 82\% and 84\%. 
-Its advantage was 30 percentage points in the first run and 34 in the second. 
+The absolute FSR difference was 30\% in the first run and 34\% in the second. 
 At the same time, hard questions accounted for 15 of the 19 additional correct answers 
 from Haiku in run 1 and 17 of the 23 in run 2. 
 
@@ -759,7 +759,7 @@ from Haiku in run 1 and 17 of the 23 in run 2.
 compares final and clean direct successes within each difficulty group.
 In Nova's first run, 23 of the 50 hard questions succeeded directly and three more
 succeeded after recovery. This gave a CDSR of 46\% and an FSR of 52\%. 
-The FDG was 6 percentage points.
+The FDG was 6\%.
 
 \begin{table}[H]
 \centering
@@ -787,7 +787,7 @@ it does not mean that their trajectories were identical.
 Nova solved all 50 questions directly and on the first attempt. 
 Haiku solved 49 directly and recovered on listing invoices issued in January 2010
 (CB200-E030) in each run, 
-giving a CDSR of 98\% and an FDG of 2 percentage points. 
+giving a CDSR of 98\% and an FDG of 2\%. 
 On medium questions, all 55 of Haiku's successes were clean and direct. 
 Nova, in contrast, recovered on two questions in run 1 and one in run 2. 
 These counts explain why the same overall recovery
@@ -971,12 +971,13 @@ Total question pairs & 160 & 160 \\
 
 The Final Success Rate (FSR) measures correct final results out of all 160 questions per run.
 In repetition 1, Haiku answered 146 questions correctly and Nova answered 127. 
-The difference was 19 out of 160 questions, or 11.88 percentage points. 
-The corresponding difference in repetition 2 was 23 out of 160, or 14.38 points.
+The absolute FSR difference was 11.88\%, 
+corresponding to 19 additional correct answers out of 160. 
+The corresponding difference in repetition 2 was 23 out of 160, or 14.38\%.
 
 Across both repetitions, Haiku's average FSR was 91.56\%,
 compared with 78.44\% for Nova.
-The average difference was 13.13 percentage points,
+The average absolute FSR difference was 13.13\%,
 equivalent to 21 more correct answers per run.
 
 The exploratory paired t-test compared the models using one average correctness
@@ -988,8 +989,8 @@ and 0 if it was incorrect in both repetitions.
 
 Using SciPy version 1.18.0, the test gave $t(159)=4.09$ and
 $p=0.000069$, below the exploratory significance threshold of 0.05.
-The approximate 95\% confidence interval for the Haiku-minus-Nova difference
-was 6.78--19.47 percentage points. 
+The approximate 95\% confidence interval for the absolute Haiku-minus-Nova
+accuracy difference ranged from 6.78\% to 19.47\%. 
 Under the test's assumptions, this supports the conclusion that Haiku's mean final correctness was higher than Nova's.
 
 The question-level differences were discrete and not normally distributed,
@@ -1158,8 +1159,8 @@ Recomputing FSR and CDSR with just the reduced set confirmed that Haiku achieved
 the same higher final and clean direct success rates in both repetitions 
 (\hyperref[fig:results-sensitivity]{Figure~\ref*{fig:results-sensitivity}}). 
 Since both models had five execution-error recoveries in each repetition, 
-those five cases were responsible for producing the Final-to-Direct Gap (FDG) of 3.25 percentage points. 
-However, its increase from 3.13 points came from the smaller denominator. 
+those five cases were responsible for producing the Final-to-Direct Gap (FDG) of 3.25\%. 
+However, its increase from 3.13\% came from the smaller denominator. 
 
 Correctness agreement was 92.86\% (143/154) for Nova versus 100\% (154/154) for Haiku. 
 Haiku's only changed outcome, for the highest-spending customer in each country (CB200-H011), 

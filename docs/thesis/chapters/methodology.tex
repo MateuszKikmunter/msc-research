@@ -612,6 +612,7 @@ Recovery was assessed over the trajectory using the rules in
 
 The evaluation reported measures of final correctness, direct success,
 recovery and responses to errors. 
+Differences between rates are reported as absolute differences using the \% symbol.
 These metrics described separate aspects of the agent's behaviour. 
 Final Success Rate (FSR) measured execution accuracy \citep{yu2018spider}
 for the terminal SQL result under this study's comparison contract.
@@ -660,7 +661,7 @@ First-attempt success is also reported in LLM coding evaluation
 additionally required no redundant action
 or unnecessary clarification and exactly one SQL attempt across the trajectory.
 FDG and RSC were descriptive summaries of this study's trajectory counts.
-FDG was expressed in percentage points and was not limited to recovery.
+FDG was expressed as a percentage and was not limited to recovery.
 For example, a correct result could also follow an unnecessary SQL attempt
 or clarification and would contribute to that gap.
 
@@ -749,7 +750,7 @@ an exploratory sensitivity check.
 Results for each standalone question were matched by question identifier within each repetition.
 Each matched pair of results fell into one of four groups: both models correct, only Nova correct,
 only Haiku correct, or neither correct. 
-The accuracy difference (expressed in percentage points) was calculated
+The absolute accuracy difference, expressed as a percentage, was calculated
 as Haiku's FSR minus Nova's FSR. 
 
 \citet{dror2018significance} discuss the importance of statistical significance
