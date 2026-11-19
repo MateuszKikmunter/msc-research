@@ -1,0 +1,57 @@
+% !TeX root = ../thesis.tex
+\clearpage
+\section{Question Mapping for Paired Trajectories}
+\label{app:paired-trajectories}
+
+\hyperref[tab:results-paired-trajectories]{Table~\ref*{tab:results-paired-trajectories}}
+identifies the seven question pairs per repetition that ended correctly for
+both models but received different trajectory classes. Each pair compares
+the same question across models. Task descriptions abbreviate the benchmark
+wording. A dash means that the pair did not have different trajectory classes
+with equal terminal categories in that repetition.
+
+\begin{table}[H]
+\centering
+{\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}Xcc@{}}
+\toprule
+\textbf{Question ID} & \textbf{Task} & \multicolumn{2}{c}{\textbf{Model that recovered}} \\
+\cmidrule(l){3-4}
+ & & \textbf{Run 1} & \textbf{Run 2} \\
+\midrule
+CB200-E030 & List invoices issued in January 2010. & Haiku & Haiku \\
+\addlinespace
+CB200-H003 & Identify the highest-revenue artist in 2012. & Nova & -- \\
+\addlinespace
+CB200-H007 & Count distinct genres purchased by each customer. & -- & Nova \\
+\addlinespace
+CB200-H023 & Find tracks with revenue above the average among sold tracks. & -- & Nova \\
+\addlinespace
+CB200-H030 & Report units sold and realised revenue by media type. & Nova & Nova \\
+\addlinespace
+CB200-H031 & Report revenue by composer, grouping missing composers as Unknown. & Nova & Nova \\
+\addlinespace
+CB200-H050 & Find the highest-revenue customer billed in the USA during 2012. & Haiku & Haiku \\
+\addlinespace
+CB200-M026 & Count distinct customers billed in each country. & Nova & Nova \\
+\addlinespace
+CB200-M039 & Report realised revenue by genre in 2012. & Nova & -- \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Task mapping for different trajectory classes with correct final outcomes. The other model succeeded directly (Source: Author, 2026).}
+\label{tab:results-paired-trajectories}
+\end{table}
+
+The recovery-stability counts in
+\hyperref[fig:results-recovery-stability]{Figure~\ref*{fig:results-recovery-stability}}
+use the following case groups. Nova recovered in both runs on H030, H031 and
+M026. Its H003 and M039 cases moved from recovery to execution failure;
+H007 and H023 moved from direct success to recovery.
+Haiku recovered in both runs on E030 and H050, listed above, and on three
+further questions: H014 (days between each customer's first and last invoice),
+H025 (the longest gap between consecutive invoices per customer), and
+H045 (the number of customers placing more than one order in each year).
+All identifiers in this paragraph have the CB200- prefix.

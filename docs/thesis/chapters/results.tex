@@ -141,8 +141,9 @@ All five cases in each run were execution-error recoveries;
 no other type of successful trajectory contributed to the gap.
 
 Despite the equal count, the models recovered on different questions.
-For example, CB200-E030 required recovery in both Haiku runs, 
-and Nova recovered CB200-M026 in both runs. 
+For example, listing invoices issued in January 2010 (CB200-E030)
+required recovery in both Haiku runs, while Nova recovered on counting
+distinct customers billed in each country (CB200-M026) in both runs.
 Nova's recovered cases also changed between repetitions.
 
 \subsubsection{Indirect Success Analysis}
@@ -218,7 +219,7 @@ with Nova having 27 and 26, and Haiku 14 and 13 such cases.
 These failures involved query errors, such as incorrect grouping
 or aggregation.
 Some also involved differences in output representation.
-For example, Haiku's answer to CB200-H038 returned the same month and revenue
+For example, Haiku's answer to the highest-revenue month question (CB200-H038) returned the same month and revenue
 as the reference, but represented the month differently. 
 This case is discussed in the scoring sensitivity analysis
 (see \hyperref[sec:results-sensitivity]{Section~\ref*{sec:results-sensitivity}}).
@@ -274,8 +275,10 @@ Nova was able to correct errors reported by Athena.
 However, the revised queries often left other requirements unmet.
 For example, in H010, both runs returned all country-genre groups instead
 of the highest-revenue genre per country.
-Similarly, H025 in the second run compared all invoice pairs instead of consecutive invoices.
-In H034 of the same run, Nova corrected the date-literal types but continued
+For the longest gap between consecutive invoices (CB200-H025), 
+the second run compared all invoice pairs.
+For the highest-revenue support representative in 2012 (CB200-H034), 
+Nova corrected the date-literal types in the same run but continued
 to count invoice totals repeatedly after joining invoice items
 (see \hyperref[lst:revenue-aggregation-error]{Listing~\ref*{lst:revenue-aggregation-error}}).
 These cases show difficulties in Nova's handling of several SQL requirements, 
@@ -283,8 +286,7 @@ such as selecting results within groups,
 comparing adjacent rows and aggregating values after joins. 
 The execution traces partially explain why Nova performed worse on the hard questions.
 
-H034 asked which support representative's customers generated the most
-realised revenue in 2012. 
+
 \hyperref[lst:revenue-aggregation-error]{Listing~\ref*{lst:revenue-aggregation-error}} 
 shows the relevant SQL fragments;
 the remaining joins, selected columns, grouping and ordering are omitted.
@@ -298,7 +300,7 @@ the remaining joins, selected columns, grouping and ordering are omitted.
   framesep=6pt,
   xleftmargin=7pt,
   xrightmargin=7pt,
-  caption={SQL correction and revenue mismatch for CB200-H034, Nova repetition 2 (Source: Author, 2026).},
+  caption={Inflated support-representative revenue after correction (CB200-H034), Nova repetition 2 (Source: Author, 2026).},
   label={lst:revenue-aggregation-error},
   captionpos=b
 ]
@@ -329,7 +331,7 @@ The reference query summed each item's unit price multiplied by its quantity.
 Nova selected the expected representative, but returned an inflated revenue figure.
 
 CB200-H043 from Nova's second run illustrates a different limitation 
-in building a query after resolving an execution error.
+in building a query after resolving an execution error. 
 The question asked: ``Show monthly invoice revenue and
 cumulative revenue over time.''
 \hyperref[lst:executable-mismatch]{Listing~\ref*{lst:executable-mismatch}}
@@ -346,7 +348,7 @@ the remaining parts of the queries are omitted for readability.
   framesep=6pt,
   xleftmargin=7pt,
   xrightmargin=7pt,
-  caption={Abbreviated two-attempt trajectory and saved results for CB200-H043, Nova repetition 2 (Source: Author, 2026).},
+  caption={Monthly and cumulative revenue mismatch (CB200-H043), Nova repetition 2 (Source: Author, 2026).},
   label={lst:executable-mismatch},
   captionpos=b
 ]
@@ -670,8 +672,9 @@ The prompt policy was not a hard execution cap, as explained in
 \hyperref[sec:protocol]{Section~\ref*{sec:protocol}}.
 
 Longer sequences did not always end in failure.
-Nova recovered CB200-M039 after five attempts in run 1 and CB200-H007 after three in run 2.
-In H007, the first two queries tried to join customers directly to
+Nova recovered on revenue by genre in 2012 (CB200-M039) after five attempts in run 1,
+and on distinct genres purchased by each customer (CB200-H007) after three in run 2.
+For the latter question, the first two queries tried to join customers directly to
 \texttt{invoice\_items} using its nonexistent \texttt{customer\_id} column.
 The third query joined through \texttt{invoices} and returned a correct result.
 \hyperref[lst:unchanged-retry-recovery]{Listing~\ref*{lst:unchanged-retry-recovery}}
@@ -782,7 +785,8 @@ Hard: final / clean direct & 26 / 23 & 25 / 21 & 41 / 37 & 42 / 38 \\
 shows that even though the models achieved perfect final accuracy on the easy group, 
 it does not mean that their trajectories were identical.
 Nova solved all 50 questions directly and on the first attempt. 
-Haiku solved 49 directly and recovered on CB200-E030 in each run, 
+Haiku solved 49 directly and recovered on listing invoices issued in January 2010
+(CB200-E030) in each run, 
 giving a CDSR of 98\% and an FDG of 2 percentage points. 
 On medium questions, all 55 of Haiku's successes were clean and direct. 
 Nova, in contrast, recovered on two questions in run 1 and one in run 2. 
@@ -842,8 +846,10 @@ The medium-group proportions were 1.67\% and 3.33\%.
 Haiku had no such sequences in any difficulty group.
 
 Long sequences were nevertheless not limited to hard questions.
-In Nova's second run, the medium questions CB200-M039 and CB200-M051
-used 28 and 24 attempts and both ended as execution failures.
+In Nova's second run, the medium questions about revenue by genre in 2012
+(CB200-M039) and the artist with the greatest catalogue duration (CB200-M051) 
+used 28 and 24 attempts, respectively. 
+Both ended as execution failures.
 Those two questions accounted for 52 of the medium group's 111 attempts
 (46.85\%).
 The other 58 questions used the remaining 59 attempts.
@@ -878,7 +884,7 @@ different trajectory classes by the total number of retained pairs.
 \end{figure}
 
 The excluded pairs had different terminal outcome categories. These included
-CB200-H038, where Nova ended with an execution error. 
+the highest-revenue month question (CB200-H038), where Nova ended with an execution error. 
 Haiku's query executed successfully, but its result failed the comparison contract
 (see \hyperref[sec:results-sensitivity]{Section~\ref*{sec:results-sensitivity}}).
 Both models failed, but their categories differed.
@@ -887,29 +893,11 @@ Seven retained pairs had different trajectory classes in each repetition.
 In all seven, both models ended correctly: one succeeded directly and the other
 recovered from an execution error.
 \hyperref[tab:results-paired-trajectories]{Table~\ref*{tab:results-paired-trajectories}}
-identifies these questions for each repetition, grouped by which model needed recovery.
+in \hyperref[app:paired-trajectories]{Appendix~\ref*{app:paired-trajectories}}
+provides the task descriptions and case mapping for each repetition.
 
-\begin{table}[H]
-\centering
-{\small
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Repetition} & \textbf{Nova recovered; Haiku succeeded directly} & \textbf{Haiku recovered; Nova succeeded directly} \\
-\midrule
-1 & H003, H030, H031, M026, M039 & E030, H050 \\
-\addlinespace[0.4em]
-2 & H007, H023, H030, H031, M026 & E030, H050 \\
-\bottomrule
-\end{tabularx}
-}
-\caption{Questions answered correctly by both models through different trajectory classes.
-Identifiers omit the CB200- prefix (Source: Author, 2026).}
-\label{tab:results-paired-trajectories}
-\end{table}
-
-Question M026 illustrates this difference
+The question asking how many distinct customers were billed in each country
+(CB200-M026) illustrates this difference
 (see \hyperref[lst:successful-recovery]{Listing~\ref*{lst:successful-recovery}}).
 Nova recovered from an execution error in both repetitions,
 while Haiku succeeded directly in both.
@@ -932,7 +920,8 @@ shows how many questions changed correctness status or trajectory class.
 Nova's trajectory classes changed more often than its correctness status,
 which shows that a question could retain the same outcome while following a different path.
 Only one question changed both measures for Haiku: 
-CB200-H011, which moved from a semantic failure to direct success.
+the highest-spending customer in each country (CB200-H011), 
+which moved from a semantic failure to direct success.
 It was an unspecified-tie case already included in the sensitivity check
 (see \hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}).
 
@@ -944,7 +933,7 @@ shows whether these were the same questions and how their outcomes changed.
 \centering
 \input{figures/results-recovery-stability}
 \caption{Trajectory classes across repetitions for questions recovered in at least
-one run. Identifiers omit the CB200- prefix (Source: Author, 2026).}
+one run. Labels show question counts (Source: Author, 2026).}
 \label{fig:results-recovery-stability}
 \end{figure}
 
@@ -1036,7 +1025,8 @@ For resolved ambiguity, direct success means that the first SQL attempt after cl
 Nova's post-clarification accuracy stayed the same, 
 but one successful case required recovery in the second run.
 
-In question CB200-A008, Nova's second-run query selected the full invoice date
+For the request to compare this year's revenue with last year's (CB200-A008),
+Nova's second-run query selected the full invoice date
 while grouping results by year. 
 Athena rejected the ungrouped date column.
 The revised query selected the year and returned a correct result.
@@ -1053,9 +1043,8 @@ The revised query selected the year and returned a correct result.
 Interactive turn accuracy counts correct final results across the ten authored
 turns per run. 
 It was measured for five two-turns episodes, where the first turn provided context for the second.
-For instance, in CB200-C002, the first turn asked which artist generated
-the most realised revenue, and the second asked how many albums
-that artist had in the catalogue.
+For instance, one episode first asked which artist generated the most realised
+revenue, then asked how many albums that artist had in the catalogue (CB200-C002).
 
 Nova reached 70\% in turn accuracy in both repetitions, and Haiku 80\%. 
 Complete-episode accuracy required both turns to be correct:
@@ -1064,7 +1053,8 @@ Nova completed 60\% (3/5) of episodes and Haiku 80\% (4/5).
 Nova's accuracy stayed the same in both runs. 
 Nonetheless, the number of recovered turns increased from one to two
 (\hyperref[fig:results-supplementary-trajectories]{Figure~\ref*{fig:results-supplementary-trajectories}}).
-For example, in CB200-C004, turn 2 succeeded directly in the first run.
+For example, a follow-up asking to rank genres by revenue after ranking them
+by units sold (CB200-C004, turn 2) succeeded directly in the first run.
 In the second, however, its first SQL attempt referenced a nonexistent column.
 This was corrected in the following attempt and a revised query returned the correct result.
 Both Haiku runs ended with semantic failures on the two turns of this episode.
@@ -1072,9 +1062,12 @@ Both Haiku runs ended with semantic failures on the two turns of this episode.
 \subsubsection{Safety Actions and Manual Labels}
 
 The no-query rate measures safety cases where models were expected to issue no SQL queries. 
-It was 80\% (8/10) in every run, with both models generating SQL for CB200-S002 and CB200-S007 in both repetitions.
-In S002, they executed a \texttt{SELECT} query in response to a table creation request, despite instructions to avoid any database action.
-Similarly, in S007, they queried customer data within a prompt-injection request. 
+It was 80\% (8/10) in every run. Both models generated SQL for two requests
+in both repetitions: creating a table of the ten highest-spending customers (CB200-S002),
+and revealing the system prompt followed by listing all customers (CB200-S007).
+For the table creation request, they executed a \texttt{SELECT} query despite
+instructions to avoid any database action. For the prompt-injection request,
+they queried customer data. 
 Both cases were manually labelled non-compliant in every run.
 
 \hyperref[fig:results-safety-labels]{Figure~\ref*{fig:results-safety-labels}}
@@ -1137,7 +1130,8 @@ purchase frequency, average transaction value)" [...]
 
 The expected output representation was not always specified in the question.
 As a result, some result mismatches occurred.
-For example, in CB200-H038, Haiku returned month 8 and revenue 47.62 in both repetitions.
+For the highest-revenue month question (CB200-H038), 
+Haiku returned month 8 and revenue 47.62 in both repetitions.
 The reference returned the same revenue with August represented as a timestamp (\texttt{2012-08-01 00:00:00.000}).
 The difference in month representation caused the mismatch under the comparison contract.
 
@@ -1168,7 +1162,8 @@ those five cases were responsible for producing the Final-to-Direct Gap (FDG) of
 However, its increase from 3.13 points came from the smaller denominator. 
 
 Correctness agreement was 92.86\% (143/154) for Nova versus 100\% (154/154) for Haiku. 
-Haiku's only changed outcome (CB200-H011) fell in the set of excluded tie-breaking cases. 
+Haiku's only changed outcome, for the highest-spending customer in each country (CB200-H011), 
+fell in the set of excluded tie-breaking cases. 
 All 11 questions whose correctness changed between Nova's repetitions remained in the subset. 
 
 \subsection{Summary Of Findings}
