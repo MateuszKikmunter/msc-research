@@ -194,3 +194,21 @@ These corrections occur during query generation, before the completed SQL
 is executed. The main experiments also supplied schema links derived from
 the reference queries to isolate generation from schema selection
 \citep{raczkowska2026retrysql}.
+
+\subsubsection{Evaluating SQL Repairs}
+
+\citet{qu2025share} developed and evaluated SHARE, a framework that helps
+language models correct generated SQL. They compared its execution accuracy
+with other correction methods after one refinement iteration.
+Their analysis also examined overcorrection, where an initially correct
+query became incorrect \citep[Appendix~C.4]{qu2025share}.
+This shows why evaluating correction should account for both repaired
+queries and errors introduced into previously correct ones.
+
+In BIRD-CRITIC, a benchmark for debugging SQL issues introduced by \citet{li2025swesql}, 
+each problem consists of an incorrect SQL query, 
+an explanation of what is wrong with it and a database schema. 
+Based on these inputs, the model must return the corrected SQL while preserving the user's intent. 
+A proposed solution is counted as successful only when all associated test cases are satisfied. 
+These tests check the required behaviour and may be based on the returned rows, 
+alterations made to the database or other conditions specific to each individual task.
