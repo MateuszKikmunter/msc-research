@@ -143,3 +143,54 @@ Grouping questions by difficulty gives a more detailed view of performance.
 can still hide specific challenges faced by Text-to-SQL systems.
 For this reason, they propose analysis of query structures, operators and errors types.
 This helps connect unsuccessful queries to particular SQL features.
+
+\subsection{Execution Feedback and SQL Repair}
+\label{sec:literature-repair}
+
+\subsubsection{Understanding Query Errors}
+
+\citet{ning2024insights} identify misinterpretations of natural-language questions 
+and incorrect alignment with database schemas as sources of semantic errors. 
+They developed an error taxonomy based on outputs from four different Text-to-SQL systems. 
+It classifies errors according to the part of the given query, 
+such as a \texttt{WHERE} or \texttt{JOIN} clause, 
+and the type of mistake, for example, a wrong column, value or aggregation function. 
+Using this classification, it is possible to examine the query and describe what is wrong with it.
+
+However, examining sequential SQL attempts could also s
+how how those errors change after the agent receives feedback. 
+For instance, after a query execution error, 
+an agent may correct the table name but still apply the wrong aggregate and leave the error unresolved. 
+Comparing the attempts can show which problems persisted and whether the final query was successful.
+
+\subsubsection{Prompted Review and Training for Correction}
+
+Prompting and training have both been used to encourage the model to correct its queries. 
+\citet{chen2024selfdebug} introduced a self-debugging procedure without additional model training. 
+They asked their models to perform a number of steps designed to identify errors in their output. 
+First, the model was instructed to provide a short summary 
+of the input question and detect which columns should be included in the answer. 
+Next, it would generate an explanation of the SQL produced and judge 
+whether it was aligned with the question asked and whether 
+it was likely to answer the question correctly. 
+This provided the model with an additional review step, 
+even in the absence of any errors returned from running unit tests.
+
+Two out of the four models tested on Spider 
+had higher scores when asked to provide this additional information, 
+while the remaining two performed equally well with or without it \citep[Table~2(a)]{chen2024selfdebug}. 
+The benefit of the review procedure varied between models, 
+but the procedure provided a way to check query meaning without an execution error prompting the review.
+
+\citet{raczkowska2026retrysql} approached correction differently 
+and trained their models to make and correct errors. 
+They inserted incorrect steps into generated reasoning sequences, 
+followed by a backtracking marker and the correct step. 
+Those sequences were then used for continued pre-training of small coding models. 
+Several variants of retry-data led to improvements in SQL generation. 
+However, these improvements varied by model, dataset and difficulty group.
+
+These corrections occur during query generation, before the completed SQL
+is executed. The main experiments also supplied schema links derived from
+the reference queries to isolate generation from schema selection
+\citep{raczkowska2026retrysql}.
