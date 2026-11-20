@@ -242,3 +242,26 @@ Therefore, this study examines successive SQL attempts and their results
 to investigate recovery from errors. 
 It asks what proportion of detected errors were corrected, 
 which errors persisted and whether later attempts returned the expected answer.
+
+\subsubsection{Diagnosing Recorded Behaviour}
+
+\citet{yan2026bottleneck} used trajectory analysis to investigate failures
+of an interactive Text-to-SQL agent on the BIRD-Interact benchmark.
+The agent could inspect the schema, retrieve knowledge,
+ask a simulated user for clarification and execute SQL.
+Its later actions could depend on the responses it received.
+
+In addition to task accuracy, they examined how the agent used its interaction budget,
+which limited the actions it could take.
+Using benchmark annotations, they distinguished failures involving missing
+information from those that occurred after the required information acquired by the agent
+\citep[Section~3.1 and Table~2]{yan2026bottleneck}.
+These findings provided a basis for PASCAL, a framework they developed
+to coordinate information gathering before SQL generation
+\citep[Sections~3.2--4]{yan2026bottleneck}.
+
+Together, these studies illustrate how trajectory analysis can support the debugging process
+by connecting unsuccessful outcomes with the actions and information
+preceding them.
+This directly relates to this study and its focus on how trajectory-aware evaluation
+changes the interpretation of final execution accuracy.
