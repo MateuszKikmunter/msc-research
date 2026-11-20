@@ -225,7 +225,17 @@ They measured progress against goal states or manually annotated subgoals.
 Based on that, they reported variations in the levels of progress achieved 
 by models with similarly low rates of task success \citep[Section~4.2]{ma2024agentboard}.
 
-Applying this idea to SQL requires clear criteria for what counts as partial progress. 
+TRAJECT-Bench, on the other hand, 
+uses trajectory-aware and final performance metrics to compare agents' 
+tool selections and arguments with reference calls 
+and assess final-answer accuracy \citep{he2026trajectbench}.
+In Text-to-SQL systems, however, 
+various queries can answer the same question correctly. 
+Hence, reference sequences would need to accommodate these valid alternatives.
+Instead, this study examines successive SQL attempts and database feedback,
+and compares their results with reference outputs.
+
+At the same time, applying AgentBoard's to SQL requires clear criteria for what counts as partial progress. 
 Successful query generation or an execution error revision may be insufficient to show
 whether the resulting answer is correct. 
 Therefore, this study examines successive SQL attempts and their results 
