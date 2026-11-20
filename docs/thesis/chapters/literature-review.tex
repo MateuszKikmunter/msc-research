@@ -212,3 +212,23 @@ Based on these inputs, the model must return the corrected SQL while preserving 
 A proposed solution is counted as successful only when all associated test cases are satisfied. 
 These tests check the required behaviour and may be based on the returned rows, 
 alterations made to the database or other conditions specific to each individual task.
+
+\subsection{Trajectory-Aware Evaluation and Diagnosis}
+\label{sec:literature-trajectories}
+
+\subsubsection{Measuring Intermediate Progress}
+
+AgentBoard reports intermediate progress alongside task success, 
+allowing partially completed tasks to be distinguished from those 
+where little progress was made \citep{ma2024agentboard}. 
+They measured progress against goal states or manually annotated subgoals. 
+Based on that, they reported variations in the levels of progress achieved 
+by models with similarly low rates of task success \citep[Section~4.2]{ma2024agentboard}.
+
+Applying this idea to SQL requires clear criteria for what counts as partial progress. 
+Successful query generation or an execution error revision may be insufficient to show
+whether the resulting answer is correct. 
+Therefore, this study examines successive SQL attempts and their results 
+to investigate recovery from errors. 
+It asks what proportion of detected errors were corrected, 
+which errors persisted and whether later attempts returned the expected answer.
