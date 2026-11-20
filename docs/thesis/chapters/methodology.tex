@@ -311,7 +311,7 @@ identifier were counted as a single attempt.
 The Athena execution identifier linked the observation to the candidate-result
 record, which contained the path to the complete saved result.
 
-\hyperref[lst:trace-example]{Listing~\ref*{lst:trace-example}} illustrates these identifiers using CB200-E001
+\hyperref[lst:trace-example]{Listing~\ref*{lst:trace-example}} illustrates these identifiers using the artist-count question (CB200-E001)
 from Nova Lite's first repetition. For readability, the listing regroups
 selected fields in YAML, a text format for structured data
 \citep{yamlSpec122}.
@@ -558,8 +558,8 @@ a new fault.
 
 \subsubsection{Worked Error-Transition Example}
 
-\hyperref[lst:error-transition-example]{Listing~\ref*{lst:error-transition-example}} shows this pattern in a saved
-error transition from Nova Lite's first repetition. 
+\hyperref[lst:error-transition-example]{Listing~\ref*{lst:error-transition-example}} shows this pattern in Nova Lite's first repetition
+when identifying the highest-revenue month in 2012 (CB200-H038).
 Selected fields from the
 evaluation JSON are presented in YAML, following the format used in
 \hyperref[lst:trace-example]{Listing~\ref*{lst:trace-example}}.
@@ -872,29 +872,29 @@ case containing two separately classified turns.
 \begin{table}[H]
 \centering
 {\small
-\begin{tabularx}{\textwidth}{@{}l l c >{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}>{\hsize=1.15\hsize\linewidth=\hsize\raggedright\arraybackslash}X l c >{\hsize=.85\hsize\linewidth=\hsize\raggedright\arraybackslash}X@{}}
 \toprule
 \textbf{Question} & \textbf{Model} & \textbf{Rep.} & \textbf{Confirmed outcome} \\
 \midrule
-CB200-E002 & Nova Lite & 1 & Direct success \\
+Album count\newline {\footnotesize (CB200-E002)} & Nova Lite & 1 & Direct success \\
 \addlinespace[0.4em]
-CB200-E030 & Haiku 4.5 & 1 & Execution-error recovery \\
+January 2010 invoices\newline {\footnotesize (CB200-E030)} & Haiku 4.5 & 1 & Execution-error recovery \\
 \addlinespace[0.4em]
-CB200-H049 & Nova Lite & 1 & Unrecovered execution failure \\
+Customers buying Rock but never Jazz\newline {\footnotesize (CB200-H049)} & Nova Lite & 1 & Unrecovered execution failure \\
 \addlinespace[0.4em]
-CB200-H038 & Haiku 4.5 & 1 & Executed semantic failure \\
+Highest-revenue month in 2012\newline {\footnotesize (CB200-H038)} & Haiku 4.5 & 1 & Executed semantic failure \\
 \addlinespace[0.4em]
-CB200-M015 & Nova Lite & 2 & Executed semantic failure \\
+Genre with longest average track duration\newline {\footnotesize (CB200-M015)} & Nova Lite & 2 & Executed semantic failure \\
 \addlinespace[0.4em]
-CB200-A009 & Haiku 4.5 & 2 & Direct success after clarification \\
+``Important invoices'' above \$20\newline {\footnotesize (CB200-A009)} & Haiku 4.5 & 2 & Direct success after clarification \\
 \addlinespace[0.4em]
-CB200-A008 & Nova Lite & 2 & Execution-error recovery after clarification \\
+Revenue in 2013 versus 2012\newline {\footnotesize (CB200-A008)} & Nova Lite & 2 & Execution-error recovery after clarification \\
 \addlinespace[0.4em]
-CB200-A014 & Nova Lite & 2 & Unrecovered execution failure after clarification \\
+Revenue per support representative\newline {\footnotesize (CB200-A014)} & Nova Lite & 2 & Unrecovered execution failure after clarification \\
 \addlinespace[0.4em]
-CB200-C002 & Haiku 4.5 & 2 & Direct success on both turns \\
+Highest-revenue artist and album count\newline {\footnotesize (CB200-C002)} & Haiku 4.5 & 2 & Direct success on both turns \\
 \addlinespace[0.4em]
-CB200-H026 & Nova Lite & 2 & Unrecovered execution failure; retry policy exceeded \\
+Albums purchased in at least five countries\newline {\footnotesize (CB200-H026)} & Nova Lite & 2 & Unrecovered execution failure; retry policy exceeded \\
 \addlinespace[0.4em]
 \bottomrule
 \end{tabularx}
@@ -905,7 +905,7 @@ CB200-H026 & Nova Lite & 2 & Unrecovered execution failure; retry policy exceede
 
 The check confirmed the selected classifications under the existing comparison
 contract. In particular, the semantic-failure
-label for CB200-H038 reflected a difference in month representation.
+label for the highest-revenue-month question (CB200-H038) reflected a difference in month representation.
 
 The targeted review, automated tests and reporting checks formed the validation
 approach used in this study. The cases were deliberately selected and reviewed
