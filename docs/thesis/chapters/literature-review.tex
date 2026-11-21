@@ -265,3 +265,27 @@ by connecting unsuccessful outcomes with the actions and information
 preceding them.
 This directly relates to this study and its focus on how trajectory-aware evaluation
 changes the interpretation of final execution accuracy.
+
+\subsection{Clarification, Conversation and Human Review}
+\label{sec:literature-interaction}
+
+\subsubsection{Recognising When Clarification Is Needed}
+
+Ambiguous requests can be particularly challenging for Text-to-SQL systems
+because additional interactions may be needed in order to generate appropriate SQL.
+This is examined by \citet{dong2025practiq} through their conversational Text-to-SQL dataset, PRACTIQ.
+It contains ambiguous and unanswerable questions inspired by real-world user questions.
+
+In their generated conversations, some interactions include an original question,
+a question asking for clarification, an answer, and the corresponding SQL \citep{dong2025practiq}.
+For instance, the visitor's age could mean either age at present or age at entry,
+so the answer to the clarification question specifies the required column \citep[p.~256, Figure~1]{dong2025practiq}.
+
+\citet[Section~4]{dong2025practiq} evaluate two tasks:
+classifying the user's question and generating SQL after a clarification
+exchange. They assess these using classification accuracy and execution
+accuracy, respectively.
+Similarly, this study also separates clarification behaviour
+from correctness after the user's reply.
+It additionally analyses SQL attempts during the continued interaction
+to determine whether a correct result followed direct success or recovery.
