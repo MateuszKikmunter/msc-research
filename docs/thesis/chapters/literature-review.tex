@@ -289,3 +289,54 @@ Similarly, this study also separates clarification behaviour
 from correctness after the user's reply.
 It additionally analyses SQL attempts during the continued interaction
 to determine whether a correct result followed direct success or recovery.
+
+\subsubsection{Maintaining Context Across Turns}
+
+Conversational interfaces allow users to refine their queries in iterations,
+requiring systems to track dialogue context and handle feedback over multiple turns.
+The CoSQL project website describes it as ``the dialogue version of the
+Spider and SParC tasks'' \citep[What is CoSQL?]{cosqlWebsite}.
+It includes conversations in which users explore a database, clarify
+requests and ask related questions \citep{yu2019cosql}.
+In the example shown by \citet[p.~1962, Figure~1]{yu2019cosql},
+the user asks questions about dorms, then specifically about dorms with a TV and a lounge.
+In a later question, the user asks about study rooms, 
+and it must be clarified whether this should be subject to the same constraint. 
+As a result, information from earlier turns is therefore required to construct the correct target SQL query for this question.
+
+CoSQL reports performance at both question and interaction level
+\citep[Section~6, Table~5]{yu2019cosql}.
+This study uses a similar distinction when assessing individual
+interactive turns and complete episodes.
+
+BIRD-INTERACT evaluates interactions with a simulated user during task execution
+\citep{huo2026birdinteract}.
+In the conversational task, the process follows a fixed protocol involving clarifications,
+submission of a SQL query, and a follow-up question from the user if the initial task is completed successfully.
+Alternatively, in the agentic task, the agent may choose its next action within the available tools.
+The benchmark also includes data-modifying operations and hence covers more functionality than the mostly short, read-only interactions
+examined in this study.
+
+\subsubsection{Inspecting and Correcting Query Results}
+
+Besides ambiguity and long multi-turn interactions, 
+Text-to-SQL systems also face another critical reliability issue: so-called “silent errors”, 
+where SQL queries execute successfully but produce incorrect or misleading results.
+
+These challenges are beginning to be addressed by recent research and systems such as SQLucid, 
+which helps users find and resolve errors in generated SQL queries through interactive explanations \citep{tian2024sqlucid}.
+It provides step-by-step explanations of the generated SQL and its intermediate results to help locate mistakes.
+
+Additionally, systems such as Talk2Data address the related challenge 
+of supporting complex analytical workflows and improving their accuracy and usability \citep{guo2024talk2data}.
+It breaks complex questions into simpler questions 
+and presents the resulting answers through annotated visualisations.
+Its main goal is to support further exploration and understanding of the underlying data, 
+as opposed to SQLucid, which aims to allow users to investigate and amend generated SQL queries.
+However, both provide some degree of insight into how the final result is derived, 
+although SQLucid exposes intermediate query operations, 
+while Talk2Data presents the subquestions and supporting data facts used to construct the answer.
+
+Similarly, by examining failed SQL attempts, 
+recurring errors and results that did not match reference answers, 
+this study could help identify cases that require closer human inspection.
