@@ -340,3 +340,34 @@ while Talk2Data presents the subquestions and supporting data facts used to cons
 Similarly, by examining failed SQL attempts, 
 recurring errors and results that did not match reference answers, 
 this study could help identify cases that require closer human inspection.
+
+\subsection{Research Position}
+\label{sec:literature-position}
+
+The papers reviewed address the accuracy of final results, errors in generated SQL, 
+and the sequence of operations performed leading to an answer, 
+such as requesting clarification, obtaining relevant schema data, 
+and re-running modified queries in response to database feedback. 
+In some cases, models recover following a SQL error and
+eventually output the desired result, while in others they may iterate many times, 
+failing to produce the desired outcome. 
+It is not possible to determine the sequence of events leading up to an answer from the final output alone.
+
+Building on existing trajectory-evaluation research, this study combines saved SQL
+attempts, database feedback and comparison with reference results to distinguish direct
+success, recovery and unresolved failure. 
+It also analyses repeated errors and variations in behaviour between models and across repetitions.
+
+Queries are assessed by their results without requiring a reference sequence of SQL actions. 
+The contribution includes an evaluation methodology, software implementing it 
+and an empirical analysis of the recorded behaviour. 
+The software could support further evaluations using compatible trace formats, 
+benchmark records, saved query results and comparison contracts.
+
+Standalone questions provide the main quantitative evidence. 
+Clarification and interactive cases allow investigation 
+of multiple interactions in which the information provided to the model changes.
+Safety cases were expected not to trigger SQL actions, 
+and their responses were assessed through manual review. 
+The evaluation rules and the boundaries of these comparisons 
+are described in \hyperref[sec:methodology]{Chapter~\ref*{sec:methodology}}.
