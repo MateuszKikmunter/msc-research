@@ -1,0 +1,137 @@
+% !TeX root = ../thesis.tex
+\section{Introduction}
+\label{sec:introduction}
+
+\subsection{Background and Motivation}
+\label{sec:introduction-background}
+
+Text-to-SQL systems allow users to interact with a database through natural language. 
+A model translates users' questions into SQL statements, 
+which can then be executed to retrieve the relevant data. 
+Research using Large Language Models (LLMs) has developed several approaches to this task, 
+including prompting and fine-tuning \citep{shi2025survey}.
+
+In an agentic system, answering a question and returning the final result 
+can involve multiple interactions with the underlying database system. 
+The agent may generate one or more queries, 
+possibly encounter errors, and retry, before finally providing an answer.
+A correct final result can therefore follow an unsuccessful first attempt. 
+Similarly, a failed initial SQL attempt may be followed by several additional retries 
+before the last query executes successfully and the result is returned to the user.
+Hence, evaluating only the final answer gives an 
+indication of success or failure, but leaves the preceding attempts unexplained.
+
+This distinction matters when examining how a deployed system behaves and handles errors.
+When considering only final accuracy, both a correct result reached on the first attempt 
+and a correct result reached after several failures are treated equally.
+There is therefore value in saved SQL attempts and database feedback 
+because they can provide evidence for examining these behaviours.
+
+\subsection{Research Problem}
+\label{sec:introduction-problem}
+
+Models' behaviour beyond final accuracy 
+is already the subject of ongoing research.
+For example, \citet{yan2026bottleneck} use trajectory analysis 
+to identify gaps in Text-to-SQL systems and develop a framework 
+for collecting required information before query generation.
+
+The literature reviewed in
+\hyperref[sec:literature-review]{Chapter~\ref*{sec:literature-review}}
+also covers aspects such as SQL correction, intermediate progress, 
+conversational evaluation and related topics.
+
+At the centre of this study is the question of 
+how recorded SQL attempts can be used 
+to explain performance of a deployed Text-to-SQL workflow.
+
+In particular, the study connects these attempts 
+with database feedback and reference-result comparisons. 
+This allows the final outcome to be examined alongside SQL query revisions 
+and other events leading to a successful answer or a failure.
+
+The comparison between two selected models was chosen as the main investigation method.
+This makes it possible to identify whether models answering the same questions 
+can provide the same answers and reach the similar result through different trajectories.
+Additionally, it enables examination of whether outcomes and classes remain stable across repeated runs.
+Therefore, the purpose is to understand what can be inferred from the traces, 
+especially with regard to the system's behaviour and limitations.
+
+\subsection{Research Aim and Questions}
+\label{sec:research-questions}
+
+The overall aim of this study, therefore, is to determine how trajectory-aware evaluation changes
+the interpretation of final result accuracy in an agentic Text-to-SQL system.
+
+Specifically, this work investigates the following primary research question:
+\begin{quote}
+To what extent does trajectory-aware evaluation change the interpretation
+of final result accuracy by distinguishing direct success, recovery and
+unresolved failure, and how do Nova Lite and Haiku 4.5 differ in their
+recovery, clarification, error-response and failure behaviour?
+\end{quote}
+
+To address this question, the analysis is structured around five supporting sub-questions:
+\begin{itemize}
+  \item \textbf{RQ1:} What proportion of successful final outcomes were
+  not achieved through clean direct success?
+  \item \textbf{RQ2:} How much final task success involved recovery from
+  an initially unsuccessful SQL attempt?
+  \item \textbf{RQ3:} How do the agents respond to database execution
+  errors, and which observed patterns are associated with recovery
+  or repeated failure?
+  \item \textbf{RQ4:} How do correctness, trajectory classes and
+  SQL-attempt counts vary across the benchmark's difficulty groups?
+  \item \textbf{RQ5:} When the models reach the same final-outcome
+  category on the same question, how often do their trajectory classes differ?
+\end{itemize}
+
+\subsection{Study Scope and Contributions}
+\label{sec:introduction-scope}
+
+The study used a cloud-based Text-to-SQL system to conduct the experiments 
+and gather the data required for the analysis.
+At its core, the system consists of Amazon Bedrock, AWS Lambda and Amazon Athena.
+The models selected for the experiments were Amazon Nova Lite and Claude Haiku 4.5.
+Each completed two runs of a project-specific benchmark based on the Chinook dataset.
+
+The benchmark included standalone one-off and ambiguous questions,
+two-turn interactions testing the continuation of an earlier conversation,
+and safety-related requests designed to elicit inappropriate responses and test the models' refusal behaviour.
+All query results and execution traces were saved, 
+and used to assess correctness and to reconstruct SQL trajectories. 
+
+Based on this investigation, this study makes three primary contributions:
+\begin{itemize}
+  \item An evaluation methodology connecting final correctness with
+  SQL trajectories, error responses and recovery.
+  \item Software that reconstructs and evaluates the recorded attempts
+  using saved evidence and reference results.
+  \item An empirical analysis of differences across models, difficulty
+  groups and repeated runs, supported by selected examples.
+\end{itemize}
+
+The scope of the research and the evaluation performed is restricted to 
+observable execution actions and results within the selected database, benchmark, and runs.
+The models' hidden reasoning, the quality of their natural-language answers 
+and their usefulness to the users were not examined and remain out of scope of this work.
+However, the developed software could support further evaluations if 
+the required evidence formats and comparison contracts are preserved.
+
+\subsection{Thesis Structure}
+\label{sec:introduction-structure}
+
+The structure of this thesis is as follows.
+\hyperref[sec:literature-review]{Chapter~\ref*{sec:literature-review}}
+reviews the literature on Text-to-SQL correctness, repair, trajectory evaluation,
+and interaction.
+\hyperref[sec:architecture]{Chapter~\ref*{sec:architecture}}
+presents the deployed system architecture and implementation, followed by
+\hyperref[sec:methodology]{Chapter~\ref*{sec:methodology}},
+which details the experimental design and evaluation methodology.
+\hyperref[sec:results]{Chapter~\ref*{sec:results}}
+reports the experimental results, while
+\hyperref[sec:discussion]{Chapter~\ref*{sec:discussion}}
+discusses their interpretation, limitations, and implications. Finally,
+\hyperref[sec:conclusion]{Chapter~\ref*{sec:conclusion}}
+concludes the thesis with a summary of key findings.
