@@ -1,0 +1,51 @@
+% !TeX root = ../thesis.tex
+\section*{Abstract}
+
+Final accuracy reports only whether a Text-to-SQL system produced an expected result.
+It does not tell us anything about the process by which the model reached the answer
+or any preceding actions leading to it, such as execution errors or SQL query revisions.
+However, modern research on Text-to-SQL examines these topics already
+and highlights the importance of trajectory-based evaluation of the returned results.
+Such an evaluation approach provides ways to investigate behaviour
+that final accuracy alone does not explain.
+This work created a basis for this study, which examined how recorded SQL attempts
+and database feedback reveal recovery, repeated failures and differences
+between models answering the same questions.
+
+An evaluation methodology and supporting software were developed to connect
+SQL attempts with database feedback and saved query results.
+Two large language models (LLMs) were selected, each completing two runs
+of a custom Chinook benchmark.
+Amazon Nova Lite and Claude Haiku 4.5 were deployed as part of a cloud-based
+agentic system built with Amazon Web Services (AWS) services
+such as Amazon Bedrock, AWS Lambda and Amazon Athena.
+
+The main analysis covered 160 standalone questions per run,
+which provided the primary quantitative evidence.
+Additionally, supplementary clarification, two-turn interaction and safety cases
+were assessed separately and provided complementary findings.
+Query results were compared with reference results according to a defined set of criteria.
+SQL trajectories were classified as direct successes,
+successful recoveries from errors or unsuccessful outcomes,
+with errors and subsequent modifications also analysed.
+
+Over two runs, Haiku achieved an average final accuracy of 91.56\%,
+and Nova achieved 78.44\%.
+Each model recovered from execution errors on five standalone questions per run
+and eventually returned correct results.
+Haiku recovered on every standalone question where it encountered an execution error.
+Nova, however, left most such cases unresolved.
+It also produced longer failed sequences, including SQL revisions and repeated errors.
+In some cases, models reached correct results on the same questions
+through different paths, such as direct success versus recovery.
+Moreover, supplementary cases showed that unchanged interactive accuracy
+could conceal additional recovery, while equal no-query rates concealed differences
+in manually assessed safety responses.
+
+This study therefore contributes an evaluation method and supporting software
+that help gain insights into a system's performance.
+The use of the recorded trajectories allows for moving beyond final accuracy analysis
+and may enhance debugging and model assessment for specific deployments.
+
+\textbf{Keywords:} Text-to-SQL, Large Language Models, Agentic Systems,
+Trajectory Evaluation, SQL Error Recovery, Execution Traces.
