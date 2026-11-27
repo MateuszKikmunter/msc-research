@@ -204,6 +204,8 @@ The local Node.js \citep{nodejsIntroduction} backend sent the request and its se
 agent and processed the returned response and trace events.
 The agent received schema information and instructions for read-only analysis.
 It could request clarification or submit generated SQL through the Lambda action.
+The template instructions are reproduced in
+\hyperref[app:agent-instructions]{Appendix~\ref*{app:agent-instructions}}.
 
 The Lambda function checked that the query text contained \texttt{SELECT}
 and did not contain any configured forbidden operation keywords before
@@ -213,7 +215,10 @@ Lambda returned up to 200 rows to the agent with a truncation flag, while the
 evaluator compared complete results saved by the runner with the golden SQL results.
 Validation and execution errors were returned to the
 agent through the action's \texttt{REPROMPT} response so that it could revise
-the query. The experimental retry policy is described in
+the query. 
+The action input and response formats are shown in
+\hyperref[app:query-action-contract]{Appendix~\ref*{app:query-action-contract}}.
+The experimental retry policy is described in
 \hyperref[sec:protocol]{Section~\ref*{sec:protocol}}.
 
 \subsubsection{Model Versions and Availability}
@@ -270,3 +275,5 @@ The backend also stored responses and traces in a SQLite database
 \citep{sqliteDocs} for inspection and initial data-shape checks.
 The offline evaluator read the runner's files and saved reference results. 
 The separate Python analysis script used its outputs.
+Recorded token usage and backend interaction timings are summarised separately in
+\hyperref[app:resource-usage]{Appendix~\ref*{app:resource-usage}}.

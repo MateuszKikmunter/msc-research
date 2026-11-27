@@ -141,7 +141,7 @@ Grouping questions by difficulty gives a more detailed view of performance.
 
 \citet{mitsopoulou2025analysis} explain that broad difficulty categories
 can still hide specific challenges faced by Text-to-SQL systems.
-For this reason, they propose analysis of query structures, operators and errors types.
+For this reason, they propose analysis of query structures, operators and error types.
 This helps connect unsuccessful queries to particular SQL features.
 
 \subsection{Execution Feedback and SQL Repair}
@@ -235,7 +235,7 @@ Hence, reference sequences would need to accommodate these valid alternatives.
 Instead, this study examines successive SQL attempts and database feedback,
 and compares their results with reference outputs.
 
-At the same time, applying AgentBoard's to SQL requires clear criteria for what counts as partial progress. 
+At the same time, applying AgentBoard's progress measure to SQL requires clear criteria for what counts as partial progress.
 Successful query generation or an execution error revision may be insufficient to show
 whether the resulting answer is correct. 
 Therefore, this study examines successive SQL attempts and their results 
@@ -254,7 +254,7 @@ Its later actions could depend on the responses it received.
 In addition to task accuracy, they examined how the agent used its interaction budget,
 which limited the actions it could take.
 Using benchmark annotations, they distinguished failures involving missing
-information from those that occurred after the required information acquired by the agent
+information from those that occurred after the required information had been acquired by the agent
 \citep[Section~3.1 and Table~2]{yan2026bottleneck}.
 These findings provided a basis for PASCAL, a framework they developed
 to coordinate information gathering before SQL generation
@@ -302,7 +302,7 @@ In the example shown by \citet[p.~1962, Figure~1]{yu2019cosql},
 the user asks questions about dorms, then specifically about dorms with a TV and a lounge.
 In a later question, the user asks about study rooms, 
 and it must be clarified whether this should be subject to the same constraint. 
-As a result, information from earlier turns is therefore required to construct the correct target SQL query for this question.
+As a result, information from earlier turns is required to construct the correct target SQL query for this question.
 
 CoSQL reports performance at both question and interaction level
 \citep[Section~6, Table~5]{yu2019cosql}.

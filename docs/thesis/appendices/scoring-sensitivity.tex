@@ -1,0 +1,60 @@
+% !TeX root = ../thesis.tex
+\clearpage
+\section{Questions Included in the Scoring Sensitivity Check}
+\label{app:scoring-sensitivity}
+
+\hyperref[tab:sensitivity-cases]{Table~\ref*{tab:sensitivity-cases}}
+summarises the reasons for excluding the six questions,
+as detailed in
+\hyperref[sec:sensitivity-check]{Section~\ref*{sec:sensitivity-check}}.
+The task wording, reference SQL and saved outputs were inspected together.
+Any result with extra columns, or with the expected columns in a different
+order, was rejected.
+Result comparison also used the reference column types to interpret returned values.
+So the precise format of results affected whether an answer was scored as correct.
+
+\begin{table}[H]
+\centering
+{\small
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+  >{\raggedright\arraybackslash}p{0.29\textwidth}
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Task} & \textbf{Reference convention} & \textbf{Observed difference} \\
+\midrule
+Monthly invoice revenue in 2012\newline {\footnotesize (CB200-M028)} &
+Two columns: month as a month-start timestamp, followed by revenue. The question did not specify the month format. &
+Haiku returned month numbers with matching monthly revenues in both runs. Nova returned separate year and month columns, giving three columns instead of two. \\
+\addlinespace[0.6em]
+Monthly invoice counts in 2011\newline {\footnotesize (CB200-M029)} &
+Two columns: month as a month-start timestamp, followed by invoice count. The question did not specify the month format. &
+Haiku returned matching counts with numeric months. Nova returned count before month in run 1 and added a year column in run 2. \\
+\addlinespace[0.6em]
+Highest-revenue month in 2012\newline {\footnotesize (CB200-H038)} &
+Month represented as a month-start timestamp. The question specified earliest-month tie-breaking, but no output format. &
+Haiku returned month 8 and revenue 47.62 in both runs. The reference represented August as a timestamp. Nova ended with execution errors. \\
+\addlinespace[0.6em]
+Highest-spending customer in each country\newline {\footnotesize (CB200-H011)} &
+One customer per country, selecting the lowest customer ID when revenues tied. This tie-break was absent from the question. &
+Haiku selected UK customer 53 instead of 52 in run 1; both had revenue 37.62. Its second-run result matched. Nova returned 59 customers instead of 24 winners. \\
+\addlinespace[0.6em]
+Album with the most tracks per artist\newline {\footnotesize (CB200-H041)} &
+One album per artist, breaking track-count ties by title and then album ID. The question did not specify tie-breaking. &
+Haiku selected alternative tied albums in both runs. Nova returned 347 albums; the reference selected 204, one per artist. \\
+\addlinespace[0.6em]
+Distinct genres in each playlist\newline {\footnotesize (CB200-H028)} &
+Inner joins excluded empty playlists, although the question asked for each playlist. &
+Haiku used left joins and returned 18 playlists, including four with zero genres. The reference contained 14. Nova matched the reference in both runs. \\
+\bottomrule
+\end{tabularx}
+}
+\caption{Task conventions and saved results motivating the six exclusions (Source: Author, 2026).}
+\label{tab:sensitivity-cases}
+\end{table}
+
+Exclusion applied to each question in all four runs, including correct results
+and failures involving other SQL errors. 
+The retained scores and their interpretation are reported in
+\hyperref[sec:results-sensitivity]{Section~\ref*{sec:results-sensitivity}}.

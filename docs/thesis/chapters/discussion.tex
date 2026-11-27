@@ -189,17 +189,17 @@ but also whether the model gathers the necessary information and completes the i
 
 \subsubsection{Benchmark Coverage and Correctness Judgments}
 
-The study conducted two models comparison based on a custom project-specific benchmark,
+The study compared two models based on a custom project-specific benchmark,
 limited to one schema and one database.
-The three questions difficulty levels helped 
+The three difficulty levels helped
 to identify and highlight models' capabilities and their weaknesses
 within the Chinook benchmark.
 The clarification cases and the interactive episodes
 were of moderate length and complexity.
 Nevertheless, they were quite limited in their ability
-of testing longer conversations with repeatedly changing requests.
+to test longer conversations with repeatedly changing requests.
 
-During the evaluation it became apparent that design of some questions
+During the evaluation it became apparent that the design of some questions
 did not handle tied results precisely enough which led to incorrect interpretation.
 Similarly, \citet{pourreza2023evaluating} showed that unspecified handling 
 of tied results can make reasonable SQL interpretations disagree with a reference answer. 
@@ -228,7 +228,7 @@ Their performance can be evaluated based on their final answers,
 ability to recover from errors, repeated mistakes and consistency across runs. 
 In the course of this study, Haiku outperformed Nova on most of these factors.
 
-Similarly, the same evaluation can applied to different models 
+Similarly, the same evaluation can be applied to different models
 and tasks in another deployment to find a suitable model for a specific use case. 
 The experiment runner and evaluator could also be reused for other
 Text-to-SQL systems using Athena and Bedrock Agents.

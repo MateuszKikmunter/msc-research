@@ -1,0 +1,85 @@
+% !TeX root = ../thesis.tex
+\clearpage
+\section{Recorded Token Usage and Interaction Timings}
+\label{app:resource-usage}
+
+This appendix reports resource measurements recorded during the four runs.
+They provide context for the SQL-attempt counts in
+\hyperref[sec:results-error-responses]{Section~\ref*{sec:results-error-responses}}.
+
+\subsection{Evidence and Measurement}
+
+As described in 
+\hyperref[sec:architecture-evidence]{Section~\ref*{sec:architecture-evidence}}, 
+the backend SQLite database 
+was also used to record token counts and interaction durations.
+
+The four run files identified 858 interactions, 
+each corresponding to a unique combination of session ID and input text in SQLite. 
+Token totals include model invocations associated with retries.
+
+Duration covers preparation of the Bedrock invocation through its completion.
+It therefore does not include subsequent SQLite operations, 
+downloads of complete query results, time between calls, 
+or time taken to run offline evaluation. 
+
+Each interaction with the backend was counted separately, 
+including separate scripted continuations and authored turns.
+Quantiles use linear interpolation at position $(n-1)p$
+in the sorted durations, where $n$ is the number of interactions 
+and $p$ is the requested proportion. 
+Q1--Q3 covers the middle 50\% and P95 denotes the 95th percentile.
+
+\subsection{Recorded Usage Across Runs}
+
+Totals and duration summaries covering all benchmark partitions and continuations are shown in 
+\hyperref[tab:resource-usage]{Table~\ref*{tab:resource-usage}}. 
+For both repetitions, Nova used more input tokens, 
+with a larger total in its second run. 
+The total number of input tokens for Haiku was broadly the same for both repetitions. 
+Haiku generated more output tokens than Nova in the first repetition and marginally fewer on the second.
+
+\begin{table}[H]
+\centering
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\input{analysis/resource-usage-rows}
+}
+\caption{Recorded tokens and backend interaction durations (Source: Author, 2026).}
+\label{tab:resource-usage}
+\end{table}
+
+The median time for Nova was just under four seconds, compared to almost seven seconds for Haiku.
+The worst cases for Nova were 88.22 and 96.03 seconds, compared to 20.11 and 20.51 seconds for Haiku.
+The lower median concealed longer extremes.
+
+\clearpage
+\subsection{Differences Across Benchmark Partitions}
+
+\hyperref[fig:resource-timings]{Figure~\ref*{fig:resource-timings}} 
+shows the median duration of interaction with the backend, 
+by each question type.
+Half the interactions took less time than the median and half took more.
+All four panels use the same scale, with durations labelled in seconds.
+
+\begin{figure}[H]
+\centering
+\input{figures/resource-usage-timings}
+\caption{Median interaction duration by partition and run (Source: Author, 2026).}
+\label{fig:resource-timings}
+\end{figure}
+
+Median backend interaction times were greater for Haiku in each partition. 
+Nova returned responses more quickly, although the median figure 
+masks the long interactions described above.
+These findings show therefore why response time should be
+considered alongside correctness and error recovery when assessing a deployment.
+
+There were 216 interactions in each Nova's run: 160 standalone, 
+36 ambiguity-related, ten interactive turns and ten safety requests. 
+Each Haiku's run contained 213, with 33 ambiguity-related interactions 
+and the same counts in the other categories.
+So, over all four runs, there were 858 interactions in total.
+For ambiguity cases, initial requests and scripted continuations were timed
+separately.

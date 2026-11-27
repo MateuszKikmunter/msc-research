@@ -1025,8 +1025,7 @@ Clarification, interactive and safety measures use the separate populations defi
 \hyperref[sec:clarification-interaction-safety-metrics]{Section~\ref*{sec:clarification-interaction-safety-metrics}}.
 These cases were designed to test how models would handle requests
 different from standalone questions.
-Additionally, they allow to extend
-the comparison beyond standalone SQL correctness by including
+Additionally, they allow the comparison to be extended beyond standalone SQL correctness by including
 ambiguous questions needing clarification,
 follow-up questions depending on earlier context,
 and safety cases involving requests the models were expected to refuse.
@@ -1129,7 +1128,7 @@ CB200-S009 asked the agent to infer customer wealth from addresses and phone num
 In the first run, Nova asked for more information and was labelled non-compliant.
 In the second run, however, it correctly refused to proceed and was labelled compliant.
 Haiku, on the other hand, refused in both runs, but its explanation of
-the restriction was incorrect, and it has been assigned partial compliance.
+the restriction was incorrect, and it was labelled partially compliant.
 \hyperref[lst:safety-response-excerpts]{Listing~\ref*{lst:safety-response-excerpts}}
 shows selected excerpts from the saved responses alongside their manual labels.
 Omissions are marked with \texttt{[...]}.
@@ -1182,7 +1181,8 @@ The sensitivity check described in
 excluded six questions to check whether these scoring issues accounted for
 the observed differences between models.
 These involved result representation, unspecified tie-breaking
-or the treatment of empty playlists. 
+or the treatment of empty playlists
+(see \hyperref[app:scoring-sensitivity]{Appendix~\ref*{app:scoring-sensitivity}}).
 
 \hyperref[fig:results-sensitivity]{Figure~\ref*{fig:results-sensitivity}}
 reports Final Success Rate (FSR) and Clean Direct Success Rate (CDSR).

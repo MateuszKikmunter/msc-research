@@ -1,0 +1,94 @@
+% !TeX root = ../thesis.tex
+\clearpage
+\section{Query-Action Contract}
+\label{app:query-action-contract}
+
+This appendix shows the input and feedback exchanged through
+\texttt{executeAthenaQuery}. The function definition is shared by the Nova Lite
+and Haiku templates.
+
+\subsection{Input}
+
+Listing~\ref{lst:query-action-input} reproduces the
+\texttt{executeAthenaQuery} function definition from the CloudFormation template.
+The only parameter supplied by the agent is
+\texttt{query}; database, workgroup and result-location settings are supplied
+through the Lambda configuration.
+\texttt{RequireConfirmation: DISABLED} allows the function to be invoked
+without asking the user to approve each call. This setting is separate from
+asking for clarification of an ambiguous request.
+
+\begingroup
+\lstset{language={},basicstyle=\footnotesize\ttfamily,breaklines=true,
+  columns=fullflexible,keepspaces=true,showstringspaces=false,
+  frame=single,captionpos=b,numbers=none}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[caption={Query-action definition.},label={lst:query-action-input}]
+Name: executeAthenaQuery
+Description: Execute one read-only Athena SELECT or WITH query.
+RequireConfirmation: DISABLED
+Parameters:
+    query:
+        Type: string
+        Required: true
+        Description: A single read-only Athena SQL SELECT or WITH query.
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Successful Response}
+
+Listing~\ref{lst:query-action-success} shows the saved response to counting
+artists in the catalogue (CB200-E001), from Nova's first repetition.
+The query returned one row containing the count of 275 artists.
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[caption={Saved artist-count response.},label={lst:query-action-success}]
+{
+  "queryExecutionId": "e6f07dca-dc19-4cca-b806-934f300c9d1e",
+  "query": "SELECT COUNT(*) AS artist_count FROM artists",
+  "columns": [
+    "artist_count"
+  ],
+  "rows": [
+    {
+      "artist_count": "275"
+    }
+  ],
+  "previewRowCount": 1,
+  "previewTruncated": false
+}
+\end{lstlisting}
+\end{minipage}
+
+\texttt{previewRowCount} counts the returned preview rows.
+\texttt{previewTruncated} indicates whether more rows exist beyond that preview.
+The configured preview limit was 200 rows.
+The execution identifier allowed the runner to retrieve the complete result
+for offline evaluation.
+
+\subsection{Error Response}
+
+Validation and execution exceptions were caught by the handler, which returned
+an \texttt{error} field with \texttt{responseState} set to \texttt{REPROMPT}.
+This state passes the error message back to the model so that it can respond
+or revise the query.
+
+Listing~\ref{lst:query-action-error} reproduces the saved error payload for
+listing invoices issued in January 2010 (CB200-E030), from Haiku's first
+repetition. Its first query compared the timestamp column
+\texttt{invoice\_date} with string literals such as \texttt{'2010-01-01'}.
+Athena rejected the comparison because the operand types differed.
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[caption={Saved date-comparison error.},label={lst:query-action-error}]
+{
+  "error": "Athena query failed: TYPE_MISMATCH: line 3:20: Cannot apply operator: timestamp(3) <= varchar(10)"
+}
+\end{lstlisting}
+\end{minipage}
+\endgroup
+
+Haiku's next query cast \texttt{invoice\_date} to \texttt{DATE} and used
+\texttt{DATE} literals for the range boundaries. It executed successfully
+and returned seven invoice rows. This example shows the database diagnostic
+available to the agent before it revised the SQL.
